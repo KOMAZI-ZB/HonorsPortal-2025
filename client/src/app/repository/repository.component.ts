@@ -24,7 +24,6 @@ export class RepositoryComponent implements OnInit {
   externalRepos: Repository[] = [];
   internalDocuments: Document[] = [];
 
-  // Pagination for both internal and external
   externalPagination: Pagination | null = null;
   internalPagination: Pagination | null = null;
   externalPageNumber = 1;
@@ -49,7 +48,6 @@ export class RepositoryComponent implements OnInit {
     this.loadExternalRepositories();
   }
 
-  // ✅ Internal Repository Documents (Paginated)
   loadInternalDocuments() {
     this.documentService.getInternalRepositoryDocuments(this.internalPageNumber, this.pageSize).subscribe({
       next: response => {
@@ -66,7 +64,6 @@ export class RepositoryComponent implements OnInit {
     });
   }
 
-  // ✅ External Repository Links (Paginated)
   loadExternalRepositories() {
     this.repositoryService.getExternalRepositories(this.externalPageNumber, this.pageSize).subscribe({
       next: response => {
@@ -83,13 +80,11 @@ export class RepositoryComponent implements OnInit {
     });
   }
 
-  // ✅ External Pagination Handler
   pageChangedExternal(page: number) {
     this.externalPageNumber = page;
     this.loadExternalRepositories();
   }
 
-  // ✅ Internal Pagination Handler
   pageChangedInternal(page: number) {
     this.internalPageNumber = page;
     this.loadInternalDocuments();
@@ -116,7 +111,7 @@ export class RepositoryComponent implements OnInit {
     this.documentService.deleteRepositoryDocument(docId).subscribe({
       next: () => {
         this.internalDocuments = this.internalDocuments.filter(d => d.id !== docId);
-        this.loadInternalDocuments(); // ensure fresh pagination after deletion
+        this.loadInternalDocuments();
       },
       error: err => {
         console.error('Failed to delete document', err);
@@ -135,9 +130,14 @@ export class RepositoryComponent implements OnInit {
 
     this.repositoryService.deleteExternalRepository(id).subscribe({
       next: () => {
-        this.externalRepos = this.externalRepos.filter(r => r.id !== id);
         this.toastr.success('Repository removed successfully.');
-        this.loadExternalRepositories(); // preserve pagination state
+
+        // If last item on the current page is deleted and not on first page
+        if (this.externalRepos.length === 1 && this.externalPageNumber > 1) {
+          this.externalPageNumber--;
+        }
+
+        this.loadExternalRepositories();
       },
       error: err => {
         console.error('Failed to delete repository', err);

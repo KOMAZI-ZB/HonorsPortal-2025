@@ -17,8 +17,8 @@
                 <div class="card h-100 text-center shadow-sm position-relative">
                     <a [href]="repo.linkUrl" target="_blank" rel="noopener noreferrer"
                         class="text-decoration-none text-dark">
-                        <img [src]="repo.imageUrl" class="card-img-top mx-auto d-block p-3" style="max-height: 120px;"
-                            [alt]="repo.label + ' logo'" />
+                        <img [src]="repo.imageUrl || '/assets/database.png'" class="card-img-top mx-auto d-block p-3"
+                            style="max-height: 120px;" [alt]="repo.label + ' logo'" />
                         <div class="card-body">
                             <h5 class="card-title">{{ repo.label }}</h5>
                             <p class="card-text text-muted">Visit {{ repo.label }}</p>

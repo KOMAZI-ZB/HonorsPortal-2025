@@ -1,7 +1,6 @@
 using API.DTOs;
 using API.Extensions;
 using API.Interfaces;
-using API.Entities;
 using API.Helpers;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
@@ -47,7 +46,6 @@ public class RepositoryController(
         };
 
         await _announcementService.CreateAsync(announcement, userNumber);
-
         return Ok(result);
     }
 
@@ -88,12 +86,20 @@ public class RepositoryController(
 
     [Authorize(Roles = "Coordinator,Admin")]
     [HttpPost("external")]
-    public async Task<ActionResult<RepositoryDto>> AddExternalRepository(RepositoryDto dto)
+    public async Task<ActionResult<RepositoryDto>> AddExternalRepository([FromForm] RepositoryDto dto)
     {
-        var entity = _mapper.Map<Repository>(dto);
-        var created = await _repositoryService.AddAsync(entity);
-        var dtoResult = _mapper.Map<RepositoryDto>(created);
-        return CreatedAtAction(nameof(GetExternalRepositories), new { id = dtoResult.Id }, dtoResult);
+        // Fallback if no image is uploaded
+        if (dto.Image == null)
+        {
+            dto.ImageUrl = "/assets/database.png";
+        }
+        else
+        {
+            dto.ImageUrl = await _repositoryService.UploadImageAsync(dto.Image);
+        }
+
+        var created = await _repositoryService.AddAsync(dto);
+        return CreatedAtAction(nameof(GetExternalRepositories), new { id = created.Id }, created);
     }
 
     [Authorize(Roles = "Coordinator,Admin")]
