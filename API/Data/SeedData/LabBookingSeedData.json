@@ -1,0 +1,50 @@
+[
+    {
+        "id": 1,
+        "userNumber": "2023000005",
+        "weekDays": "Monday",
+        "startTime": "08:00:00",
+        "endTime": "09:30:00",
+        "bookingDate": "2025-06-17"
+    },
+    {
+        "id": 2,
+        "userNumber": "2023000006",
+        "weekDays": "Wednesday",
+        "startTime": "11:00:00",
+        "endTime": "12:00:00",
+        "bookingDate": "2025-06-18"
+    },
+    {
+        "id": 3,
+        "userNumber": "2023000007",
+        "weekDays": "Friday",
+        "startTime": "14:00:00",
+        "endTime": "15:30:00",
+        "bookingDate": "2025-06-20"
+    },
+    {
+        "id": 4,
+        "userNumber": "2023000008",
+        "weekDays": "Tuesday",
+        "startTime": "09:00:00",
+        "endTime": "10:30:00",
+        "bookingDate": "2025-06-17"
+    },
+    {
+        "id": 5,
+        "userNumber": "2023000009",
+        "weekDays": "Thursday",
+        "startTime": "13:00:00",
+        "endTime": "14:00:00",
+        "bookingDate": "2025-06-19"
+    },
+    {
+        "id": 6,
+        "userNumber": "2023000010",
+        "weekDays": "Saturday",
+        "startTime": "12:00:00",
+        "endTime": "13:00:00",
+        "bookingDate": "2025-06-21"
+    }
+]

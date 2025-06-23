@@ -1,10 +1,8 @@
-using System;
-
-namespace API.DTOs;
-
-public class LoginDto
+namespace API.DTOs
 {
-    public required string Username { get; set; }
-    public required string Password { get; set; }
-
+    public class LoginDto
+    {
+        public string UserNumber { get; set; } = string.Empty; // Used as username
+        public string Password { get; set; } = string.Empty;
+    }
 }

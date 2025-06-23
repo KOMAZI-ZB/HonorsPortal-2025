@@ -1,0 +1,86 @@
+import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { BsModalRef } from 'ngx-bootstrap/modal';
+import { AdminService } from '../../_services/admin.service'; // ✅ FIXED: Use correct service
+import { ModuleService } from '../../_services/module.service';
+import { Module } from '../../_models/module';
+import { ToastrService } from 'ngx-toastr';
+
+@Component({
+  selector: 'app-add-user-modal',
+  standalone: true,
+  imports: [FormsModule, CommonModule],
+  templateUrl: './add-user-modal.component.html',
+  styleUrls: ['./add-user-modal.component.css']
+})
+export class AddUserModalComponent implements OnInit {
+  constructor(
+    private adminService: AdminService, // ✅ FIXED: use AdminService
+    private moduleService: ModuleService,
+    private toastr: ToastrService,
+    public modalRef: BsModalRef
+  ) { }
+
+  userNumber = '';
+  firstName = '';
+  lastName = '';
+  email = '';
+  password = '';
+  role = 'Student';
+
+  semester1Modules: Module[] = [];
+  semester2Modules: Module[] = [];
+
+  selectedSemester1: number[] = [];
+  selectedSemester2: number[] = [];
+
+  roles = ['Student', 'Lecturer', 'Coordinator', 'Admin'];
+
+  ngOnInit(): void {
+    this.moduleService.getAllModules().subscribe({
+      next: modules => {
+        this.semester1Modules = modules.filter(m => m.semester === 1);
+        this.semester2Modules = modules.filter(m => m.semester === 2);
+      }
+    });
+  }
+
+  toggleModule(id: number, list: number[], event: any) {
+    if (event.target.checked) {
+      if (!list.includes(id)) list.push(id);
+    } else {
+      const index = list.indexOf(id);
+      if (index > -1) list.splice(index, 1);
+    }
+  }
+
+  submit() {
+    const payload = {
+      userNumber: this.userNumber,
+      firstName: this.firstName,
+      lastName: this.lastName,
+      email: this.email,
+      password: this.password || 'Pa$$w0rd',
+      role: this.role,
+      semester1ModuleIds: this.selectedSemester1,
+      semester2ModuleIds: this.selectedSemester2
+    };
+
+    this.adminService.registerUser(payload).subscribe({ // ✅ FIXED: Call correct method
+      next: (res: any) => {
+        this.toastr.success(res?.message || 'User registered');
+        this.modalRef.hide();
+        // Optionally emit an event to reload table here
+      },
+      error: (err: any) => {
+        const msg = err.error?.message || 'Failed to register user';
+        this.toastr.error(msg);
+      }
+    });
+  }
+
+  cancel() {
+    this.modalRef.hide();
+  }
+}

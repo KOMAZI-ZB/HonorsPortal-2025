@@ -1,0 +1,172 @@
+[
+    {
+        "userNumber": "2023000001",
+        "firstName": "Alice",
+        "lastName": "Mokoena",
+        "email": "alice@student.com",
+        "password": "Pa$$w0rd",
+        "role": "Student",
+        "semester1ModuleIds": [
+            1,
+            2
+        ],
+        "semester2ModuleIds": [
+            1,
+            2
+        ]
+    },
+    {
+        "userNumber": "2023000002",
+        "firstName": "Brian",
+        "lastName": "Nkosi",
+        "email": "brian@student.com",
+        "password": "Pa$$w0rd",
+        "role": "Student",
+        "semester1ModuleIds": [
+            3,
+            4
+        ],
+        "semester2ModuleIds": [
+            3,
+            4
+        ]
+    },
+    {
+        "userNumber": "2023000003",
+        "firstName": "Cindy",
+        "lastName": "Naidoo",
+        "email": "cindy@student.com",
+        "password": "Pa$$w0rd",
+        "role": "Student",
+        "semester1ModuleIds": [
+            5,
+            6
+        ],
+        "semester2ModuleIds": [
+            5,
+            6
+        ]
+    },
+    {
+        "userNumber": "2023000004",
+        "firstName": "Daniel",
+        "lastName": "Smith",
+        "email": "daniel@student.com",
+        "password": "Pa$$w0rd",
+        "role": "Student",
+        "semester1ModuleIds": [
+            7,
+            8
+        ],
+        "semester2ModuleIds": [
+            7,
+            8
+        ]
+    },
+    {
+        "userNumber": "2023000005",
+        "firstName": "Drake",
+        "lastName": "Zulu",
+        "email": "drake@lecturer.com",
+        "password": "Pa$$w0rd",
+        "role": "Lecturer",
+        "semester1ModuleIds": [
+            9,
+            10
+        ],
+        "semester2ModuleIds": [
+            9,
+            10
+        ]
+    },
+    {
+        "userNumber": "2023000006",
+        "firstName": "Esther",
+        "lastName": "Van Rooyen",
+        "email": "esther@lecturer.com",
+        "password": "Pa$$w0rd",
+        "role": "Lecturer",
+        "semester1ModuleIds": [
+            11,
+            12
+        ],
+        "semester2ModuleIds": [
+            11,
+            12
+        ]
+    },
+    {
+        "userNumber": "2023000007",
+        "firstName": "Felix",
+        "lastName": "Mabena",
+        "email": "felix@lecturer.com",
+        "password": "Pa$$w0rd",
+        "role": "Lecturer",
+        "semester1ModuleIds": [
+            13,
+            14
+        ],
+        "semester2ModuleIds": [
+            13,
+            14
+        ]
+    },
+    {
+        "userNumber": "2023000008",
+        "firstName": "Grace",
+        "lastName": "Peters",
+        "email": "grace@lecturer.com",
+        "password": "Pa$$w0rd",
+        "role": "Lecturer",
+        "semester1ModuleIds": [
+            15,
+            16
+        ],
+        "semester2ModuleIds": [
+            15,
+            16
+        ]
+    },
+    {
+        "userNumber": "2023000009",
+        "firstName": "Hannah",
+        "lastName": "Williams",
+        "email": "hannah@coordinator.com",
+        "password": "Pa$$w0rd",
+        "role": "Coordinator",
+        "semester1ModuleIds": [
+            17,
+            18
+        ],
+        "semester2ModuleIds": [
+            17,
+            18
+        ]
+    },
+    {
+        "userNumber": "2023000010",
+        "firstName": "Ivan",
+        "lastName": "Moloi",
+        "email": "ivan@coordinator.com",
+        "password": "Pa$$w0rd",
+        "role": "Coordinator",
+        "semester1ModuleIds": [
+            19,
+            20
+        ],
+        "semester2ModuleIds": [
+            19,
+            20
+        ]
+    },
+    {
+        "userNumber": "admin",
+        "firstName": "System",
+        "lastName": "Administrator",
+        "email": "admin@portal.com",
+        "password": "Pa$$w0rd",
+        "role": "Admin",
+        "semester1ModuleIds": [],
+        "semester2ModuleIds": []
+    }
+]

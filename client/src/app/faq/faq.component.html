@@ -1,0 +1,64 @@
+<!-- ➕ Add FAQ Button (Admin/Lecturer/Coordinator only) -->
+<div class="mb-3 text-end" *ngIf="canEdit()">
+    <button class="btn btn-primary btn-sm" (click)="openEditModal()">
+        Add FAQ
+    </button>
+</div>
+
+<!-- 📋 FAQ List -->
+<div *ngFor="let faq of faqs" class="card mb-3 faq-card" [ngClass]="faq.answer ? 'faq-answered' : 'faq-unanswered'"
+    (click)="toggleFaq(faq.id)">
+
+    <div class="card-body position-relative" [ngClass]="{ 'faq-collapsed': openFaqId !== faq.id }">
+
+        <!-- Centered Question + Chevron -->
+        <div class="d-flex justify-content-center align-items-center text-center flex-column min-height">
+            <h5 class="mb-0 text-dark pe-5">
+                <strong></strong> {{ faq.question }}
+            </h5>
+            <div class="chevron-icon mt-2">
+                <i class="bi" [ngClass]="openFaqId === faq.id ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+            </div>
+        </div>
+
+        <!-- Expanded Content -->
+        <div *ngIf="openFaqId === faq.id" class="mt-3">
+            <div *ngIf="faq.answer; else unansweredBlock" class="mb-4">
+                <p class="mb-2"><strong>A:</strong> {{ faq.answer }}</p>
+            </div>
+
+            <ng-template #unansweredBlock>
+                <p class="text-muted fst-italic mb-4">No answer yet</p>
+            </ng-template>
+
+            <div class="mt-2">
+                <button *ngIf="canEdit()" class="btn btn-sm btn-outline-primary me-2"
+                    (click)="openEditModal(faq); $event.stopPropagation();">
+                    ✏️ Edit
+                </button>
+                <button *ngIf="canDelete()" class="btn btn-sm btn-outline-danger"
+                    (click)="deleteFaq(faq.id); $event.stopPropagation();">
+                    🗑️ Delete
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 📄 Pagination Controls -->
+<nav *ngIf="pagination">
+    <ul class="pagination justify-content-center">
+        <li class="page-item" [class.disabled]="pagination.currentPage === 1">
+            <a class="page-link" (click)="pageChanged(pagination.currentPage - 1)">Previous</a>
+        </li>
+
+        <li class="page-item" *ngFor="let page of [].constructor(pagination.totalPages); let i = index"
+            [class.active]="pagination.currentPage === i + 1">
+            <a class="page-link" (click)="pageChanged(i + 1)">{{ i + 1 }}</a>
+        </li>
+
+        <li class="page-item" [class.disabled]="pagination.currentPage === pagination.totalPages">
+            <a class="page-link" (click)="pageChanged(pagination.currentPage + 1)">Next</a>
+        </li>
+    </ul>
+</nav>

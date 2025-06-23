@@ -1,0 +1,62 @@
+[
+    {
+        "id": 1,
+        "question": "How do I reset my portal password?",
+        "answer": "Click on 'Forgot Password' on the login page and follow the instructions.",
+        "lastUpdated": "2025-06-01T10:00:00Z"
+    },
+    {
+        "id": 2,
+        "question": "Where can I find previous exam papers?",
+        "answer": "Visit the Repository tab and check the internal repository for module resources.",
+        "lastUpdated": "2025-06-02T11:45:00Z"
+    },
+    {
+        "id": 3,
+        "question": "Can I submit my project late if I was sick?",
+        "answer": "",
+        "lastUpdated": "2025-06-03T12:15:00Z"
+    },
+    {
+        "id": 4,
+        "question": "When are semester 2 modules starting?",
+        "answer": "Semester 2 starts on July 15th. Check the academic calendar for more.",
+        "lastUpdated": "2025-06-04T11:00:00Z"
+    },
+    {
+        "id": 5,
+        "question": "Is it mandatory to attend lab sessions?",
+        "answer": "Yes, attendance is compulsory for lab sessions unless otherwise stated.",
+        "lastUpdated": "2025-06-05T15:45:00Z"
+    },
+    {
+        "id": 6,
+        "question": "How can I view my class timetable?",
+        "answer": "Go to the Scheduler tab and select 'Class Schedule' to see your timetable.",
+        "lastUpdated": "2025-06-06T09:30:00Z"
+    },
+    {
+        "id": 7,
+        "question": "Who do I contact for academic counselling?",
+        "answer": "You can contact your assigned coordinator or visit the Help Centre.",
+        "lastUpdated": "2025-06-07T10:00:00Z"
+    },
+    {
+        "id": 8,
+        "question": "Can I access the portal on my phone?",
+        "answer": "Yes, the portal is mobile-friendly and works on all modern smartphones.",
+        "lastUpdated": "2025-06-08T14:00:00Z"
+    },
+    {
+        "id": 9,
+        "question": "Are supplementary exams scheduled automatically?",
+        "answer": "",
+        "lastUpdated": "2025-06-09T16:10:00Z"
+    },
+    {
+        "id": 10,
+        "question": "Can I download resources without Wi-Fi?",
+        "answer": "Yes, once you download materials from the Repository tab, they are available offline.",
+        "lastUpdated": "2025-06-10T12:00:00Z"
+    }
+]

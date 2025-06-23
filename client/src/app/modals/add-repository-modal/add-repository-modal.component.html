@@ -1,0 +1,36 @@
+<div class="modal-header">
+    <h5 class="modal-title">Add External Repository</h5>
+    <button type="button" class="btn-close" aria-label="Close" (click)="cancel()"></button>
+</div>
+
+<div class="modal-body">
+    <form [formGroup]="form">
+        <div class="mb-3">
+            <label for="label" class="form-label">Repository Name</label>
+            <input type="text" id="label" class="form-control" formControlName="label"
+                placeholder="e.g., SpringerLink" />
+        </div>
+
+        <div class="mb-3">
+            <label for="imageUrl" class="form-label">Image URL</label>
+            <input type="text" id="imageUrl" class="form-control" formControlName="imageUrl"
+                placeholder="e.g., /assets/springer.png or leave blank for default" />
+            <div class="form-text text-muted">
+                Leave blank to use the default image: <code>/assets/database.png</code>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label for="linkUrl" class="form-label">Repository Link</label>
+            <input type="text" id="linkUrl" class="form-control" formControlName="linkUrl"
+                placeholder="e.g., https://link.springer.com/" />
+        </div>
+    </form>
+</div>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="cancel()">Cancel</button>
+    <button type="button" class="btn btn-primary" [disabled]="form.invalid" (click)="submit()">
+        Add
+    </button>
+</div>

@@ -1,15 +1,17 @@
-using System;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Entities;
 
-public class AppUser
+[Index(nameof(UserNumber), IsUnique = true)]
+public class AppUser : IdentityUser<int>
 {
+    public required string FirstName { get; set; }
+    public required string LastName { get; set; }
+    public required string UserNumber { get; set; }
 
-    public int Id { get; set; }
-    public required string UserName { get; set; }
+    public ICollection<AppUserRole> UserRoles { get; set; } = new List<AppUserRole>();
 
-    public required byte[] PasswordHash { get; set; }
-
-    public required byte[] PasswordSalt { get; set; }
-
+    // ✅ NEW: Used to link users to modules (Phase 2)
+    public ICollection<UserModule> UserModules { get; set; } = new List<UserModule>();
 }

@@ -1,67 +1,58 @@
-using System;
-using System.Security.Cryptography;
-using System.Text;
-using API.Data;
 using API.DTOs;
 using API.Entities;
+using API.Extensions;
 using API.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers;
 
-public class AccountController(DataContext context, ITokenService tokenService) : BaseApiController
+[ApiController]
+[Route("api/[controller]")]
+public class AccountController(
+    UserManager<AppUser> userManager,
+    ITokenService tokenService
+) : BaseApiController
 {
-    [HttpPost("register")] //account/register
-    public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
-    {
-        if (await UserExists(registerDto.Username)) return BadRequest("Username is taken");
-
-        using var hmac = new HMACSHA512();
-
-        var user = new AppUser
-        {
-            UserName = registerDto.Username.ToLower(),
-            PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDto.Password)),
-            PasswordSalt = hmac.Key
-        };
-
-        context.Users.Add(user);
-        await context.SaveChangesAsync();
-        return new UserDto
-        {
-            Username = user.UserName,
-            Token = tokenService.CreateToken(user)
-        };
-    }
-
     [HttpPost("login")]
     public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
     {
-        var user = await context.Users.FirstOrDefaultAsync(x =>
-        x.UserName == loginDto.Username.ToLower());
+        var user = await userManager.Users
+            .Include(u => u.UserModules)
+                .ThenInclude(um => um.Module)
+            .FirstOrDefaultAsync(x => x.UserNumber == loginDto.UserNumber);
 
-        if (user == null) return Unauthorized("Invalid username");
+        if (user == null)
+            return Unauthorized("Invalid user number or password.");
 
-        using var hmac = new HMACSHA512(user.PasswordSalt);
-        var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(loginDto.Password));
+        var passwordValid = await userManager.CheckPasswordAsync(user, loginDto.Password);
+        if (!passwordValid)
+            return Unauthorized("Invalid user number or password.");
 
-        for (int i = 0; i < computedHash.Length; i++)
-        {
-            if (computedHash[i] != user.PasswordHash[i]) return Unauthorized("Invalid password");
-        }
+        var roles = await userManager.GetRolesAsync(user);
 
         return new UserDto
         {
-            Username = user.UserName,
-            Token = tokenService.CreateToken(user)
+            UserNumber = user.UserNumber,
+            Name = user.FirstName,
+            Surname = user.LastName,
+            Email = user.Email ?? string.Empty,
+            Roles = roles.ToArray(),
+            Token = await tokenService.CreateToken(user),
+            Modules = user.UserModules.Select(um => new ModuleDto
+            {
+                Id = um.Module.Id,
+                ModuleCode = um.Module.ModuleCode,
+                ModuleName = um.Module.ModuleName,
+                Semester = um.Module.Semester
+            }).ToList()
         };
     }
 
-
-    private async Task<bool> UserExists(string username)
+    [HttpPost("logout")]
+    public IActionResult Logout()
     {
-        return await context.Users.AnyAsync(x => x.UserName.ToLower() == username.ToLower()); //Bob != bob
+        return Ok(new { message = "Logged out (client must clear token)." });
     }
-
 }

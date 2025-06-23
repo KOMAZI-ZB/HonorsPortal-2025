@@ -1,0 +1,31 @@
+<!-- src/app/lecturer-panel/lecturer-panel.component.html -->
+<div class="row">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>My Assigned Modules</h2>
+    </div>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Module Code</th>
+                <th>Module Name</th>
+                <th>Semester</th>
+                <th>Edit Details</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (mod of modules; track mod.id) {
+            <tr>
+                <td>{{ mod.moduleCode }}</td>
+                <td>{{ mod.moduleName }}</td>
+                <td>{{ mod.semester }}</td>
+                <td>
+                    <button class="btn btn-outline-secondary btn-sm" (click)="openEditDetailsModal(mod)">
+                        Edit Details
+                    </button>
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>

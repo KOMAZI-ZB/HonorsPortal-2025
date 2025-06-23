@@ -1,0 +1,31 @@
+.scheduler-container {
+    padding: 20px;
+}
+
+.card-container {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.card {
+    background-color: #f1f1f1;
+    padding: 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: black;
+    flex: 1 1 200px;
+    transition: background-color 0.3s ease;
+    border: 1px solid #ccc;
+}
+
+.card:hover {
+    background-color: #e0e0e0;
+}
+
+.card.disabled {
+    background-color: #ddd;
+    color: #888;
+    pointer-events: none;
+    border: 1px dashed #aaa;
+}

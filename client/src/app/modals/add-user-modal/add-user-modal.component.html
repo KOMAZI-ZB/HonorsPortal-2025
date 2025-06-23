@@ -1,0 +1,64 @@
+<!-- src/app/modals/add-user-modal.component.html -->
+<div class="modal-header">
+    <h4 class="modal-title">Add New User</h4>
+    <button type="button" class="btn-close" (click)="cancel()" aria-label="Close"></button>
+</div>
+
+<div class="modal-body">
+    <form>
+        <div class="mb-3">
+            <label>User Number</label>
+            <input type="text" class="form-control" [(ngModel)]="userNumber" name="userNumber" required />
+        </div>
+
+        <div class="mb-3">
+            <label>First Name</label>
+            <input type="text" class="form-control" [(ngModel)]="firstName" name="firstName" required />
+        </div>
+
+        <div class="mb-3">
+            <label>Last Name</label>
+            <input type="text" class="form-control" [(ngModel)]="lastName" name="lastName" required />
+        </div>
+
+        <div class="mb-3">
+            <label>Email</label>
+            <input type="email" class="form-control" [(ngModel)]="email" name="email" required />
+        </div>
+
+        <div class="mb-3">
+            <label>Password (optional)</label>
+            <input type="password" class="form-control" [(ngModel)]="password" name="password" />
+        </div>
+
+        <div class="mb-3">
+            <label>Role</label>
+            <select class="form-select" [(ngModel)]="role" name="role">
+                <option *ngFor="let r of roles" [value]="r">{{ r }}</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label>Semester 1 Modules</label>
+            <div *ngFor="let mod of semester1Modules" class="form-check">
+                <input class="form-check-input" type="checkbox" [value]="mod.id"
+                    (change)="toggleModule(mod.id, selectedSemester1, $event)" />
+                <label class="form-check-label">{{ mod.moduleCode }} - {{ mod.moduleName }}</label>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label>Semester 2 Modules</label>
+            <div *ngFor="let mod of semester2Modules" class="form-check">
+                <input class="form-check-input" type="checkbox" [value]="mod.id"
+                    (change)="toggleModule(mod.id, selectedSemester2, $event)" />
+                <label class="form-check-label">{{ mod.moduleCode }} - {{ mod.moduleName }}</label>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="cancel()">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="submit()">Submit</button>
+</div>

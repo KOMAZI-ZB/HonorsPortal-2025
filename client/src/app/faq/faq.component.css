@@ -1,0 +1,97 @@
+/* Container */
+.faq-container {
+    padding: 2rem 1.5rem;
+    max-width: 700px;
+    margin: 0 auto;
+    background-color: #fff;
+}
+
+/* FAQ Card Style */
+.card.faq-card {
+    background-color: #c8c9ca !important;
+    /* card background color */
+    border: none;
+    border-radius: 8px;
+    box-shadow: none;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1rem;
+    transition: background-color 0.3s ease;
+}
+
+/* Hover effect */
+.faq-card:hover {
+    background-color: #bfc0c2;
+}
+
+/* Collapsed Behavior */
+.faq-collapsed {
+    padding: 0;
+}
+
+/* FAQ Card Body - center all content */
+.faq-card .card-body {
+    padding: 1rem 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+/* Question + Chevron Container */
+.faq-card .d-flex {
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding: 0.5rem 0;
+}
+
+/* Question text */
+.faq-card h5 {
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin: 0;
+    color: #000;
+}
+
+/* Chevron icon */
+.faq-card .chevron-icon i {
+    font-size: 1.2rem;
+    color: #000;
+    transition: transform 0.3s ease;
+}
+
+/* Rotate chevron when open */
+.faq-card .chevron-icon i.bi-chevron-up {
+    transform: rotate(180deg);
+}
+
+/* Answer text */
+.faq-card p {
+    font-size: 0.95rem;
+    margin-top: 1rem;
+    margin-bottom: 0;
+    line-height: 1.6;
+    text-align: center;
+}
+
+/* Edit/Delete buttons container */
+.faq-card .mt-2 {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+/* Button style */
+.faq-card .btn {
+    font-size: 0.8rem;
+    padding: 0.3rem 0.75rem;
+}
+
+/* Optional: Remove border-left colors if not needed */
+.faq-answered,
+.faq-unanswered {
+    background-color: #c8c9ca !important;
+    border-left: none !important;
+}

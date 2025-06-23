@@ -1,0 +1,55 @@
+<div class="modal-header">
+    <h5 class="modal-title">Post New Announcement</h5>
+    <button type="button" class="btn-close" aria-label="Close" (click)="cancel()"></button>
+</div>
+
+<div class="modal-body">
+    <form [formGroup]="form" (ngSubmit)="submit()" enctype="multipart/form-data" novalidate>
+
+        <!-- Announcement Type -->
+        <div class="mb-3">
+            <label class="form-label">Type</label>
+            <select class="form-select" formControlName="type" [disabled]="currentUserRole !== 'Admin'">
+                <option value="General">General</option>
+                <option value="System" *ngIf="currentUserRole === 'Admin'">System</option>
+            </select>
+        </div>
+
+        <!-- Title -->
+        <div class="mb-3">
+            <label class="form-label">Title</label>
+            <input type="text" class="form-control" formControlName="title" placeholder="Enter title" />
+            <div *ngIf="form.get('title')?.touched && form.get('title')?.invalid" class="text-danger">
+                Title is required (min 3 characters).
+            </div>
+        </div>
+
+        <!-- Message -->
+        <div class="mb-3">
+            <label class="form-label">Message</label>
+            <textarea class="form-control" formControlName="message" rows="4" placeholder="Enter message..."></textarea>
+            <div *ngIf="form.get('message')?.touched && form.get('message')?.invalid" class="text-danger">
+                Message is required (min 5 characters).
+            </div>
+        </div>
+
+        <!-- Image Upload -->
+        <div class="mb-3">
+            <label class="form-label">Attach Image (Optional)</label>
+            <input type="file" class="form-control" (change)="onFileSelected($event)" />
+        </div>
+
+        <!-- Optional Module ID (if future support added) -->
+        <div class="mb-3 d-none">
+            <label class="form-label">Module ID</label>
+            <input type="number" class="form-control" formControlName="moduleId" />
+        </div>
+
+        <!-- Buttons -->
+        <div class="d-flex justify-content-end">
+            <button type="submit" class="btn btn-primary me-2" [disabled]="form.invalid">Post</button>
+            <button type="button" class="btn btn-secondary" (click)="cancel()">Cancel</button>
+        </div>
+
+    </form>
+</div>

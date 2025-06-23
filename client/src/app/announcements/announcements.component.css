@@ -1,0 +1,16 @@
+.card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.announcement-img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+}
+
+.badge.custom-type-badge {
+    background-color: #0063df !important;
+    color: white !important;
+    font-weight: 600;
+}

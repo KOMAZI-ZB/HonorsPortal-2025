@@ -1,0 +1,20 @@
+<!-- src/app/modals/delete-module-modal/delete-module-modal.component.html -->
+<div class="modal-header">
+    <h5 class="modal-title text-danger">Confirm Module Deletion</h5>
+    <button type="button" class="btn-close" aria-label="Close" (click)="cancel()"></button>
+</div>
+
+<div class="modal-body">
+    <p>
+        Are you sure you want to delete the module
+        <strong>{{ module.moduleCode }} – {{ module.moduleName }}</strong>?
+    </p>
+    <p class="text-warning">
+        This will remove the module from the system and unassign it from all users.
+    </p>
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
+    <button class="btn btn-danger" (click)="confirmDelete()">Delete</button>
+</div>

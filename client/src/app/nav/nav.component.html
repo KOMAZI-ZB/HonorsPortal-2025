@@ -1,83 +1,66 @@
 <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-primary">
     <div class="container">
-        <a class="navbar-brand" routerLink="/" routerLinkActive="active">Application</a>
+        <a class="navbar-brand" routerLink="/" routerLinkActive="active">Academic Portal</a>
 
+        <ul class="navbar-nav me-auto mb-2 mb-md-0" *ngIf="accountService.currentUser()">
+            <!-- Announcements -->
+            <li class="nav-item" (click)="markAnnouncementsAsSeen()">
+                <a routerLink="/announcements" routerLinkActive="active" class="nav-link">
+                    Announcements
+                    <span *ngIf="hasNewAnnouncement" class="emoji-alert">🔔</span>
+                </a>
+            </li>
 
+            <!-- Modules (Hidden from Admins) -->
+            <li class="nav-item" *ngIf="!isAdmin()">
+                <a routerLink="/modules" routerLinkActive="active" class="nav-link">Modules</a>
+            </li>
 
-        <ul class="navbar-nav me-auto mb-2 mb-md-0">
-            @if(accountService.currentUser()){
+            <!-- Repository (Visible to all roles) -->
             <li class="nav-item">
-                <a routerLink="/members" routerLinkActive="active" class="nav-link">Matches</a>
+                <a routerLink="/repository" routerLinkActive="active" class="nav-link">Repository</a>
             </li>
-            <li class="nav-item">
-                <a routerLink="/lists" routerLinkActive="active" class="nav-link">Lists</a>
+
+            <!-- Scheduler (Hidden from Admins) -->
+            <li class="nav-item" *ngIf="!isAdmin()">
+                <a routerLink="/scheduler" routerLinkActive="active" class="nav-link">Schedule</a>
             </li>
+
+            <!-- FAQ -->
             <li class="nav-item">
-                <a routerLink="/messages" routerLinkActive="active" class="nav-link">Messages</a>
+                <a routerLink="/faq" routerLinkActive="active" class="nav-link">FAQ</a>
             </li>
-            }
-            <li class="nav-item">
-                <a routerLink="/errors" routerLinkActive="active" class="nav-link">Errors</a>
+
+            <!-- Admin Panel -->
+            <li *appHasRole="['Admin']" class="nav-item">
+                <a routerLink="/admin" routerLinkActive="active" class="nav-link">Admin Panel</a>
+            </li>
+
+            <!-- Lecturer Panel -->
+            <li *ngIf="showLecturerPanel" class="nav-item">
+                <a routerLink="/lecturer" routerLinkActive="active" class="nav-link">Lecturer Panel</a>
             </li>
         </ul>
 
-
-        @if(accountService.currentUser()){
-        <div dropdown class="dropdown">
+        <!-- Logged-in User Dropdown -->
+        <div *ngIf="accountService.currentUser()" dropdown class="dropdown">
+            <img class="me-2" src="./assets/user.png" alt="user icon" width="32" height="32" />
             <a dropdownToggle class="dropdown-toggle text-light text-decoration-none">
-
-                Welcome {{accountService.currentUser()?.username | titlecase}}
+                Welcome {{ accountService.currentUser()?.name }}
             </a>
             <div *dropdownMenu class="dropdown-menu">
-                <a class="dropdown-item">Edit profile</a>
-                <div class="dropdown-divider"></div>
                 <a class="dropdown-item" (click)="logout()">Logout</a>
             </div>
         </div>
-        }
 
-        @if(!accountService.currentUser()){
-
-        <form #loginForm="ngForm" (ngSubmit)="login()" class="d-flex">
-            <input name="username" [(ngModel)]="model.username" class="form-control me-2" placeholder="Username">
-
+        <!-- Login Form -->
+        <form *ngIf="!accountService.currentUser()" #loginForm="ngForm" (ngSubmit)="login()" class="d-flex"
+            autocomplete="on">
+            <input name="userNumber" [(ngModel)]="model.userNumber" class="form-control me-2" placeholder="User Number"
+                type="text" autocomplete="username" />
             <input name="password" [(ngModel)]="model.password" class="form-control me-2" placeholder="Password"
-                type="password">
-
+                type="password" autocomplete="current-password" />
             <button class="btn btn-success" type="submit">Login</button>
         </form>
-        }
-
     </div>
 </nav>
-
-
-
-
-
-<!--<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-    <div class="container">
-        <a class="navbar-brand" href="#">DatingApp</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
-            aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarCollapse">
-            <ul class="navbar-nav me-auto mb-2 mb-md-0">
-                <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="#">Home</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Link</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link disabled" aria-disabled="true">Disabled</a>
-                </li>
-            </ul>
-            <form class="d-flex" role="search">
-                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-                <button class="btn btn-outline-success" type="submit">Search</button>
-            </form>
-        </div>
-    </div>
-</nav>-->

@@ -1,0 +1,60 @@
+<div class="container mt-4">
+    <h2 class="text-center">Lab Schedule</h2>
+
+    <!-- Download PDF Button -->
+    <div class="text-end mb-3">
+        <button class="btn btn-success" (click)="downloadScheduleAsPdf()">
+            Download PDF
+        </button>
+    </div>
+
+    <!-- Weekly Grid Table -->
+    <div id="labScheduleTable" class="table-responsive mt-3">
+        <table class="table table-bordered text-center align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th style="width: 140px;">Time</th>
+                    <th *ngFor="let day of weekdays">{{ day }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let slot of timeSlots">
+                    <td><strong>{{ slot }}</strong></td>
+                    <td *ngFor="let day of weekdays">
+                        <ng-container *ngIf="getBookingObject(day, slot) as booking; else emptyCell">
+                            <button class="btn btn-outline-dark btn-sm w-100" (click)="triggerUnbookModal(booking)"
+                                style="cursor: pointer; white-space: normal;">
+                                {{ getBookingLabel(day, slot) }}
+                            </button>
+                        </ng-container>
+                        <ng-template #emptyCell>
+                            <span class="text-muted">-</span>
+                        </ng-template>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Role-Based Action -->
+    <div class="mt-4 text-center">
+        <div *ngIf="canBook(); else readonlyMsg">
+            <button class="btn btn-primary" (click)="openBookingModal()">
+                Book Lab Slot
+            </button>
+        </div>
+        <ng-template #readonlyMsg>
+            <p class="text-muted">View-only access: You cannot book or unbook lab slots.</p>
+        </ng-template>
+    </div>
+
+    <!-- Modal for Booking -->
+    <app-book-lab-slot-modal *ngIf="showBookingModal" [weekdays]="weekdays" [availableTimeSlots]="timeSlots"
+        (confirmBooking)="handleBookingConfirmed($event)" (cancel)="closeBookingModal()">
+    </app-book-lab-slot-modal>
+
+    <!-- Modal for Unbooking -->
+    <app-unbook-lab-slot-modal *ngIf="showUnbookingModal && selectedBookingToDelete" [booking]="selectedBookingToDelete"
+        (confirmUnbooking)="handleBookingUnconfirmed()" (cancel)="closeUnbookModal()">
+    </app-unbook-lab-slot-modal>
+</div>

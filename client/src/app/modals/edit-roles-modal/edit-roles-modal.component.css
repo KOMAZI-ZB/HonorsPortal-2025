@@ -1,0 +1,5 @@
+/* src/app/modals/edit-roles-modal.component.css */
+.modal-body {
+    max-height: 60vh;
+    overflow-y: auto;
+}

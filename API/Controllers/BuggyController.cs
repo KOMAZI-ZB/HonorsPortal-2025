@@ -1,40 +1,35 @@
-using API.Data;
+// ✅ BuggyController.cs
 using Microsoft.AspNetCore.Authorization;
-using API.Entities;
 using Microsoft.AspNetCore.Mvc;
 
-namespace API.Controllers;
-
-public class BuggyController(DataContext context) : BaseApiController
+namespace API.Controllers
 {
-    [Authorize]
-    [HttpGet("auth")]
-    public ActionResult<string> GetAuth()
+    [ApiController]
+    [Route("api/[controller]")]
+    public class BuggyController : ControllerBase
     {
-        return "secret text";
-    }
+        [HttpGet("not-found")]
+        public ActionResult GetNotFound()
+        {
+            return NotFound();
+        }
 
-    [HttpGet("not-found")]
-    public ActionResult<AppUser> GetNotFound()
-    {
-        var thing = context.Users.Find(-1);
+        [HttpGet("server-error")]
+        public ActionResult GetServerError()
+        {
+            throw new Exception("This is a server error for testing purposes.");
+        }
 
-        if (thing == null) return NotFound();
+        [HttpGet("bad-request")]
+        public ActionResult GetBadRequest()
+        {
+            return BadRequest("This is a bad request for testing purposes.");
+        }
 
-        return thing;
-    }
-
-    [HttpGet("server-error")]
-    public ActionResult<AppUser> GetServerError()
-    {
-        var thing = context.Users.Find(-1) ?? throw new Exception("A bad thing has happened");
-
-        return thing;
-    }
-
-    [HttpGet("bad-request")]
-    public ActionResult<string> GetBadRequest()
-    {
-        return BadRequest("This was not a good request");
+        [HttpGet("unauthorized")]
+        public ActionResult GetUnauthorized()
+        {
+            return Unauthorized();
+        }
     }
 }

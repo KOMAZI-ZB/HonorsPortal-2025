@@ -1,0 +1,38 @@
+<div class="modal fade show d-block" tabindex="-1" role="dialog" style="background: rgba(0,0,0,0.5);">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Book Lab Slot</h5>
+                <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
+            </div>
+
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label for="daySelect" class="form-label">Select Day</label>
+                        <select id="daySelect" class="form-select" [(ngModel)]="selectedDay" name="day">
+                            <option *ngFor="let day of weekdays" [value]="day">{{ day }}</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="timeSelect" class="form-label">Select Start Time</label>
+                        <select id="timeSelect" class="form-select" [(ngModel)]="selectedTime" name="time">
+                            <option *ngFor="let time of availableTimeSlots" [value]="time">{{ time }}</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="close()">Cancel</button>
+                <button type="button" class="btn btn-primary" [disabled]="!selectedDay || !selectedTime"
+                    (click)="submit()">
+                    Confirm Booking
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>

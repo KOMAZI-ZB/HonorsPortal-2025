@@ -1,0 +1,48 @@
+<!-- Announcements Header -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Announcements</h2>
+    <button *ngIf="currentUserRole !== 'Student'" class="btn btn-primary" (click)="openPostModal()">
+        Post Announcement
+    </button>
+</div>
+
+<!-- Announcement Feed -->
+<div *ngFor="let ann of announcements" class="card mb-3 shadow-sm">
+    <div class="card-body">
+        <!-- Header Row -->
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="d-flex align-items-center gap-2">
+                <span class="announcement-badge">{{ ann.type }}</span>
+                <small class="text-muted">{{ ann.createdAt | date: 'medium' }}</small>
+            </div>
+            <button *ngIf="canDelete(ann)" class="btn btn-sm btn-outline-danger" (click)="deleteAnnouncement(ann.id)">
+                Delete
+            </button>
+        </div>
+
+        <!-- Title -->
+        <h5 class="card-title mb-1">{{ ann.title }}</h5>
+
+        <!-- Message -->
+        <p class="card-text">{{ ann.message }}</p>
+
+        <!-- Image -->
+        <img *ngIf="ann.imagePath" [src]="ann.imagePath" class="img-fluid rounded mt-2" style="max-height: 200px;" />
+    </div>
+</div>
+
+<!-- Pagination Controls -->
+<nav *ngIf="pagination" class="mt-4 d-flex justify-content-center">
+    <ul class="pagination">
+        <li class="page-item" [class.disabled]="pagination.currentPage === 1">
+            <a class="page-link" (click)="pageChanged(pagination.currentPage - 1)">Previous</a>
+        </li>
+        <li class="page-item" *ngFor="let page of [].constructor(pagination.totalPages); let i = index"
+            [class.active]="pagination.currentPage === i + 1">
+            <a class="page-link" (click)="pageChanged(i + 1)">{{ i + 1 }}</a>
+        </li>
+        <li class="page-item" [class.disabled]="pagination.currentPage === pagination.totalPages">
+            <a class="page-link" (click)="pageChanged(pagination.currentPage + 1)">Next</a>
+        </li>
+    </ul>
+</nav>

@@ -1,0 +1,5 @@
+/* src/app/modals/edit-details-modal.component.css */
+.modal-body {
+    max-height: 75vh;
+    overflow-y: auto;
+}

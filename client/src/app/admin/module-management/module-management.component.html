@@ -1,0 +1,41 @@
+<!-- src/app/module-management/module-management.component.html -->
+<div class="row">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Module Management</h2>
+        <button class="btn btn-primary" (click)="openAddModuleModal()">Add Module</button>
+    </div>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Module Code</th>
+                <th>Module Name</th>
+                <th>Semester</th>
+                <th>Edit Name</th>
+                <th>Edit Code</th>
+                <th>Edit Details</th>
+                <th>Delete Module</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let mod of modules; trackBy: trackById">
+                <td>{{ mod.moduleCode }}</td>
+                <td>{{ mod.moduleName }}</td>
+                <td>{{ mod.semester }}</td>
+                <td>
+                    <button class="btn btn-outline-secondary btn-sm" (click)="openEditNameModal(mod)">Edit Name</button>
+                </td>
+                <td>
+                    <button class="btn btn-outline-secondary btn-sm" (click)="openEditCodeModal(mod)">Edit Code</button>
+                </td>
+                <td>
+                    <button class="btn btn-outline-secondary btn-sm" (click)="openEditDetailsModal(mod)">Edit
+                        Details</button>
+                </td>
+                <td>
+                    <button class="btn btn-outline-danger btn-sm" (click)="openDeleteModuleModal(mod)">Delete</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

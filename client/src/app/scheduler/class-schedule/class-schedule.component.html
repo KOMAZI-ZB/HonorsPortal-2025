@@ -1,0 +1,68 @@
+<div class="container mt-4">
+    <h2 class="text-center">Class Schedule</h2>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <label for="semester">Semester:</label>
+            <select id="semester" class="form-select d-inline-block w-auto ms-2" [(ngModel)]="semester"
+                (change)="onSemesterChange()">
+                <option [value]="1">Semester 1</option>
+                <option [value]="2">Semester 2</option>
+            </select>
+        </div>
+        <button class="btn btn-success" (click)="downloadScheduleAsPdf()">
+            Download Schedule (PDF)
+        </button>
+    </div>
+
+    <div id="classScheduleTable" class="table-responsive mt-3">
+        <table class="table table-bordered text-center align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th colspan="2">Time</th>
+                    <th *ngFor="let day of weekdays" colspan="2">{{ day }}</th>
+                </tr>
+                <tr>
+                    <th>Start</th>
+                    <th>End</th>
+                    <ng-container *ngFor="let day of weekdays">
+                        <th>Code</th>
+                        <th>Venue</th>
+                    </ng-container>
+                </tr>
+            </thead>
+            <tbody>
+                <ng-container *ngFor="let block of timeBlocks">
+                    <ng-container
+                        *ngFor="let row of [].constructor(getMaxEntriesForBlock(block)); let rowIndex = index">
+                        <tr>
+                            <td *ngIf="rowIndex === 0" [attr.rowspan]="getMaxEntriesForBlock(block)">
+                                <strong>{{ block.startTime }}</strong>
+                            </td>
+                            <td *ngIf="rowIndex === 0" [attr.rowspan]="getMaxEntriesForBlock(block)">
+                                <strong>{{ block.endTime }}</strong>
+                            </td>
+
+                            <ng-container *ngFor="let day of weekdays">
+                                <ng-container *ngIf="getModulesByBlock(block, day).length > rowIndex">
+                                    <td
+                                        [ngStyle]="{'background-color': getColorForModule(getModulesByBlock(block, day)[rowIndex].moduleCode)}">
+                                        {{ getModulesByBlock(block, day)[rowIndex].moduleCode }}
+                                    </td>
+                                    <td
+                                        [ngStyle]="{'background-color': getColorForModule(getModulesByBlock(block, day)[rowIndex].moduleCode)}">
+                                        {{ getModulesByBlock(block, day)[rowIndex].classVenue || '-' }}
+                                    </td>
+                                </ng-container>
+                                <ng-container *ngIf="getModulesByBlock(block, day).length <= rowIndex">
+                                    <td>-</td>
+                                    <td>-</td>
+                                </ng-container>
+                            </ng-container>
+                        </tr>
+                    </ng-container>
+                </ng-container>
+            </tbody>
+        </table>
+    </div>
+</div>
