@@ -26,7 +26,6 @@ public class DocumentsController(
         if (result == null)
             return BadRequest("Upload failed.");
 
-        // ✅ Trigger auto announcement: DocumentUpload
         var announcement = new CreateAnnouncementDto
         {
             Type = "DocumentUpload",
@@ -71,7 +70,10 @@ public class DocumentsController(
         var success = await _documentService.DeleteDocumentAsync(documentId, userNumber, isPrivileged);
 
         if (!success)
-            return Forbid("You do not have permission to delete this document.");
+        {
+            // ❗ FIXED: Don't use `Forbid("...")`, which causes 500
+            return StatusCode(403, new { message = "You do not have permission to delete this document." });
+        }
 
         return Ok(new { message = "Document deleted successfully." });
     }
@@ -81,7 +83,7 @@ public class DocumentsController(
     [HttpGet("all")]
     public async Task<ActionResult<IEnumerable<DocumentDto>>> GetAllModuleDocuments()
     {
-        var allModuleDocs = await _documentService.GetDocumentsByModuleAsync(0); // 0 = special flag
+        var allModuleDocs = await _documentService.GetDocumentsByModuleAsync(0);
         return Ok(allModuleDocs);
     }
 }

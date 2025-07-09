@@ -273,6 +273,7 @@ namespace API.Data.Migrations
                     FilePath = table.Column<string>(type: "TEXT", nullable: false),
                     UploadedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
                     UploadedBy = table.Column<string>(type: "TEXT", nullable: false),
+                    UploadedByUserNumber = table.Column<string>(type: "TEXT", nullable: false),
                     ModuleId = table.Column<int>(type: "INTEGER", nullable: true),
                     Source = table.Column<string>(type: "TEXT", nullable: false)
                 },

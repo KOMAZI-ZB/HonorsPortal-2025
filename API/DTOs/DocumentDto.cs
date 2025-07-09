@@ -13,5 +13,7 @@ namespace API.DTOs
         public string UploadedBy { get; set; } = string.Empty;
 
         public int? ModuleId { get; set; } // null for Repository files
+                                           // ✅ Optional: expose user number for UI logic
+        public string? UploadedByUserNumber { get; set; }
     }
 }

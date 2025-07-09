@@ -68,7 +68,8 @@ namespace API.Services
             {
                 Title = dto.Title,
                 FilePath = uploadResult.SecureUrl.AbsoluteUri,
-                UploadedBy = user.LastName,
+                UploadedBy = user.LastName,                // For display only
+                UploadedByUserNumber = user.UserNumber,    // For access control
                 UploadedAt = DateTime.UtcNow,
                 ModuleId = dto.ModuleId,
                 Source = dto.Source
@@ -127,7 +128,7 @@ namespace API.Services
             var document = await _context.Documents.FindAsync(documentId);
             if (document == null) return false;
 
-            if (document.UploadedBy != requesterUserNumber && !isAdminOrCoordinator)
+            if (document.UploadedByUserNumber != requesterUserNumber && !isAdminOrCoordinator)
                 return false;
 
             _context.Documents.Remove(document);

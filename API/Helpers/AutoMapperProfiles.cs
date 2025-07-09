@@ -31,8 +31,9 @@ namespace API.Helpers
                 .ForMember(dest => dest.NormalizedEmail, opt => opt.MapFrom(src => src.Email.ToUpper()))
                 .ForMember(dest => dest.NormalizedUserName, opt => opt.MapFrom(src => src.Email.ToUpper()));
 
-            // ✅ Document Mapping
-            CreateMap<Document, DocumentDto>();
+            // ✅ Document Mapping (Updated: explicitly map UploadedByUserNumber)
+            CreateMap<Document, DocumentDto>()
+                .ForMember(dest => dest.UploadedByUserNumber, opt => opt.MapFrom(src => src.UploadedByUserNumber));
             CreateMap<UploadDocumentDto, Document>();
 
             // ✅ FAQ and Announcement
