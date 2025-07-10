@@ -8,10 +8,17 @@
 }
 
 .ufs-logo {
-    max-width: 1000px;
-    margin-bottom: 20px;
-    margin-top: 40px;
+    width: 400px;
+    /* Controls the displayed size of the logo */
+    height: auto;
+    /* Keep aspect ratio */
+    margin-bottom: 30px;
+    /* Extra spacing */
+    margin-top: 50px;
+    /* More space above */
+    display: block;
 }
+
 
 .portal-title {
     font-size: 1rem;
@@ -23,11 +30,11 @@
 
 .login-form {
     width: 100%;
-    max-width: 320px;
+    max-width: 380px;
 }
 
 .login-form input {
-    height: 50px;
+    height: 60px;
     /* Bigger input box */
     font-size: 1.1rem;
     /* Bigger font */
@@ -35,7 +42,16 @@
 }
 
 .login-form button {
-    height: 50px;
+    height: 60px;
     font-size: 1.1rem;
     font-weight: bold;
+}
+
+.portal-title {
+    font-size: 1.2rem;
+    /* Increased from 1rem to 1.5rem */
+    font-weight: bold;
+    margin-bottom: 25px;
+    color: #2c3e50;
+    text-align: center;
 }

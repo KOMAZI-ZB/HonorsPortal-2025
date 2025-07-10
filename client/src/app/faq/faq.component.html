@@ -1,5 +1,5 @@
-<!-- ➕ Add FAQ Button (Admin/Lecturer/Coordinator only) -->
-<div class="mb-3 text-end" *ngIf="canEdit()">
+<!-- ➕ Add FAQ Button (Admins only) -->
+<div class="mb-3 text-end" *ngIf="isAdmin()">
     <button class="btn btn-primary btn-sm" (click)="openEditModal()">
         Add FAQ
     </button>
@@ -8,7 +8,6 @@
 <!-- 📋 FAQ List -->
 <div *ngFor="let faq of faqs" class="card mb-3 faq-card" [ngClass]="faq.answer ? 'faq-answered' : 'faq-unanswered'"
     (click)="toggleFaq(faq.id)">
-
     <div class="card-body position-relative" [ngClass]="{ 'faq-collapsed': openFaqId !== faq.id }">
 
         <!-- Centered Question + Chevron -->
@@ -31,13 +30,13 @@
                 <p class="text-muted fst-italic mb-4">No answer yet</p>
             </ng-template>
 
-            <div class="mt-2">
-                <button *ngIf="canEdit()" class="btn btn-sm btn-outline-primary me-2"
+            <!-- Admin Only Edit/Delete Buttons -->
+            <div class="mt-2" *ngIf="isAdmin()">
+                <button class="btn btn-sm btn-outline-primary me-2"
                     (click)="openEditModal(faq); $event.stopPropagation();">
                     ✏️ Edit
                 </button>
-                <button *ngIf="canDelete()" class="btn btn-sm btn-outline-danger"
-                    (click)="deleteFaq(faq.id); $event.stopPropagation();">
+                <button class="btn btn-sm btn-outline-danger" (click)="deleteFaq(faq.id); $event.stopPropagation();">
                     🗑️ Delete
                 </button>
             </div>

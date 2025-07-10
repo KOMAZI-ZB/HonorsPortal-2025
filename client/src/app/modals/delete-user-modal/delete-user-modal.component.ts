@@ -24,7 +24,7 @@ export class DeleteUserModalComponent {
   ) { }
 
   confirmDelete() {
-    this.http.delete(`${this.baseUrl}account/delete-user/${this.user.userNumber}`).subscribe({
+    this.http.delete(`${this.baseUrl}admin/delete-user/${this.user.userNumber}`).subscribe({
       next: (res: any) => {
         this.toastr.success(res?.message || 'User deleted');
         this.modalRef.hide();

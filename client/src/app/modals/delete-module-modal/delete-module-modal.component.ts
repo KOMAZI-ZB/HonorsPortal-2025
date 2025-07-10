@@ -25,9 +25,9 @@ export class DeleteModuleModalComponent {
   ) { }
 
   confirmDelete() {
-    this.http.delete(`${this.baseUrl}modules/${this.module.id}`).subscribe({
-      next: () => {
-        this.toastr.success('Module deleted successfully');
+    this.http.delete<{ message: string }>(`${this.baseUrl}modules/${this.module.id}`).subscribe({
+      next: (res) => {
+        this.toastr.success(res.message || 'Module deleted successfully');
         this.modalRef.hide();
       },
       error: err => {

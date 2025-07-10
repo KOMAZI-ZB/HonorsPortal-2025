@@ -12,6 +12,7 @@ import { AccountService } from '../_services/account.service';
 import { Repository } from '../_models/repository';
 import { AddRepositoryModalComponent } from '../modals/add-repository-modal/add-repository-modal.component';
 import { Pagination } from '../_models/pagination';
+import { ConfirmDeleteModalComponent } from '../modals/confirm-delete-modal/confirm-delete-modal.component';
 
 @Component({
   selector: 'app-repository',
@@ -126,24 +127,28 @@ export class RepositoryComponent implements OnInit {
 
   deleteExternalRepository(id: number) {
     if (!this.hasRepoManagementRights()) return;
-    if (!confirm('Are you sure you want to delete this repository?')) return;
 
-    this.repositoryService.deleteExternalRepository(id).subscribe({
-      next: () => {
-        this.toastr.success('Repository removed successfully.');
-
-        // If last item on the current page is deleted and not on first page
-        if (this.externalRepos.length === 1 && this.externalPageNumber > 1) {
-          this.externalPageNumber--;
-        }
-
-        this.loadExternalRepositories();
-      },
-      error: err => {
-        console.error('Failed to delete repository', err);
-        this.toastr.error('Failed to delete repository.');
+    const initialState: Partial<ConfirmDeleteModalComponent> = {
+      title: 'Confirm Repository Deletion',
+      message: 'Are you sure you want to delete this external repository?',
+      onConfirm: () => {
+        this.repositoryService.deleteExternalRepository(id).subscribe({
+          next: () => {
+            this.toastr.success('Repository removed successfully.');
+            if (this.externalRepos.length === 1 && this.externalPageNumber > 1) {
+              this.externalPageNumber--;
+            }
+            this.loadExternalRepositories();
+          },
+          error: err => {
+            console.error('Failed to delete repository', err);
+            this.toastr.error('Failed to delete repository.');
+          }
+        });
       }
-    });
+    };
+
+    this.bsModalRef = this.modalService.show(ConfirmDeleteModalComponent, { initialState });
   }
 
   hasUploadRights(): boolean {

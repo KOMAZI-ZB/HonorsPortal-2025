@@ -93,11 +93,7 @@ export class FaqComponent implements OnInit {
     this.openFaqId = this.openFaqId === id ? null : id;
   }
 
-  canEdit(): boolean {
-    return ['Admin', 'Lecturer', 'Coordinator'].includes(this.userRole);
-  }
-
-  canDelete(): boolean {
+  isAdmin(): boolean {
     return this.userRole === 'Admin';
   }
 }

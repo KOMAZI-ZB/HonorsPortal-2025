@@ -150,9 +150,18 @@ public class ModulesController(DataContext context) : BaseApiController
         var module = await context.Modules.FindAsync(id);
         if (module == null) return NotFound("Module not found.");
 
+        var userLinks = await context.UserModules.Where(x => x.ModuleId == id).ToListAsync();
+        var docs = await context.Documents.Where(x => x.ModuleId == id).ToListAsync();
+        var announcements = await context.Announcements.Where(x => x.ModuleId == id).ToListAsync(); // ✅ Added line
+
+        context.UserModules.RemoveRange(userLinks);
+        context.Documents.RemoveRange(docs);
+        context.Announcements.RemoveRange(announcements); // ✅ Added line
         context.Modules.Remove(module);
+
         await context.SaveChangesAsync();
-        return Ok("Module deleted.");
+        return Ok(new { message = "Module deleted." });
+
     }
 
     [Authorize(Roles = "Admin,Lecturer,Coordinator")]

@@ -1,20 +1,95 @@
-<hr />
-<h6>Class Schedule</h6>
-<div class="mb-3">
-    <label>Class Venue</label>
-    <input type="text" class="form-control" [(ngModel)]="classVenue" name="classVenue" />
-</div>
+<div class="p-3">
+    <hr />
+    <h6>Module Details</h6>
 
-<div class="mb-3">
-    <label>Class Days & Times</label>
-    <div *ngFor="let day of weekDays" class="mb-2 ms-2">
-        <div class="form-check form-check-inline">
-            <input type="checkbox" class="form-check-input" [id]="day" [(ngModel)]="selectedDays[day]" />
-            <label class="form-check-label me-3" [for]="day">{{ day }}</label>
+    <div class="mb-3">
+        <label>Module Code</label>
+        <input type="text" class="form-control" [(ngModel)]="moduleCode" name="moduleCode" />
+    </div>
+
+    <div class="mb-3">
+        <label>Module Name</label>
+        <input type="text" class="form-control" [(ngModel)]="moduleName" name="moduleName" />
+    </div>
+
+    <div class="mb-3">
+        <label>Semester</label>
+        <select class="form-control" [(ngModel)]="semester" name="semester">
+            <option [value]="1">Semester 1</option>
+            <option [value]="2">Semester 2</option>
+        </select>
+    </div>
+
+    <hr />
+    <h6>Class Schedule</h6>
+
+    <div class="mb-3">
+        <label>Class Venue</label>
+        <input type="text" class="form-control" [(ngModel)]="classVenue" name="classVenue" />
+    </div>
+
+    <div class="mb-3">
+        <label>Class Days & Times</label>
+        <div *ngFor="let day of weekDays" class="mb-2 ms-2">
+            <div class="form-check form-check-inline">
+                <input type="checkbox" class="form-check-input" [id]="day" [(ngModel)]="selectedDays[day]" />
+                <label class="form-check-label me-3" [for]="day">{{ day }}</label>
+            </div>
+            <input type="time" class="form-control d-inline w-auto me-2" [(ngModel)]="startTimes[day]"
+                [disabled]="!selectedDays[day]" />
+            <input type="time" class="form-control d-inline w-auto" [(ngModel)]="endTimes[day]"
+                [disabled]="!selectedDays[day]" />
         </div>
-        <input type="time" class="form-control d-inline w-auto me-2" [(ngModel)]="startTimes[day]"
-            [disabled]="!selectedDays[day]" />
-        <input type="time" class="form-control d-inline w-auto" [(ngModel)]="endTimes[day]"
-            [disabled]="!selectedDays[day]" />
+    </div>
+
+    <hr />
+    <h6>Test Schedule</h6>
+
+    <div class="mb-3">
+        <label>Test 1 Venue</label>
+        <input type="text" class="form-control" [(ngModel)]="test1Venue" name="test1Venue" />
+    </div>
+    <div class="mb-3">
+        <label>Test 1 Date</label>
+        <input type="date" class="form-control" [(ngModel)]="test1Date" name="test1Date" />
+    </div>
+    <div class="mb-3">
+        <label>Test 1 Time</label>
+        <input type="time" class="form-control" [(ngModel)]="test1Time" name="test1Time" />
+    </div>
+
+    <div class="mb-3">
+        <label>Test 2 Venue</label>
+        <input type="text" class="form-control" [(ngModel)]="test2Venue" name="test2Venue" />
+    </div>
+    <div class="mb-3">
+        <label>Test 2 Date</label>
+        <input type="date" class="form-control" [(ngModel)]="test2Date" name="test2Date" />
+    </div>
+    <div class="mb-3">
+        <label>Test 2 Time</label>
+        <input type="time" class="form-control" [(ngModel)]="test2Time" name="test2Time" />
+    </div>
+
+    <hr />
+    <h6>Supplementary Test</h6>
+
+    <div class="mb-3">
+        <label>Supplementary Venue</label>
+        <input type="text" class="form-control" [(ngModel)]="supplementaryVenue" name="supplementaryVenue" />
+    </div>
+    <div class="mb-3">
+        <label>Supplementary Date</label>
+        <input type="date" class="form-control" [(ngModel)]="supplementaryDate" name="supplementaryDate" />
+    </div>
+    <div class="mb-3">
+        <label>Supplementary Time</label>
+        <input type="time" class="form-control" [(ngModel)]="supplementaryTime" name="supplementaryTime" />
+    </div>
+
+    <hr />
+    <div class="text-end">
+        <button class="btn btn-secondary me-2" (click)="cancel()">Cancel</button>
+        <button class="btn btn-primary" (click)="submit()">Add Module</button>
     </div>
 </div>

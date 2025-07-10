@@ -41,7 +41,7 @@ export class EditRolesModalComponent implements OnInit {
   }
 
   submit() {
-    this.http.put(`${this.baseUrl}account/update-roles/${this.user.userNumber}`, this.selectedRoles).subscribe({
+    this.http.put(`${this.baseUrl}admin/update-roles/${this.user.userNumber}`, this.selectedRoles).subscribe({
       next: () => {
         this.toastr.success('Roles updated successfully');
         this.modalRef.hide();
