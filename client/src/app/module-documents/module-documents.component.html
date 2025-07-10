@@ -21,7 +21,12 @@
                 <td>{{ doc.uploadedBy }}</td>
                 <td>{{ doc.uploadedAt | date: 'medium' }}</td>
                 <td class="text-center">
-                    <a [href]="doc.filePath" target="_blank" class="btn btn-sm btn-success me-2">Download</a>
+                    <a [href]="doc.filePath" target="_blank" rel="noopener noreferrer" download
+                        class="btn btn-sm btn-success me-2">
+                        Download
+                    </a>
+
+
                     <button *ngIf="hasUploadRights()" class="btn btn-sm btn-danger" (click)="deleteDocument(doc.id)">
                         Delete
                     </button>

@@ -56,10 +56,13 @@ namespace API.Services
             var uploadParams = new RawUploadParams
             {
                 File = new FileDescription(dto.File.FileName, stream),
-                Folder = "academic-portal-docs"
+                Folder = "academic-portal-docs",
+                Type = "upload" // ✅ This makes the file publicly accessible
             };
 
-            uploadResult = await _cloudinary.UploadAsync(uploadParams);
+
+            uploadResult = await _cloudinary.UploadAsync(uploadParams, "raw");
+
 
             if (uploadResult.Error != null)
                 throw new Exception(uploadResult.Error.Message);
