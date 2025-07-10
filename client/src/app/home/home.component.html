@@ -1,4 +1,25 @@
-<div class="container mt-5 text-center">
-    <h1>Welcome to the UFS Academic Portal</h1>
-    <p class="lead">Login from the navigation bar above to access your dashboard and announcements.</p>
+<div class="login-container">
+    <!-- Logo -->
+    <img src="assets/ufslogo.png" alt="UFS Logo" class="ufs-logo" />
+
+    <!-- Title -->
+    <h2 class="portal-title">Sign in with Usernumber and Password</h2>
+
+    <!-- Login Form -->
+    <form (ngSubmit)="login()" #loginForm="ngForm" class="login-form">
+        <div class="mb-3">
+            <input name="userNumber" [(ngModel)]="model.userNumber" class="form-control text-center" type="text"
+                placeholder="User Number" autocomplete="username" required />
+        </div>
+
+        <div class="mb-3 input-group">
+            <input [type]="showPassword ? 'text' : 'password'" name="password" [(ngModel)]="model.password"
+                class="form-control text-center" placeholder="Password" autocomplete="current-password" required />
+            <span class="input-group-text" (click)="togglePasswordVisibility()" style="cursor: pointer;">
+                <i class="fas" [ngClass]="showPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
+            </span>
+        </div>
+
+        <button class="btn btn-primary w-100" type="submit">Login</button>
+    </form>
 </div>

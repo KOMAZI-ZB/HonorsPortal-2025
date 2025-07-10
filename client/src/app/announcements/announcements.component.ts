@@ -4,6 +4,7 @@ import { Announcement } from '../_models/announcement';
 import { AnnouncementService } from '../_services/announcement.service';
 import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 import { CreateAnnouncementModalComponent } from '../modals/create-announcement-modal/create-announcement-modal.component';
+import { ConfirmDeleteModalComponent } from '../modals/confirm-delete-modal/confirm-delete-modal.component';
 import { AccountService } from '../_services/account.service';
 import { Pagination } from '../_models/pagination';
 
@@ -18,10 +19,14 @@ export class AnnouncementsComponent implements OnInit {
   announcements: Announcement[] = [];
   pagination: Pagination | null = null;
   pageNumber = 1;
-  pageSize = 5;
+  pageSize = 10;
   bsModalRef?: BsModalRef;
   currentUserRole: string = '';
   currentUserNumber: string = '';
+
+  // 🆕 For modal image preview
+  selectedImageUrl: string | null = null;
+  showImageModal: boolean = false;
 
   constructor(
     private announcementService: AnnouncementService,
@@ -42,11 +47,12 @@ export class AnnouncementsComponent implements OnInit {
         this.announcements = response.body ?? [];
         this.pagination = JSON.parse(response.headers.get('Pagination')!);
 
-        const latest = this.announcements[0]?.createdAt;
-        const lastSeen = localStorage.getItem('lastSeenAnnouncement');
-        if (!lastSeen || new Date(latest) > new Date(lastSeen)) {
-          localStorage.setItem('announcementsSeen', 'false');
-        }
+        // 🔕 Removed logic that sets 'announcementsSeen' flag to prevent 🔔 emoji
+        // const latest = this.announcements[0]?.createdAt;
+        // const lastSeen = localStorage.getItem('lastSeenAnnouncement');
+        // if (!lastSeen || new Date(latest) > new Date(lastSeen)) {
+        //   localStorage.setItem('announcementsSeen', 'false');
+        // }
       },
       error: err => console.error(err)
     });
@@ -64,7 +70,8 @@ export class AnnouncementsComponent implements OnInit {
 
     this.bsModalRef.onHidden?.subscribe(() => {
       this.loadAnnouncements();
-      localStorage.setItem('announcementsSeen', 'false'); // 🔔 Set new flag
+      // 🔕 Removed 'announcementsSeen' flag update
+      // localStorage.setItem('announcementsSeen', 'false');
     });
   }
 
@@ -78,11 +85,27 @@ export class AnnouncementsComponent implements OnInit {
   }
 
   deleteAnnouncement(id: number) {
-    if (confirm('Are you sure you want to delete this announcement?')) {
-      this.announcementService.delete(id).subscribe({
-        next: () => this.loadAnnouncements(),
-        error: err => console.error(err)
-      });
-    }
+    this.bsModalRef = this.modalService.show(ConfirmDeleteModalComponent, {
+      class: 'modal-sm',
+      initialState: {
+        onConfirm: () => {
+          this.announcementService.delete(id).subscribe({
+            next: () => this.loadAnnouncements(),
+            error: err => console.error(err)
+          });
+        }
+      }
+    });
+  }
+
+  // 🆕 Image modal logic
+  openImageModal(imageUrl: string) {
+    this.selectedImageUrl = imageUrl;
+    this.showImageModal = true;
+  }
+
+  closeImageModal() {
+    this.selectedImageUrl = null;
+    this.showImageModal = false;
   }
 }

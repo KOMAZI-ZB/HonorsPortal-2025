@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { BsModalRef } from 'ngx-bootstrap/modal';
-import { AdminService } from '../../_services/admin.service'; // ✅ FIXED: Use correct service
+import { AdminService } from '../../_services/admin.service';
 import { ModuleService } from '../../_services/module.service';
 import { Module } from '../../_models/module';
 import { ToastrService } from 'ngx-toastr';
@@ -16,7 +16,7 @@ import { ToastrService } from 'ngx-toastr';
 })
 export class AddUserModalComponent implements OnInit {
   constructor(
-    private adminService: AdminService, // ✅ FIXED: use AdminService
+    private adminService: AdminService,
     private moduleService: ModuleService,
     private toastr: ToastrService,
     public modalRef: BsModalRef
@@ -28,6 +28,7 @@ export class AddUserModalComponent implements OnInit {
   email = '';
   password = '';
   role = 'Student';
+  showPassword = false;
 
   semester1Modules: Module[] = [];
   semester2Modules: Module[] = [];
@@ -55,6 +56,10 @@ export class AddUserModalComponent implements OnInit {
     }
   }
 
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
+  }
+
   submit() {
     const payload = {
       userNumber: this.userNumber,
@@ -67,11 +72,10 @@ export class AddUserModalComponent implements OnInit {
       semester2ModuleIds: this.selectedSemester2
     };
 
-    this.adminService.registerUser(payload).subscribe({ // ✅ FIXED: Call correct method
+    this.adminService.registerUser(payload).subscribe({
       next: (res: any) => {
         this.toastr.success(res?.message || 'User registered');
         this.modalRef.hide();
-        // Optionally emit an event to reload table here
       },
       error: (err: any) => {
         const msg = err.error?.message || 'Failed to register user';

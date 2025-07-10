@@ -1,0 +1,41 @@
+.login-container {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 40px 20px 0;
+}
+
+.ufs-logo {
+    max-width: 1000px;
+    margin-bottom: 20px;
+    margin-top: 40px;
+}
+
+.portal-title {
+    font-size: 1rem;
+    font-weight: bold;
+    margin-bottom: 25px;
+    color: #2c3e50;
+    text-align: center;
+}
+
+.login-form {
+    width: 100%;
+    max-width: 320px;
+}
+
+.login-form input {
+    height: 50px;
+    /* Bigger input box */
+    font-size: 1.1rem;
+    /* Bigger font */
+    padding: 10px;
+}
+
+.login-form button {
+    height: 50px;
+    font-size: 1.1rem;
+    font-weight: bold;
+}

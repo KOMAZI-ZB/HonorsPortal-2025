@@ -6,6 +6,7 @@ import { ToastrService } from 'ngx-toastr';
 import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 import { AccountService } from '../_services/account.service';
 import { FaqModalComponent } from '../modals/faq-modal/faq-modal.component';
+import { ConfirmDeleteModalComponent } from '../modals/confirm-delete-modal/confirm-delete-modal.component';
 import { RouterModule } from '@angular/router';
 import { Pagination } from '../_models/pagination';
 
@@ -20,7 +21,7 @@ export class FaqComponent implements OnInit {
   faqs: FaqEntry[] = [];
   pagination: Pagination | null = null;
   pageNumber = 1;
-  pageSize = 5;
+  pageSize = 6;
   bsModalRef?: BsModalRef;
   userRole: string = '';
   openFaqId: number | null = null;
@@ -71,15 +72,21 @@ export class FaqComponent implements OnInit {
   }
 
   deleteFaq(id: number) {
-    if (confirm('Are you sure you want to delete this FAQ entry?')) {
-      this.faqService.deleteFaq(id).subscribe({
-        next: () => {
-          this.toastr.success('FAQ deleted');
-          this.loadFaqs();
-        },
-        error: () => this.toastr.error('Failed to delete FAQ')
-      });
-    }
+    const initialState = {
+      title: 'Confirm Deletion',
+      message: 'Are you sure you want to delete this FAQ entry?',
+      onConfirm: () => {
+        this.faqService.deleteFaq(id).subscribe({
+          next: () => {
+            this.toastr.success('FAQ deleted');
+            this.loadFaqs();
+          },
+          error: () => this.toastr.error('Failed to delete FAQ')
+        });
+      }
+    };
+
+    this.bsModalRef = this.modalService.show(ConfirmDeleteModalComponent, { initialState });
   }
 
   toggleFaq(id: number) {

@@ -1,48 +1,34 @@
 <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-primary">
     <div class="container">
-        <a class="navbar-brand" routerLink="/" routerLinkActive="active">Academic Portal</a>
+        <a class="navbar-brand" routerLink="/" routerLinkActive="active">CSI HONORS PORTAL</a>
 
         <ul class="navbar-nav me-auto mb-2 mb-md-0" *ngIf="accountService.currentUser()">
-            <!-- Announcements -->
             <li class="nav-item" (click)="markAnnouncementsAsSeen()">
                 <a routerLink="/announcements" routerLinkActive="active" class="nav-link">
                     Announcements
-                    <span *ngIf="hasNewAnnouncement" class="emoji-alert">🔔</span>
                 </a>
             </li>
-
-            <!-- Modules (Hidden from Admins) -->
             <li class="nav-item" *ngIf="!isAdmin()">
                 <a routerLink="/modules" routerLinkActive="active" class="nav-link">Modules</a>
             </li>
-
-            <!-- Repository (Visible to all roles) -->
             <li class="nav-item">
                 <a routerLink="/repository" routerLinkActive="active" class="nav-link">Repository</a>
             </li>
-
-            <!-- Scheduler (Hidden from Admins) -->
             <li class="nav-item" *ngIf="!isAdmin()">
                 <a routerLink="/scheduler" routerLinkActive="active" class="nav-link">Schedule</a>
             </li>
-
-            <!-- FAQ -->
             <li class="nav-item">
                 <a routerLink="/faq" routerLinkActive="active" class="nav-link">FAQ</a>
             </li>
-
-            <!-- Admin Panel -->
             <li *appHasRole="['Admin']" class="nav-item">
                 <a routerLink="/admin" routerLinkActive="active" class="nav-link">Admin Panel</a>
             </li>
-
-            <!-- Lecturer Panel -->
             <li *ngIf="showLecturerPanel" class="nav-item">
                 <a routerLink="/lecturer" routerLinkActive="active" class="nav-link">Lecturer Panel</a>
             </li>
         </ul>
 
-        <!-- Logged-in User Dropdown -->
+        <!-- User Dropdown -->
         <div *ngIf="accountService.currentUser()" dropdown class="dropdown">
             <img class="me-2" src="./assets/user.png" alt="user icon" width="32" height="32" />
             <a dropdownToggle class="dropdown-toggle text-light text-decoration-none">
@@ -52,15 +38,5 @@
                 <a class="dropdown-item" (click)="logout()">Logout</a>
             </div>
         </div>
-
-        <!-- Login Form -->
-        <form *ngIf="!accountService.currentUser()" #loginForm="ngForm" (ngSubmit)="login()" class="d-flex"
-            autocomplete="on">
-            <input name="userNumber" [(ngModel)]="model.userNumber" class="form-control me-2" placeholder="User Number"
-                type="text" autocomplete="username" />
-            <input name="password" [(ngModel)]="model.password" class="form-control me-2" placeholder="Password"
-                type="password" autocomplete="current-password" />
-            <button class="btn btn-success" type="submit">Login</button>
-        </form>
     </div>
 </nav>

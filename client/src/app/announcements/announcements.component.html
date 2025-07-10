@@ -12,7 +12,8 @@
         <!-- Header Row -->
         <div class="d-flex justify-content-between align-items-center mb-2">
             <div class="d-flex align-items-center gap-2">
-                <span class="announcement-badge">{{ ann.type }}</span>
+                <!-- Removed emoji/alert icon – only showing type text -->
+                <span class="text-uppercase fw-bold text-primary small">{{ ann.type }}</span>
                 <small class="text-muted">{{ ann.createdAt | date: 'medium' }}</small>
             </div>
             <button *ngIf="canDelete(ann)" class="btn btn-sm btn-outline-danger" (click)="deleteAnnouncement(ann.id)">
@@ -26,8 +27,9 @@
         <!-- Message -->
         <p class="card-text">{{ ann.message }}</p>
 
-        <!-- Image -->
-        <img *ngIf="ann.imagePath" [src]="ann.imagePath" class="img-fluid rounded mt-2" style="max-height: 200px;" />
+        <!-- Image (clickable) -->
+        <img *ngIf="ann.imagePath" [src]="ann.imagePath" class="img-fluid rounded mt-2"
+            style="max-height: 200px; cursor: pointer;" (click)="openImageModal(ann.imagePath)" />
     </div>
 </div>
 
@@ -46,3 +48,18 @@
         </li>
     </ul>
 </nav>
+
+<!-- Image Modal -->
+<div class="modal fade show d-block" tabindex="-1" role="dialog" *ngIf="showImageModal"
+    style="background-color: rgba(0, 0, 0, 0.8); z-index: 1055;" (click)="closeImageModal()">
+    <div class="modal-dialog modal-dialog-centered" role="document" (click)="$event.stopPropagation()">
+        <div class="modal-content bg-transparent border-0">
+            <div class="modal-body p-0">
+                <img [src]="selectedImageUrl" class="img-fluid w-100 rounded" style="max-height: 90vh;" />
+            </div>
+            <div class="modal-footer justify-content-center border-0">
+                <button class="btn btn-light" (click)="closeImageModal()">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
