@@ -18,17 +18,25 @@ public class AccountController(
     [HttpPost("login")]
     public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
     {
+        var errors = new Dictionary<string, string>();
+
         var user = await userManager.Users
             .Include(u => u.UserModules)
                 .ThenInclude(um => um.Module)
             .FirstOrDefaultAsync(x => x.UserNumber == loginDto.UserNumber);
 
         if (user == null)
-            return Unauthorized("Invalid user number or password.");
+        {
+            errors["userNumber"] = "User number not found.";
+            return Unauthorized(errors);
+        }
 
         var passwordValid = await userManager.CheckPasswordAsync(user, loginDto.Password);
         if (!passwordValid)
-            return Unauthorized("Invalid user number or password.");
+        {
+            errors["password"] = "Invalid password.";
+            return Unauthorized(errors);
+        }
 
         var roles = await userManager.GetRolesAsync(user);
 

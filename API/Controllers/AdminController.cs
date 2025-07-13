@@ -8,8 +8,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers;
 
-[ApiController] // ✅ Required for proper model validation and binding
-[Route("api/[controller]")] // ✅ Standard routing
+[ApiController]
+[Route("api/[controller]")]
 public class AdminController(
     UserManager<AppUser> userManager,
     RoleManager<AppRole> roleManager,
@@ -31,9 +31,9 @@ public class AdminController(
             FirstName = dto.FirstName,
             LastName = dto.LastName,
             UserNumber = dto.UserNumber,
-            Email = dto.Email.Trim().ToLower(), // ✅ Trimmed
+            Email = dto.Email.Trim().ToLower(),
             UserName = dto.UserNumber,
-            NormalizedEmail = dto.Email.Trim().ToUpper(), // ✅ Trimmed
+            NormalizedEmail = dto.Email.Trim().ToUpper(),
             NormalizedUserName = dto.UserNumber.ToUpper()
         };
 
@@ -75,7 +75,6 @@ public class AdminController(
     public async Task<ActionResult<IEnumerable<UserDto>>> GetUsersWithRoles()
     {
         var users = await userManager.Users.OrderBy(u => u.UserName).ToListAsync();
-
         var result = new List<UserDto>();
 
         foreach (var user in users)
@@ -85,12 +84,12 @@ public class AdminController(
             result.Add(new UserDto
             {
                 UserNumber = user.UserNumber,
-                Name = user.FirstName, // ✅ Matches frontend
-                Surname = user.LastName, // ✅ Matches frontend
+                Name = user.FirstName,
+                Surname = user.LastName,
                 Email = user.Email ?? string.Empty,
                 Roles = roles.ToArray(),
-                Token = "", // Not used in Admin panel
-                Modules = new List<ModuleDto>() // Not used here, but keep for consistency
+                Token = "",
+                Modules = new List<ModuleDto>()
             });
         }
 
@@ -239,6 +238,39 @@ public class AdminController(
 
         await context.SaveChangesAsync();
         return Ok(new { message = "Roles updated successfully" });
+    }
+
+    [Authorize(Policy = "RequireAdminRole")]
+    [HttpPut("update-user/{userNumber}")]
+    public async Task<ActionResult> UpdateUser(string userNumber, UpdateUserDto dto)
+    {
+        var user = await userManager.Users.FirstOrDefaultAsync(u => u.UserNumber == userNumber);
+        if (user == null) return NotFound("User not found");
+
+        user.FirstName = dto.FirstName;
+        user.LastName = dto.LastName;
+        user.Email = dto.Email.ToLower();
+        user.NormalizedEmail = dto.Email.ToUpper();
+        user.UserName = userNumber;
+        user.NormalizedUserName = userNumber.ToUpper();
+
+        var updateResult = await userManager.UpdateAsync(user);
+        if (!updateResult.Succeeded)
+            return BadRequest(updateResult.Errors);
+
+        if (!string.IsNullOrWhiteSpace(dto.UpdatePassword))
+        {
+            var token = await userManager.GeneratePasswordResetTokenAsync(user);
+            var passwordResult = await userManager.ResetPasswordAsync(user, token, dto.UpdatePassword);
+            if (!passwordResult.Succeeded)
+                return BadRequest(passwordResult.Errors);
+        }
+
+        var currentRoles = await userManager.GetRolesAsync(user);
+        await userManager.RemoveFromRolesAsync(user, currentRoles);
+        await userManager.AddToRolesAsync(user, dto.Roles);
+
+        return Ok(new { message = "User updated successfully." });
     }
 
     [Authorize(Policy = "RequireAdminRole")]

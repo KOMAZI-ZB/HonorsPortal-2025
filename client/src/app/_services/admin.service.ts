@@ -52,4 +52,15 @@ export class AdminService {
   updateUserRoles(userNumber: string, roles: string[]) {
     return this.http.put(`${this.baseUrl}admin/update-roles/${userNumber}`, roles);
   }
+
+  // ✅ NEW: Update full user (name, email, password, roles)
+  updateUser(userNumber: string, model: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    updatePassword?: string;
+    roles: string[];
+  }) {
+    return this.http.put(`${this.baseUrl}admin/update-user/${userNumber}`, model);
+  }
 }

@@ -50,6 +50,7 @@ export class AccountService {
     );
   }
 
+
   register(model: any) {
     return this.http.post<{ message: string }>(this.baseUrl + 'account/register-user', model).pipe(
       map(response => {

@@ -22,11 +22,14 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
               }
               throw modalStateErrors.flat();
             } else {
-              toastr.error(error.error, error.status)
+              toastr.error(error.error, error.status);
             }
             break;
           case 401:
-            toastr.error('Unauthorised', error.status)
+            // ✅ Suppress toast only for login endpoint
+            if (!req.url.includes('/account/login')) {
+              toastr.error('Unauthorised', error.status);
+            }
             break;
           case 404:
             router.navigateByUrl('/not-found');
@@ -42,5 +45,5 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
       }
       throw error;
     })
-  )
+  );
 };

@@ -60,18 +60,22 @@ namespace API.Services
                 Type = "upload" // ✅ This makes the file publicly accessible
             };
 
-
             uploadResult = await _cloudinary.UploadAsync(uploadParams, "raw");
-
 
             if (uploadResult.Error != null)
                 throw new Exception(uploadResult.Error.Message);
+
+            var userRole = await _context.UserRoles
+                .Include(ur => ur.Role)
+                .Where(ur => ur.UserId == user.Id)
+                .Select(ur => ur.Role.Name)
+                .FirstOrDefaultAsync();
 
             var document = new Document
             {
                 Title = dto.Title,
                 FilePath = uploadResult.SecureUrl.AbsoluteUri,
-                UploadedBy = user.LastName,                // For display only
+                UploadedBy = userRole ?? "Unknown",         // ⬅️ Updated: display user role instead of last name
                 UploadedByUserNumber = user.UserNumber,    // For access control
                 UploadedAt = DateTime.UtcNow,
                 ModuleId = dto.ModuleId,

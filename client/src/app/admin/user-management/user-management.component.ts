@@ -5,7 +5,7 @@ import { User } from '../../_models/user';
 
 import { AddUserModalComponent } from '../../modals/add-user-modal/add-user-modal.component';
 import { EditModulesModalComponent } from '../../modals/edit-modules-modal/edit-modules-modal.component';
-import { EditRolesModalComponent } from '../../modals/edit-roles-modal/edit-roles-modal.component';
+import { EditUserModalComponent } from '../../modals/edit-user-modal/edit-user-modal.component';
 import { DeleteUserModalComponent } from '../../modals/delete-user-modal/delete-user-modal.component';
 import { AdminService } from '../../_services/admin.service';
 
@@ -47,7 +47,6 @@ export class UserManagementComponent implements OnInit {
   }
 
   openEditModulesModal(user: User) {
-    // ✅ Ensure we use user from getAllUsers (with modules preloaded)
     const matchedUser = this.users.find(u => u.userNumber === user.userNumber);
     if (!matchedUser) return;
 
@@ -58,8 +57,8 @@ export class UserManagementComponent implements OnInit {
     this.modalRef.onHidden?.subscribe(() => this.loadUsers());
   }
 
-  openEditRolesModal(user: User) {
-    this.modalRef = this.modalService.show(EditRolesModalComponent, {
+  openEditUserModal(user: User) {
+    this.modalRef = this.modalService.show(EditUserModalComponent, {
       initialState: { user }
     });
     this.modalRef.onHidden?.subscribe(() => this.loadUsers());

@@ -15,23 +15,28 @@ import { ToastrService } from 'ngx-toastr';
 export class HomeComponent {
   private accountService = inject(AccountService);
   private router = inject(Router);
-  private toastr = inject(ToastrService);
+  private toastr = inject(ToastrService); // Optional
 
   model: any = {};
   showPassword = false;
+  userNumberError = '';
+  passwordError = '';
 
   login() {
+    this.userNumberError = '';
+    this.passwordError = '';
+
     this.accountService.login(this.model).subscribe({
       next: () => {
         const role = this.accountService.getUserRole();
-        if (role === 'Admin') {
-          this.router.navigateByUrl('/admin');
-        } else {
-          this.router.navigateByUrl('/announcements');
-        }
+        this.router.navigateByUrl(role === 'Admin' ? '/admin' : '/announcements');
       },
       error: error => {
-        this.toastr.error(error.error || 'Login failed');
+        const errObj = error?.error;
+        if (typeof errObj === 'object') {
+          this.userNumberError = errObj?.userNumber || '';
+          this.passwordError = errObj?.password || '';
+        }
       }
     });
   }

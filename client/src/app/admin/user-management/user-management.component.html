@@ -12,7 +12,7 @@
                 <th>Surname</th>
                 <th>Email</th>
                 <th>Roles</th>
-                <th>Edit Roles</th>
+                <th>Edit User</th>
                 <th>Edit Modules</th>
                 <th>Delete User</th>
             </tr>
@@ -25,8 +25,8 @@
                 <td>{{ user.email }}</td>
                 <td>{{ user.roles.join(', ') }}</td>
                 <td>
-                    <button class="btn btn-outline-secondary btn-sm" (click)="openEditRolesModal(user)">Edit
-                        Roles</button>
+                    <button class="btn btn-outline-secondary btn-sm" (click)="openEditUserModal(user)">Edit
+                        User</button>
                 </td>
                 <td>
                     <button class="btn btn-outline-secondary btn-sm" (click)="openEditModulesModal(user)">Edit

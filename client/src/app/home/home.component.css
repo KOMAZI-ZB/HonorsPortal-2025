@@ -30,11 +30,11 @@
 
 .login-form {
     width: 100%;
-    max-width: 380px;
+    max-width: 360px;
 }
 
 .login-form input {
-    height: 60px;
+    height: 40px;
     /* Bigger input box */
     font-size: 1.1rem;
     /* Bigger font */
@@ -42,7 +42,7 @@
 }
 
 .login-form button {
-    height: 60px;
+    height: 40px;
     font-size: 1.1rem;
     font-weight: bold;
 }

@@ -18,7 +18,8 @@ public static class IdentityServiceExtensions
         })
         .AddRoles<AppRole>()
         .AddRoleManager<RoleManager<AppRole>>()
-        .AddEntityFrameworkStores<DataContext>();
+        .AddEntityFrameworkStores<DataContext>()
+        .AddDefaultTokenProviders(); // ✅ THIS LINE FIXES THE ERROR
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
@@ -33,7 +34,6 @@ public static class IdentityServiceExtensions
                 };
             });
 
-        // ✅ Register all required policies
         services.AddAuthorizationBuilder()
             .AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"))
             .AddPolicy("RequireLecturerRole", policy => policy.RequireRole("Lecturer"))
