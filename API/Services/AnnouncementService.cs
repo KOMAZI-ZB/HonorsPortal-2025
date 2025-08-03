@@ -33,12 +33,47 @@ public class AnnouncementService : IAnnouncementService
 
     public async Task<PagedList<AnnouncementDto>> GetAllPaginatedAsync(QueryParams queryParams)
     {
-        var query = _context.Announcements
-            .OrderByDescending(a => a.CreatedAt)
-            .ProjectTo<AnnouncementDto>(_mapper.ConfigurationProvider)
-            .AsQueryable();
+        // Fetch join date for filtering
+        var user = await _context.Users
+            .Where(u => u.UserNumber == queryParams.CurrentUserNumber)
+            .Select(u => new { u.JoinDate })
+            .FirstOrDefaultAsync();
 
-        return await PagedList<AnnouncementDto>.CreateAsync(query, queryParams.PageNumber, queryParams.PageSize);
+        var query = _context.Announcements.AsQueryable();
+
+        // ✅ CORRECTED: Filter announcements created ON or AFTER the user's join date
+        if (user?.JoinDate is not null)
+        {
+            var joinDateTime = user.JoinDate.Value.ToDateTime(TimeOnly.MinValue);
+            query = query.Where(a => a.CreatedAt >= joinDateTime);
+        }
+
+        // ✅ Apply filtering based on the dropdown selection
+        if (!string.IsNullOrEmpty(queryParams.TypeFilter))
+        {
+            var filter = queryParams.TypeFilter.ToLower();
+
+            if (filter == "announcement")
+            {
+                query = query.Where(a =>
+                    a.Type.ToLower() == "general" || a.Type.ToLower() == "system");
+            }
+            else if (filter == "notification")
+            {
+                query = query.Where(a =>
+                    a.Type.ToLower() != "general" && a.Type.ToLower() != "system");
+            }
+        }
+
+        var projectedQuery = query
+            .ProjectTo<AnnouncementDto>(_mapper.ConfigurationProvider)
+            .OrderByDescending(a => a.CreatedAt);
+
+        return await PagedList<AnnouncementDto>.CreateAsync(
+            projectedQuery,
+            queryParams.PageNumber,
+            queryParams.PageSize
+        );
     }
 
     public async Task<AnnouncementDto?> CreateAsync(CreateAnnouncementDto dto, string createdByUserNumber)
@@ -61,10 +96,11 @@ public class AnnouncementService : IAnnouncementService
             imagePath = uploadResult.SecureUrl.AbsoluteUri;
         }
 
+        // ✅ Title is no longer modified — keep it exactly as user typed
         var announcement = new Announcement
         {
             Type = dto.Type,
-            Title = dto.Title,
+            Title = dto.Title.Trim(), // Use raw title without suffix
             Message = dto.Message,
             ImagePath = imagePath,
             CreatedBy = createdByUserNumber,

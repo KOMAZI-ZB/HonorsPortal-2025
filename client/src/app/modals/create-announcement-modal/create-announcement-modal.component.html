@@ -6,10 +6,10 @@
 <div class="modal-body">
     <form [formGroup]="form" (ngSubmit)="submit()" enctype="multipart/form-data" novalidate>
 
-        <!-- Announcement Type -->
+        <!-- ✅ FIXED: No disabled binding, keep it active for value selection -->
         <div class="mb-3">
             <label class="form-label">Type</label>
-            <select class="form-select" formControlName="type" [disabled]="currentUserRole !== 'Admin'">
+            <select class="form-select" formControlName="type">
                 <option value="General">General</option>
                 <option value="System" *ngIf="currentUserRole === 'Admin'">System</option>
             </select>
@@ -39,17 +39,15 @@
             <input type="file" class="form-control" (change)="onFileSelected($event)" />
         </div>
 
-        <!-- Optional Module ID (if future support added) -->
+        <!-- Hidden Module ID -->
         <div class="mb-3 d-none">
             <label class="form-label">Module ID</label>
             <input type="number" class="form-control" formControlName="moduleId" />
         </div>
 
-        <!-- Buttons -->
         <div class="d-flex justify-content-end">
             <button type="submit" class="btn btn-primary me-2" [disabled]="form.invalid">Post</button>
             <button type="button" class="btn btn-secondary" (click)="cancel()">Cancel</button>
         </div>
-
     </form>
 </div>

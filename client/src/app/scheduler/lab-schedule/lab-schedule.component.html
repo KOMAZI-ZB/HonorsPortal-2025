@@ -1,15 +1,28 @@
 <div class="container mt-4">
-    <h2 class="text-center">Lab Schedule</h2>
-
-    <!-- Download PDF Button -->
-    <div class="text-end mb-3">
-        <button class="btn btn-success" (click)="downloadScheduleAsPdf()">
-            Download PDF
-        </button>
+    <!-- Button Row: Book Lab Slot (left) + Download PDF (right) -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div *ngIf="canBook(); else readonlyMsg">
+            <button class="btn btn-primary" (click)="openBookingModal()">
+                Book Lab Slot
+            </button>
+        </div>
+        <ng-template #readonlyMsg></ng-template>
+        <div>
+            <button class="btn btn-success" (click)="downloadScheduleAsPdf()">
+                Download PDF
+            </button>
+        </div>
     </div>
 
-    <!-- Weekly Grid Table -->
-    <div id="labScheduleTable" class="table-responsive mt-3">
+    <!-- Weekly Grid Table with Logo and Heading (PDF only) -->
+    <div id="labScheduleTable" class="table-responsive mt-3 p-4 bg-white">
+
+        <!-- ✅ Only shown in PDF -->
+        <div class="pdf-only text-center mb-3">
+            <img src="assets/ufslogo.jpg" alt="UFS Logo" />
+            <h2>Lab Schedule</h2>
+        </div>
+
         <table class="table table-bordered text-center align-middle">
             <thead class="table-light">
                 <tr>
@@ -34,18 +47,6 @@
                 </tr>
             </tbody>
         </table>
-    </div>
-
-    <!-- Role-Based Action -->
-    <div class="mt-4 text-center">
-        <div *ngIf="canBook(); else readonlyMsg">
-            <button class="btn btn-primary" (click)="openBookingModal()">
-                Book Lab Slot
-            </button>
-        </div>
-        <ng-template #readonlyMsg>
-            <p class="text-muted">View-only access: You cannot book or unbook lab slots.</p>
-        </ng-template>
     </div>
 
     <!-- Modal for Booking -->

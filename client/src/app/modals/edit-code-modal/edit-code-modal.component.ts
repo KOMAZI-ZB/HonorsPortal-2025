@@ -38,21 +38,7 @@ export class EditCodeModalComponent implements OnInit {
       weekDays: this.module.weekDays || null,
       startTimes: this.module.startTimes || null,
       endTimes: this.module.endTimes || null,
-
-      test1Venue: this.module.test1Venue || null,
-      test1Date: this.module.test1Date || null,
-      test1StartTime: this.module.test1StartTime || null,
-      test1EndTime: this.module.test1EndTime || null,
-
-      test2Venue: this.module.test2Venue || null,
-      test2Date: this.module.test2Date || null,
-      test2StartTime: this.module.test2StartTime || null,
-      test2EndTime: this.module.test2EndTime || null,
-
-      supplementaryVenue: this.module.supplementaryVenue || null,
-      supplementaryDate: this.module.supplementaryDate || null,
-      supplementaryStartTime: this.module.supplementaryStartTime || null,
-      supplementaryEndTime: this.module.supplementaryEndTime || null
+      assessments: this.module.assessments || []  // ensure existing assessments are preserved
     };
 
     this.http.put(`${this.baseUrl}modules/${this.module.id}`, payload).subscribe({

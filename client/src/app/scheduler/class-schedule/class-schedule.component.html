@@ -1,7 +1,6 @@
 <div class="container mt-4">
-    <h2 class="text-center">Class Schedule</h2>
-
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <!-- Controls (EXCLUDED from PDF) -->
+    <div class="d-flex justify-content-between align-items-center mb-3 no-print">
         <div>
             <label for="semester">Semester:</label>
             <select id="semester" class="form-select d-inline-block w-auto ms-2" [(ngModel)]="semester"
@@ -11,11 +10,17 @@
             </select>
         </div>
         <button class="btn btn-success" (click)="downloadScheduleAsPdf()">
-            Download Schedule (PDF)
+            Download (PDF)
         </button>
     </div>
 
-    <div id="classScheduleTable" class="table-responsive mt-3">
+    <!-- PDF Export Content Only -->
+    <div id="pdfContent" class="table-responsive mt-3 p-4 bg-white">
+        <div class="text-center mb-3">
+            <img src="assets/ufslogo.jpg" alt="UFS Logo" />
+            <h2>Class Schedule</h2>
+        </div>
+
         <table class="table table-bordered text-center align-middle">
             <thead class="table-light">
                 <tr>
@@ -37,11 +42,12 @@
                         *ngFor="let row of [].constructor(getMaxEntriesForBlock(block)); let rowIndex = index">
                         <tr>
                             <td *ngIf="rowIndex === 0" [attr.rowspan]="getMaxEntriesForBlock(block)">
-                                <strong>{{ block.startTime }}</strong>
+                                <strong>{{ formatTime(block.startTime) }}</strong>
                             </td>
                             <td *ngIf="rowIndex === 0" [attr.rowspan]="getMaxEntriesForBlock(block)">
-                                <strong>{{ block.endTime }}</strong>
+                                <strong>{{ formatTime(block.endTime) }}</strong>
                             </td>
+
 
                             <ng-container *ngFor="let day of weekdays">
                                 <ng-container *ngIf="getModulesByBlock(block, day).length > rowIndex">

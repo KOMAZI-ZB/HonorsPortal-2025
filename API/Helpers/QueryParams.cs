@@ -19,7 +19,13 @@ public class QueryParams
     // For role-based module view
     public string? RoleContext { get; set; } // "Lecturer", "Student", etc.
 
-    // Future-proofing: pagination (optional)
+    // Added: For pagination
     public int PageNumber { get; set; } = 1;
     public int PageSize { get; set; } = 10;
+
+    // ✅ NEW: Required to filter based on user's join date
+    public string? CurrentUserNumber { get; set; }
+
+    // ✅ NEW: Filter by type e.g. Announcement, Notification
+    public string? TypeFilter { get; set; }
 }

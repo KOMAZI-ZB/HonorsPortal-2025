@@ -1,4 +1,4 @@
-/* ✅ Logo styling */
+/* ✅ Logo styling inside PDF export */
 #pdfContent img {
     width: 400px;
     height: auto;
@@ -14,14 +14,14 @@
     text-align: center;
 }
 
-/* ✅ White background and spacing */
+/* ✅ White background and padding */
 #pdfContent {
     background-color: white;
     padding: 20px;
     border-radius: 10px;
 }
 
-/* ✅ Table styling */
+/* ✅ Table grid lines */
 .table-bordered td,
 .table-bordered th {
     vertical-align: middle;
@@ -31,13 +31,14 @@
     font-size: 16px;
 }
 
+/* ✅ Blue header */
 .table thead th {
     background-color: #007bff;
     color: white;
     font-weight: bold;
 }
 
-/* ✅ Print mode: exclude interactive controls */
+/* ✅ Print mode */
 @media print {
 
     .btn,

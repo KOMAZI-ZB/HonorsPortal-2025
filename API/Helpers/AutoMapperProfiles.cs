@@ -31,7 +31,7 @@ namespace API.Helpers
                 .ForMember(dest => dest.NormalizedEmail, opt => opt.MapFrom(src => src.Email.ToUpper()))
                 .ForMember(dest => dest.NormalizedUserName, opt => opt.MapFrom(src => src.Email.ToUpper()));
 
-            // ✅ Document Mapping (Updated: explicitly map UploadedByUserNumber)
+            // ✅ Document Mapping
             CreateMap<Document, DocumentDto>()
                 .ForMember(dest => dest.UploadedByUserNumber, opt => opt.MapFrom(src => src.UploadedByUserNumber));
             CreateMap<UploadDocumentDto, Document>();
@@ -53,20 +53,16 @@ namespace API.Helpers
                 .ForMember(dest => dest.EndTimes, opt => opt.MapFrom(src =>
                     src.EndTimes != null ? src.EndTimes.Split(',', StringSplitOptions.None) : Array.Empty<string>()));
 
-            // ✅ Test Schedule Mapping (Test 1 only – others handled manually)
-            CreateMap<Module, TestScheduleDto>()
-                .ForMember(dest => dest.TestType, opt => opt.MapFrom(src => "Test 1"))
-                .ForMember(dest => dest.TestDate, opt => opt.MapFrom(src =>
-                    src.Test1Date.HasValue ? src.Test1Date.Value.ToString("yyyy-MM-dd") : null))
-                .ForMember(dest => dest.StartTime, opt => opt.MapFrom(src =>
-                    src.Test1StartTime.HasValue ? src.Test1StartTime.Value.ToString("HH:mm:ss") : null))
-                .ForMember(dest => dest.EndTime, opt => opt.MapFrom(src =>
-                    src.Test1EndTime.HasValue ? src.Test1EndTime.Value.ToString("HH:mm:ss") : null))
-                .ForMember(dest => dest.Venue, opt => opt.MapFrom(src => src.Test1Venue));
-
             // ✅ External Repository Mapping
             CreateMap<Repository, RepositoryDto>();
-            CreateMap<RepositoryDto, Repository>(); // ✅ Fix: Add reverse mapping
+            CreateMap<RepositoryDto, Repository>();
+
+            // ✅ Assessment Mapping
+            CreateMap<Assessment, AssessmentDto>()
+                .ForMember(dest => dest.ModuleCode, opt => opt.MapFrom(src => src.Module.ModuleCode));
+
+            CreateMap<CreateAssessmentDto, Assessment>();
+            CreateMap<UpdateAssessmentDto, Assessment>();
         }
     }
 }

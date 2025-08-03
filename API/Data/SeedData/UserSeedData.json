@@ -6,6 +6,7 @@
         "email": "alice@student.com",
         "password": "Pa$$w0rd",
         "role": "Student",
+        "joinDate": "2024-01-15",
         "semester1ModuleIds": [
             1,
             2
@@ -22,6 +23,7 @@
         "email": "brian@student.com",
         "password": "Pa$$w0rd",
         "role": "Student",
+        "joinDate": "2024-01-18",
         "semester1ModuleIds": [
             3,
             4
@@ -38,6 +40,7 @@
         "email": "cindy@student.com",
         "password": "Pa$$w0rd",
         "role": "Student",
+        "joinDate": "2024-01-20",
         "semester1ModuleIds": [
             5,
             6
@@ -54,6 +57,7 @@
         "email": "daniel@student.com",
         "password": "Pa$$w0rd",
         "role": "Student",
+        "joinDate": "2024-01-25",
         "semester1ModuleIds": [
             7,
             8
@@ -70,6 +74,7 @@
         "email": "drake@lecturer.com",
         "password": "Pa$$w0rd",
         "role": "Lecturer",
+        "joinDate": "2023-12-10",
         "semester1ModuleIds": [
             9,
             10
@@ -86,6 +91,7 @@
         "email": "esther@lecturer.com",
         "password": "Pa$$w0rd",
         "role": "Lecturer",
+        "joinDate": "2023-12-12",
         "semester1ModuleIds": [
             11,
             12
@@ -102,6 +108,7 @@
         "email": "felix@lecturer.com",
         "password": "Pa$$w0rd",
         "role": "Lecturer",
+        "joinDate": "2023-12-14",
         "semester1ModuleIds": [
             13,
             14
@@ -118,6 +125,7 @@
         "email": "grace@lecturer.com",
         "password": "Pa$$w0rd",
         "role": "Lecturer",
+        "joinDate": "2023-12-18",
         "semester1ModuleIds": [
             15,
             16
@@ -134,6 +142,7 @@
         "email": "hannah@coordinator.com",
         "password": "Pa$$w0rd",
         "role": "Coordinator",
+        "joinDate": "2023-11-20",
         "semester1ModuleIds": [
             17,
             18
@@ -150,6 +159,7 @@
         "email": "ivan@coordinator.com",
         "password": "Pa$$w0rd",
         "role": "Coordinator",
+        "joinDate": "2023-11-22",
         "semester1ModuleIds": [
             19,
             20
@@ -161,11 +171,12 @@
     },
     {
         "userNumber": "admin",
-        "firstName": "System",
+        "firstName": "Admin",
         "lastName": "Administrator",
         "email": "admin@portal.com",
         "password": "Pa$$w0rd",
         "role": "Admin",
+        "joinDate": "2023-10-01",
         "semester1ModuleIds": [],
         "semester2ModuleIds": []
     }

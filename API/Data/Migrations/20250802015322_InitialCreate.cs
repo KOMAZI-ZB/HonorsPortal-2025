@@ -35,6 +35,7 @@ namespace API.Data.Migrations
                     FirstName = table.Column<string>(type: "TEXT", nullable: false),
                     LastName = table.Column<string>(type: "TEXT", nullable: false),
                     UserNumber = table.Column<string>(type: "TEXT", nullable: false),
+                    JoinDate = table.Column<DateOnly>(type: "TEXT", nullable: true),
                     UserName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
@@ -99,19 +100,7 @@ namespace API.Data.Migrations
                     ClassVenue = table.Column<string>(type: "TEXT", nullable: true),
                     WeekDays = table.Column<string>(type: "TEXT", nullable: true),
                     StartTimes = table.Column<string>(type: "TEXT", nullable: true),
-                    EndTimes = table.Column<string>(type: "TEXT", nullable: true),
-                    Test1Venue = table.Column<string>(type: "TEXT", nullable: true),
-                    Test1Date = table.Column<DateOnly>(type: "TEXT", nullable: true),
-                    Test1StartTime = table.Column<TimeOnly>(type: "TEXT", nullable: true),
-                    Test1EndTime = table.Column<TimeOnly>(type: "TEXT", nullable: true),
-                    Test2Venue = table.Column<string>(type: "TEXT", nullable: true),
-                    Test2Date = table.Column<DateOnly>(type: "TEXT", nullable: true),
-                    Test2StartTime = table.Column<TimeOnly>(type: "TEXT", nullable: true),
-                    Test2EndTime = table.Column<TimeOnly>(type: "TEXT", nullable: true),
-                    SupplementaryVenue = table.Column<string>(type: "TEXT", nullable: true),
-                    SupplementaryDate = table.Column<DateOnly>(type: "TEXT", nullable: true),
-                    SupplementaryStartTime = table.Column<TimeOnly>(type: "TEXT", nullable: true),
-                    SupplementaryEndTime = table.Column<TimeOnly>(type: "TEXT", nullable: true)
+                    EndTimes = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -264,6 +253,32 @@ namespace API.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Assessments",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Title = table.Column<string>(type: "TEXT", nullable: false),
+                    Date = table.Column<DateOnly>(type: "TEXT", nullable: false),
+                    StartTime = table.Column<string>(type: "TEXT", nullable: true),
+                    EndTime = table.Column<string>(type: "TEXT", nullable: true),
+                    DueTime = table.Column<string>(type: "TEXT", nullable: true),
+                    Venue = table.Column<string>(type: "TEXT", nullable: true),
+                    IsTimed = table.Column<bool>(type: "INTEGER", nullable: false),
+                    ModuleId = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Assessments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Assessments_Modules_ModuleId",
+                        column: x => x.ModuleId,
+                        principalTable: "Modules",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Documents",
                 columns: table => new
                 {
@@ -361,6 +376,11 @@ namespace API.Data.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_Assessments_ModuleId",
+                table: "Assessments",
+                column: "ModuleId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Documents_ModuleId",
                 table: "Documents",
                 column: "ModuleId");
@@ -391,6 +411,9 @@ namespace API.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUserTokens");
+
+            migrationBuilder.DropTable(
+                name: "Assessments");
 
             migrationBuilder.DropTable(
                 name: "Documents");

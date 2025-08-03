@@ -7,6 +7,16 @@ import { environment } from '../../../environments/environment';
 import { ToastrService } from 'ngx-toastr';
 import { CommonModule } from '@angular/common';
 
+interface Assessment {
+  title: string;
+  date: string;
+  isTimed: boolean;
+  startTime?: string;
+  endTime?: string;
+  dueTime?: string;
+  venue?: string;
+}
+
 @Component({
   selector: 'app-edit-details-modal',
   standalone: true,
@@ -24,21 +34,7 @@ export class EditDetailsModalComponent implements OnInit {
   weekDays: string[] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   selectedDaysMap: { [day: string]: { checked: boolean; startTime: string; endTime: string } } = {};
 
-  // ✅ Separate test start and end times
-  test1Venue = '';
-  test1Date = '';
-  test1StartTime = '';
-  test1EndTime = '';
-
-  test2Venue = '';
-  test2Date = '';
-  test2StartTime = '';
-  test2EndTime = '';
-
-  supplementaryVenue = '';
-  supplementaryDate = '';
-  supplementaryStartTime = '';
-  supplementaryEndTime = '';
+  assessments: Assessment[] = [];
 
   constructor(
     private http: HttpClient,
@@ -53,11 +49,11 @@ export class EditDetailsModalComponent implements OnInit {
       this.selectedDaysMap[day] = { checked: false, startTime: '', endTime: '' };
     });
 
-    const weekDayList: string[] = this.module.weekDays || [];
-    const startTimes: string[] = this.module.startTimes || [];
-    const endTimes: string[] = this.module.endTimes || [];
+    const weekDayList = this.module.weekDays || [];
+    const startTimes = this.module.startTimes || [];
+    const endTimes = this.module.endTimes || [];
 
-    weekDayList.forEach((day: string, i: number) => {
+    weekDayList.forEach((day, i) => {
       if (this.selectedDaysMap[day]) {
         this.selectedDaysMap[day].checked = true;
         this.selectedDaysMap[day].startTime = startTimes[i] || '';
@@ -65,20 +61,24 @@ export class EditDetailsModalComponent implements OnInit {
       }
     });
 
-    this.test1Venue = this.module.test1Venue || '';
-    this.test1Date = this.module.test1Date || '';
-    this.test1StartTime = this.module.test1StartTime || '';
-    this.test1EndTime = this.module.test1EndTime || '';
-
-    this.test2Venue = this.module.test2Venue || '';
-    this.test2Date = this.module.test2Date || '';
-    this.test2StartTime = this.module.test2StartTime || '';
-    this.test2EndTime = this.module.test2EndTime || '';
-
-    this.supplementaryVenue = this.module.supplementaryVenue || '';
-    this.supplementaryDate = this.module.supplementaryDate || '';
-    this.supplementaryStartTime = this.module.supplementaryStartTime || '';
-    this.supplementaryEndTime = this.module.supplementaryEndTime || '';
+    // 🆕 Fetch the full module from the backend (ensures assessments are fresh and complete)
+    this.http.get<Module>(`${this.baseUrl}modules/${this.module.id}`).subscribe({
+      next: updated => {
+        this.assessments = (updated.assessments || []).map(a => ({
+          title: a.title,
+          date: a.date,
+          isTimed: a.isTimed,
+          startTime: a.startTime || '',
+          endTime: a.endTime || '',
+          dueTime: a.dueTime || '',
+          venue: a.venue || ''
+        }));
+      },
+      error: err => {
+        console.error('❌ Failed to fetch module data:', err);
+        this.assessments = [];
+      }
+    });
   }
 
   private formatTimeString(time: string): string | null {
@@ -86,31 +86,44 @@ export class EditDetailsModalComponent implements OnInit {
     return time.length === 5 ? time + ':00' : time;
   }
 
+  addAssessment() {
+    this.assessments.push({
+      title: '',
+      date: '',
+      isTimed: true,
+      startTime: '',
+      endTime: '',
+      venue: ''
+    });
+  }
+
+  removeAssessment(index: number) {
+    this.assessments.splice(index, 1);
+  }
+
   submit() {
     const selectedDays = this.weekDays.filter(day => this.selectedDaysMap[day].checked);
     const startTimes = selectedDays.map(day => this.formatTimeString(this.selectedDaysMap[day].startTime) || '');
     const endTimes = selectedDays.map(day => this.formatTimeString(this.selectedDaysMap[day].endTime) || '');
 
+    const cleanedAssessments = this.assessments.filter(a => a.date && a.date.trim() !== '');
+
+    const processedAssessments = cleanedAssessments.map(a => ({
+      title: a.title,
+      date: a.date,
+      isTimed: a.isTimed,
+      startTime: a.isTimed ? this.formatTimeString(a.startTime!) : null,
+      endTime: a.isTimed ? this.formatTimeString(a.endTime!) : null,
+      dueTime: a.isTimed ? null : this.formatTimeString(a.dueTime!),
+      venue: a.isTimed ? a.venue : null
+    }));
+
     const payload = {
       classVenue: this.classVenue || null,
       weekDays: selectedDays,
-      startTimes: startTimes,
-      endTimes: endTimes,
-
-      test1Venue: this.test1Venue || null,
-      test1Date: this.test1Date || null,
-      test1StartTime: this.formatTimeString(this.test1StartTime),
-      test1EndTime: this.formatTimeString(this.test1EndTime),
-
-      test2Venue: this.test2Venue || null,
-      test2Date: this.test2Date || null,
-      test2StartTime: this.formatTimeString(this.test2StartTime),
-      test2EndTime: this.formatTimeString(this.test2EndTime),
-
-      supplementaryVenue: this.supplementaryVenue || null,
-      supplementaryDate: this.supplementaryDate || null,
-      supplementaryStartTime: this.formatTimeString(this.supplementaryStartTime),
-      supplementaryEndTime: this.formatTimeString(this.supplementaryEndTime)
+      startTimes,
+      endTimes,
+      assessments: processedAssessments
     };
 
     this.http.put<any>(`${this.baseUrl}modules/${this.module.id}`, payload).subscribe({

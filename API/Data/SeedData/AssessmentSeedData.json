@@ -1,0 +1,162 @@
+[
+    {
+        "title": "Test 1",
+        "date": "2025-03-10",
+        "startTime": "09:00:00",
+        "endTime": "10:00:00",
+        "dueTime": null,
+        "venue": "C1",
+        "isTimed": true,
+        "moduleId": 1
+    },
+    {
+        "title": "Assignment 1",
+        "date": "2025-03-17",
+        "startTime": null,
+        "endTime": null,
+        "dueTime": "23:59:00",
+        "venue": null,
+        "isTimed": false,
+        "moduleId": 1
+    },
+    {
+        "title": "Test 2",
+        "date": "2025-03-15",
+        "startTime": "09:00:00",
+        "endTime": "10:00:00",
+        "dueTime": null,
+        "venue": "C2",
+        "isTimed": true,
+        "moduleId": 2
+    },
+    {
+        "title": "Assignment 2",
+        "date": "2025-03-22",
+        "startTime": null,
+        "endTime": null,
+        "dueTime": "23:59:00",
+        "venue": null,
+        "isTimed": false,
+        "moduleId": 2
+    },
+    {
+        "title": "Test 3",
+        "date": "2025-03-20",
+        "startTime": "09:00:00",
+        "endTime": "10:00:00",
+        "dueTime": null,
+        "venue": "C3",
+        "isTimed": true,
+        "moduleId": 3
+    },
+    {
+        "title": "Assignment 3",
+        "date": "2025-03-27",
+        "startTime": null,
+        "endTime": null,
+        "dueTime": "23:59:00",
+        "venue": null,
+        "isTimed": false,
+        "moduleId": 3
+    },
+    {
+        "title": "Test 4",
+        "date": "2025-03-25",
+        "startTime": "09:00:00",
+        "endTime": "10:00:00",
+        "dueTime": null,
+        "venue": "C4",
+        "isTimed": true,
+        "moduleId": 4
+    },
+    {
+        "title": "Assignment 4",
+        "date": "2025-04-01",
+        "startTime": null,
+        "endTime": null,
+        "dueTime": "23:59:00",
+        "venue": null,
+        "isTimed": false,
+        "moduleId": 4
+    },
+    {
+        "title": "Test 5",
+        "date": "2025-03-30",
+        "startTime": "09:00:00",
+        "endTime": "10:00:00",
+        "dueTime": null,
+        "venue": "C5",
+        "isTimed": true,
+        "moduleId": 5
+    },
+    {
+        "title": "Assignment 5",
+        "date": "2025-04-06",
+        "startTime": null,
+        "endTime": null,
+        "dueTime": "23:59:00",
+        "venue": null,
+        "isTimed": false,
+        "moduleId": 5
+    },
+    {
+        "title": "Test 6",
+        "date": "2025-04-04",
+        "startTime": "09:00:00",
+        "endTime": "10:00:00",
+        "dueTime": null,
+        "venue": "C6",
+        "isTimed": true,
+        "moduleId": 6
+    },
+    {
+        "title": "Assignment 6",
+        "date": "2025-04-11",
+        "startTime": null,
+        "endTime": null,
+        "dueTime": "23:59:00",
+        "venue": null,
+        "isTimed": false,
+        "moduleId": 6
+    },
+    {
+        "title": "Test 7",
+        "date": "2025-04-09",
+        "startTime": "09:00:00",
+        "endTime": "10:00:00",
+        "dueTime": null,
+        "venue": "C7",
+        "isTimed": true,
+        "moduleId": 7
+    },
+    {
+        "title": "Assignment 7",
+        "date": "2025-04-16",
+        "startTime": null,
+        "endTime": null,
+        "dueTime": "23:59:00",
+        "venue": null,
+        "isTimed": false,
+        "moduleId": 7
+    },
+    {
+        "title": "Test 8",
+        "date": "2025-04-14",
+        "startTime": "09:00:00",
+        "endTime": "10:00:00",
+        "dueTime": null,
+        "venue": "C8",
+        "isTimed": true,
+        "moduleId": 8
+    },
+    {
+        "title": "Assignment 8",
+        "date": "2025-04-21",
+        "startTime": null,
+        "endTime": null,
+        "dueTime": "23:59:00",
+        "venue": null,
+        "isTimed": false,
+        "moduleId": 8
+    }
+]

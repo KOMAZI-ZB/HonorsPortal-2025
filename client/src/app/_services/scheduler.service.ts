@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { ClassSchedule } from '../_models/class-schedule';
-import { TestSchedule } from '../_models/test-schedule';
+import { AssessmentSchedule } from '../_models/assessment-schedule';
 
 @Injectable({
   providedIn: 'root'
@@ -18,10 +18,10 @@ export class SchedulerService {
     return this.http.get<ClassSchedule[]>(`${this.baseUrl}class/${semester}`);
   }
 
-  // ✅ Get personalized test timetable for the current user
-  getTestSchedule(semester: number): Observable<TestSchedule[]> {
-    return this.http.get<TestSchedule[]>(`${this.baseUrl}test/${semester}`);
+  // ✅ Get personalized assessment schedule for the current user
+  getAssessmentSchedule(semester: number): Observable<AssessmentSchedule[]> {
+    return this.http.get<AssessmentSchedule[]>(`${this.baseUrl}assessment/${semester}`);
   }
 
-  // 🔒 Additional endpoints like exam timetable or lab booking are handled in LabbookingService
+  // 🔒 Additional endpoints like lab bookings are handled in LabbookingService
 }

@@ -1,5 +1,66 @@
+/* Button styling (unchanged) */
 .btn-outline-primary {
     border-radius: 20px;
     font-weight: 500;
     text-transform: none;
+}
+
+/* ✅ Logo and heading section (PDF) */
+#labScheduleTable .pdf-only img {
+    width: 400px;
+    height: auto;
+    margin-bottom: 10px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#labScheduleTable .pdf-only h2 {
+    font-size: 32px;
+    margin-top: 30px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* Table container */
+#labScheduleTable {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+/* ✅ Table borders and cell alignment - now using black borders */
+.table-bordered td,
+.table-bordered th {
+    vertical-align: middle;
+    text-align: center;
+    border: 1px solid #000;
+    /* Black borders */
+    padding: 12px;
+    font-size: 16px;
+}
+
+/* ✅ First row (thead) background color to blue with white text */
+.table thead th {
+    background-color: #007bff;
+    /* Bootstrap primary blue */
+    color: white;
+    font-weight: bold;
+}
+
+/* Time column (first column in tbody) */
+.table tbody td:first-child {
+    font-weight: bold;
+    background-color: #f8f9fa;
+}
+
+/* Print settings */
+@media print {
+    #labScheduleTable {
+        page-break-inside: avoid;
+    }
+
+    .btn {
+        display: none !important;
+    }
 }

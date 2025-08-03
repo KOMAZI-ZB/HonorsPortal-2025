@@ -34,7 +34,8 @@ public class AdminController(
             Email = dto.Email.Trim().ToLower(),
             UserName = dto.UserNumber,
             NormalizedEmail = dto.Email.Trim().ToUpper(),
-            NormalizedUserName = dto.UserNumber.ToUpper()
+            NormalizedUserName = dto.UserNumber.ToUpper(),
+            JoinDate = DateOnly.FromDateTime(DateTime.UtcNow) // ✅ Set JoinDate on registration
         };
 
         var result = await userManager.CreateAsync(user, dto.Password);
@@ -89,6 +90,7 @@ public class AdminController(
                 Email = user.Email ?? string.Empty,
                 Roles = roles.ToArray(),
                 Token = "",
+                JoinDate = user.JoinDate, // ✅ Include JoinDate
                 Modules = new List<ModuleDto>()
             });
         }
@@ -119,6 +121,7 @@ public class AdminController(
                 Email = user.Email ?? string.Empty,
                 Roles = roles.ToArray(),
                 Token = "",
+                JoinDate = user.JoinDate, // ✅ Include JoinDate
                 Modules = user.UserModules.Select(um => new ModuleDto
                 {
                     Id = um.Module.Id,
@@ -155,6 +158,7 @@ public class AdminController(
                 Email = user.Email ?? string.Empty,
                 Roles = new[] { role },
                 Token = "",
+                JoinDate = user.JoinDate, // ✅ Include JoinDate
                 Modules = user.UserModules.Select(um => new ModuleDto
                 {
                     Id = um.Module.Id,
@@ -191,6 +195,7 @@ public class AdminController(
                 Email = user.Email ?? string.Empty,
                 Roles = roles.ToArray(),
                 Token = "",
+                JoinDate = user.JoinDate, // ✅ Include JoinDate
                 Modules = new List<ModuleDto>()
             });
         }

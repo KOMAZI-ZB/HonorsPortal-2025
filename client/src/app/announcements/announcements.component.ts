@@ -7,11 +7,12 @@ import { CreateAnnouncementModalComponent } from '../modals/create-announcement-
 import { ConfirmDeleteModalComponent } from '../modals/confirm-delete-modal/confirm-delete-modal.component';
 import { AccountService } from '../_services/account.service';
 import { Pagination } from '../_models/pagination';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-announcements',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './announcements.component.html',
   styleUrls: ['./announcements.component.css']
 })
@@ -24,6 +25,9 @@ export class AnnouncementsComponent implements OnInit {
   currentUserRole: string = '';
   currentUserNumber: string = '';
 
+  // 🆕 For filtering
+  typeFilter: string = '';
+
   // 🆕 For modal image preview
   selectedImageUrl: string | null = null;
   showImageModal: boolean = false;
@@ -35,27 +39,26 @@ export class AnnouncementsComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.loadAnnouncements();
     const user = this.accountService.currentUser();
     this.currentUserNumber = user?.userNumber || '';
     this.currentUserRole = this.accountService.getUserRole();
+    this.loadAnnouncements();
   }
 
   loadAnnouncements() {
-    this.announcementService.getPaginatedAnnouncements(this.pageNumber, this.pageSize).subscribe({
-      next: response => {
-        this.announcements = response.body ?? [];
-        this.pagination = JSON.parse(response.headers.get('Pagination')!);
-
-        // 🔕 Removed logic that sets 'announcementsSeen' flag to prevent 🔔 emoji
-        // const latest = this.announcements[0]?.createdAt;
-        // const lastSeen = localStorage.getItem('lastSeenAnnouncement');
-        // if (!lastSeen || new Date(latest) > new Date(lastSeen)) {
-        //   localStorage.setItem('announcementsSeen', 'false');
-        // }
-      },
-      error: err => console.error(err)
-    });
+    this.announcementService
+      .getPaginatedAnnouncements(
+        this.pageNumber,
+        this.pageSize,
+        this.typeFilter
+      )
+      .subscribe({
+        next: response => {
+          this.announcements = response.body ?? [];
+          this.pagination = JSON.parse(response.headers.get('Pagination')!);
+        },
+        error: err => console.error(err)
+      });
   }
 
   pageChanged(newPage: number) {
@@ -70,8 +73,6 @@ export class AnnouncementsComponent implements OnInit {
 
     this.bsModalRef.onHidden?.subscribe(() => {
       this.loadAnnouncements();
-      // 🔕 Removed 'announcementsSeen' flag update
-      // localStorage.setItem('announcementsSeen', 'false');
     });
   }
 
@@ -98,7 +99,6 @@ export class AnnouncementsComponent implements OnInit {
     });
   }
 
-  // 🆕 Image modal logic
   openImageModal(imageUrl: string) {
     this.selectedImageUrl = imageUrl;
     this.showImageModal = true;
@@ -107,5 +107,12 @@ export class AnnouncementsComponent implements OnInit {
   closeImageModal() {
     this.selectedImageUrl = null;
     this.showImageModal = false;
+  }
+
+  // ✅ Badge label formatter (used in template only)
+  formatBadgeLabel(type: string): string {
+    const readable = type.replace(/([a-z])([A-Z])/g, '$1 $2').toUpperCase();
+    const isAnnouncement = type.toLowerCase() === 'general' || type.toLowerCase() === 'system';
+    return isAnnouncement ? `${readable} ANNOUNCEMENT` : `${readable} NOTIFICATION`;
   }
 }

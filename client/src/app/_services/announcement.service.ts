@@ -13,9 +13,18 @@ export class AnnouncementService {
 
   constructor(private http: HttpClient) { }
 
-  // ✅ Get paginated announcements
-  getPaginatedAnnouncements(pageNumber: number, pageSize: number): Observable<HttpResponse<Announcement[]>> {
-    const params = setPaginationHeaders(pageNumber, pageSize);
+  // ✅ Get paginated announcements (with optional filters)
+  getPaginatedAnnouncements(
+    pageNumber: number,
+    pageSize: number,
+    typeFilter: string = ''
+  ): Observable<HttpResponse<Announcement[]>> {
+    let params = setPaginationHeaders(pageNumber, pageSize); // ✅ Removed CurrentUserNumber
+
+    if (typeFilter) {
+      params = params.append('TypeFilter', typeFilter);
+    }
+
     return this.http.get<Announcement[]>(`${this.baseUrl}announcements`, {
       observe: 'response',
       params

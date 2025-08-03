@@ -104,20 +104,6 @@ export class UploadDocumentModalComponent implements OnInit, OnChanges {
       next: () => {
         this.toastr.success('Document uploaded successfully.');
         this.onUpload.emit();
-
-        // ✅ Trigger the system-generated announcement
-        const announcement = {
-          type: source === 'Module' ? 'DocumentUpload' : 'RepositoryUpdate',
-          title: `New ${source === 'Module' ? 'Module' : 'Repository'} Document`,
-          message: `${title} was uploaded to ${source === 'Module' ? 'your module' : 'the internal repository'}`,
-          moduleId: source === 'Module' ? moduleId : null
-        };
-
-        this.announcementService.createFromSystem(announcement).subscribe({
-          next: () => console.log('System announcement triggered.'),
-          error: (err) => console.warn('Announcement failed:', err)
-        });
-
         this.bsModalRef.hide();
       },
       error: (err) => {

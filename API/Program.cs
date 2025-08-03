@@ -5,6 +5,7 @@ using API.Helpers;
 using API.Middleware;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization; // ✅ Needed for ReferenceHandler
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,12 +13,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddIdentityServices(builder.Configuration);
 
-// ✅ Global support for TimeOnly and DateOnly serialization
+// ✅ Global support for TimeOnly, DateOnly, and object cycle prevention
 builder.Services.AddControllers()
     .AddJsonOptions(opts =>
     {
         opts.JsonSerializerOptions.Converters.Add(new TimeOnlyJsonConverter());
         opts.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
+        opts.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles; // ✅ Prevent cycles
     });
 
 var app = builder.Build();
@@ -51,6 +53,7 @@ try
     await Seed.SeedAnnouncements(context);
     await Seed.SeedLabBookings(context);
     await Seed.SeedRepositories(context); // ✅ NEW: Seeding recommended repositories
+    await Seed.SeedAssessments(context); // ✅ NEW: Seeding assessments
 
 }
 catch (Exception ex)

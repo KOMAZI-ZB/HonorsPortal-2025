@@ -23,6 +23,9 @@ public class AnnouncementsController(IAnnouncementService announcementService) :
     [HttpGet]
     public async Task<ActionResult<IEnumerable<AnnouncementDto>>> GetAll([FromQuery] QueryParams queryParams)
     {
+        // ✅ Ensure current user's UserNumber is set for filtering by JoinDate
+        queryParams.CurrentUserNumber = User.GetUsername();
+
         var result = await _announcementService.GetAllPaginatedAsync(queryParams);
         Response.AddPaginationHeader(result);
         return Ok(result);

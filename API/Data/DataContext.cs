@@ -27,14 +27,17 @@ namespace API.Data
         // ✅ Phase 6 Tables
         public DbSet<LabBooking> LabBookings { get; set; }
 
-        // ✅ NEW: Recommended Repositories
+        // ✅ NEW: External Repository Links
         public DbSet<Repository> Repositories { get; set; }
+
+        // ✅ NEW: Dynamic Assessment Schedule
+        public DbSet<Assessment> Assessments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
 
-            // ✅ AppUser ↔ AppUserRole (Phase 1)
+            // ✅ AppUser ↔ AppUserRole
             builder.Entity<AppUser>(b =>
             {
                 b.HasMany(u => u.UserRoles)
@@ -48,7 +51,7 @@ namespace API.Data
                  .IsRequired();
             });
 
-            // ✅ AppRole ↔ AppUserRole (Phase 1)
+            // ✅ AppRole ↔ AppUserRole
             builder.Entity<AppRole>(b =>
             {
                 b.HasMany(r => r.UserRoles)
@@ -57,7 +60,7 @@ namespace API.Data
                  .IsRequired();
             });
 
-            // ✅ Module ↔ UserModule (Phase 2)
+            // ✅ Module ↔ UserModule
             builder.Entity<Module>(b =>
             {
                 b.HasMany(m => m.UserModules)
@@ -66,11 +69,11 @@ namespace API.Data
                  .IsRequired();
             });
 
-            // ✅ Composite Key for UserModule (Phase 2)
+            // ✅ Composite Key for UserModule
             builder.Entity<UserModule>()
                 .HasKey(um => new { um.AppUserId, um.ModuleId });
 
-            // ✅ Constraints for FAQ Entries (Phase 4)
+            // ✅ Constraints for FAQ
             builder.Entity<FaqEntry>(b =>
             {
                 b.Property(f => f.Question).IsRequired();
@@ -78,7 +81,7 @@ namespace API.Data
                 b.Property(f => f.LastUpdated).IsRequired();
             });
 
-            // ✅ Constraints for Announcements (Phase 5)
+            // ✅ Constraints for Announcements
             builder.Entity<Announcement>(b =>
             {
                 b.Property(a => a.Type).IsRequired();
@@ -87,17 +90,11 @@ namespace API.Data
                 b.Property(a => a.CreatedBy).IsRequired();
             });
 
-            // ✅ Constraints for Lab Bookings (Phase 6)
+            // ✅ Constraints for Lab Bookings
             builder.Entity<LabBooking>(b =>
             {
-                b.Property(lb => lb.UserNumber)
-                  .IsRequired()
-                  .HasMaxLength(20);
-
-                b.Property(lb => lb.WeekDays)
-                  .IsRequired()
-                  .HasMaxLength(20);
-
+                b.Property(lb => lb.UserNumber).IsRequired().HasMaxLength(20);
+                b.Property(lb => lb.WeekDays).IsRequired().HasMaxLength(20);
                 b.Property(lb => lb.BookingDate).IsRequired();
                 b.Property(lb => lb.StartTime).IsRequired();
                 b.Property(lb => lb.EndTime).IsRequired();
@@ -110,6 +107,22 @@ namespace API.Data
                 b.Property(r => r.ImageUrl).IsRequired();
                 b.Property(r => r.LinkUrl).IsRequired();
             });
+
+            // ✅ Constraints for Assessments
+            // ✅ Constraints for Assessments
+            builder.Entity<Assessment>(b =>
+            {
+                b.Property(a => a.Title).IsRequired();
+                b.Property(a => a.Date).IsRequired();
+                b.Property(a => a.IsTimed).IsRequired();
+
+                b.HasOne(a => a.Module)
+                 .WithMany(m => m.Assessments)  // ✅ explicitly name the nav prop on Module
+                 .HasForeignKey(a => a.ModuleId)
+                 .IsRequired()
+                 .OnDelete(DeleteBehavior.Cascade);
+            });
+
         }
     }
 }

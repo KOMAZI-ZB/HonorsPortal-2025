@@ -34,28 +34,7 @@ public class Seed
                 await roleManager.CreateAsync(new AppRole { Name = role });
         }
 
-        var adminExists = await userManager.Users.AnyAsync(u => u.UserNumber == "admin");
-        if (!adminExists)
-        {
-            var admin = new AppUser
-            {
-                FirstName = "Admin",
-                LastName = "User",
-                UserNumber = "admin",
-                Email = "admin@portal.com",
-                UserName = "admin",
-                NormalizedEmail = "ADMIN@PORTAL.COM",
-                NormalizedUserName = "ADMIN"
-            };
-
-            var result = await userManager.CreateAsync(admin, "Pa$$w0rd");
-            if (result.Succeeded)
-            {
-                await userManager.AddToRoleAsync(admin, "Admin");
-            }
-        }
-
-        if (!await userManager.Users.AnyAsync(u => u.UserNumber != "admin"))
+        if (!await userManager.Users.AnyAsync())
         {
             var userDataPath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "SeedData", "UserSeedData.json");
             if (!File.Exists(userDataPath)) return;
@@ -76,7 +55,8 @@ public class Seed
                     Email = dto.Email.ToLower(),
                     UserName = dto.UserNumber,
                     NormalizedEmail = dto.Email.ToUpper(),
-                    NormalizedUserName = dto.UserNumber.ToUpper()
+                    NormalizedUserName = dto.UserNumber.ToUpper(),
+                    JoinDate = dto.JoinDate ?? DateOnly.FromDateTime(DateTime.UtcNow)
                 };
 
                 var result = await userManager.CreateAsync(user, dto.Password);
@@ -116,7 +96,6 @@ public class Seed
 
         if (faqs is null) return;
 
-        // ✅ FIX: Make sure Answer is not null
         foreach (var faq in faqs)
         {
             faq.Answer ??= string.Empty;
@@ -174,6 +153,23 @@ public class Seed
         if (repositories is null) return;
 
         context.Repositories.AddRange(repositories);
+        await context.SaveChangesAsync();
+    }
+
+    public static async Task SeedAssessments(DataContext context)
+    {
+        if (await context.Assessments.AnyAsync()) return;
+
+        var path = Path.Combine(Directory.GetCurrentDirectory(), "Data", "SeedData", "AssessmentSeedData.json");
+        if (!File.Exists(path)) return;
+
+        var json = await File.ReadAllTextAsync(path);
+        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        var assessments = JsonSerializer.Deserialize<List<Assessment>>(json, options);
+
+        if (assessments is null) return;
+
+        context.Assessments.AddRange(assessments);
         await context.SaveChangesAsync();
     }
 }

@@ -1,6 +1,6 @@
 [
     {
-        "type": "General",
+        "type": "GENERAL",
         "title": "Welcome to the Portal",
         "message": "The academic portal is now live. Please explore the features.",
         "imagePath": null,
@@ -9,7 +9,7 @@
         "moduleId": null
     },
     {
-        "type": "System",
+        "type": "SYSTEM",
         "title": "System Maintenance",
         "message": "Portal will be under maintenance on June 15 from 01:00–03:00.",
         "imagePath": null,
@@ -18,7 +18,7 @@
         "moduleId": null
     },
     {
-        "type": "DocumentUpload",
+        "type": "DOCUMENT UPLOAD",
         "title": "Assignment 1 Uploaded",
         "message": "Assignment 1 has been added to the course materials for CSC101.",
         "imagePath": null,
@@ -27,7 +27,7 @@
         "moduleId": 9
     },
     {
-        "type": "RepositoryUpdate",
+        "type": "REPOSITORY UPDATE",
         "title": "New Research Paper Added",
         "message": "A new PDF has been uploaded to the Internal Repository.",
         "imagePath": null,
@@ -36,7 +36,7 @@
         "moduleId": null
     },
     {
-        "type": "ScheduleUpdate",
+        "type": "SCHEDULE UPDATE",
         "title": "Updated Test Schedule",
         "message": "Test 1 for MTH102 has been moved to July 1. Please check the scheduler.",
         "imagePath": null,

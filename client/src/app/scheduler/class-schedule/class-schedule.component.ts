@@ -117,7 +117,6 @@ export class ClassScheduleComponent implements OnInit {
       '#ffe0b2', '#c8e6c9', '#d1c4e9', '#b2ebf2'
     ];
 
-    // Hash the entire module code to create variation
     const hash = moduleCode
       .toUpperCase()
       .split('')
@@ -127,8 +126,8 @@ export class ClassScheduleComponent implements OnInit {
   }
 
   downloadScheduleAsPdf(): void {
-    const tableElement = document.getElementById('classScheduleTable');
-    if (!tableElement) return;
+    const content = document.getElementById('pdfContent');
+    if (!content) return;
 
     html2pdf().set({
       margin: 0.5,
@@ -136,6 +135,13 @@ export class ClassScheduleComponent implements OnInit {
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 2 },
       jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
-    }).from(tableElement).save();
+    }).from(content).save();
   }
+
+  formatTime(time: string): string {
+    if (!time) return '-';
+    const [hour, minute] = time.split(':');
+    return `${hour}:${minute}`;
+  }
+
 }

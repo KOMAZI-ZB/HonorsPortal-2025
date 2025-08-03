@@ -36,76 +36,74 @@
             </div>
         </div>
 
-        <!-- 📘 TEST 1 -->
+        <!-- 📘 ASSESSMENTS -->
         <hr />
-        <h6>Test 1</h6>
-        <div class="mb-3">
-            <label>Venue</label>
-            <input type="text" class="form-control" [(ngModel)]="test1Venue" name="test1Venue" />
-        </div>
-        <div class="mb-3">
-            <label>Date</label>
-            <input type="date" class="form-control" [(ngModel)]="test1Date" name="test1Date" />
-        </div>
-        <div class="row mb-3">
-            <div class="col">
-                <label>Start Time</label>
-                <input type="time" class="form-control" [(ngModel)]="test1StartTime" name="test1StartTime" min="06:00"
-                    max="22:00" />
-            </div>
-            <div class="col">
-                <label>End Time</label>
-                <input type="time" class="form-control" [(ngModel)]="test1EndTime" name="test1EndTime" min="06:00"
-                    max="22:00" />
+        <h6>Assessments</h6>
+
+        <div *ngFor="let assessment of assessments; let i = index" class="border rounded mb-3">
+            <!-- Collapsible Header -->
+            <button class="btn btn-light w-100 text-start p-3" type="button" data-bs-toggle="collapse"
+                [attr.data-bs-target]="'#collapse' + i" [attr.aria-expanded]="true"
+                [attr.aria-controls]="'collapse' + i">
+                <strong>📘 Assessment {{ i + 1 }}: {{ assessment.title || 'Untitled' }}</strong>
+            </button>
+
+            <!-- Collapsible Body -->
+            <div class="collapse show p-3" [id]="'collapse' + i">
+                <div class="mb-2">
+                    <label>Title</label>
+                    <input type="text" class="form-control" [(ngModel)]="assessment.title" [name]="'title' + i" />
+                </div>
+
+                <div class="mb-2">
+                    <label>Date</label>
+                    <input type="date" class="form-control" [(ngModel)]="assessment.date" [name]="'date' + i" />
+                </div>
+
+                <div class="mb-2">
+                    <label>
+                        <input type="checkbox" [(ngModel)]="assessment.isTimed" [name]="'isTimed' + i" />
+                        Timed Assessment (e.g., Venue & Time)
+                    </label>
+                </div>
+
+                <div *ngIf="assessment.isTimed">
+                    <div class="mb-2">
+                        <label>Venue</label>
+                        <input type="text" class="form-control" [(ngModel)]="assessment.venue" [name]="'venue' + i" />
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <label>Start Time</label>
+                            <input type="time" class="form-control" [(ngModel)]="assessment.startTime"
+                                [name]="'startTime' + i" />
+                        </div>
+                        <div class="col">
+                            <label>End Time</label>
+                            <input type="time" class="form-control" [(ngModel)]="assessment.endTime"
+                                [name]="'endTime' + i" />
+                        </div>
+                    </div>
+                </div>
+
+                <div *ngIf="!assessment.isTimed" class="mb-2">
+                    <label>Due Time</label>
+                    <input type="time" class="form-control" [(ngModel)]="assessment.dueTime" [name]="'dueTime' + i" />
+                </div>
+
+                <div class="text-end mt-3">
+                    <button class="btn btn-sm btn-outline-danger" (click)="removeAssessment(i)" type="button">
+                        Remove
+                    </button>
+                </div>
             </div>
         </div>
 
-        <!-- 📘 TEST 2 -->
-        <hr />
-        <h6>Test 2</h6>
-        <div class="mb-3">
-            <label>Venue</label>
-            <input type="text" class="form-control" [(ngModel)]="test2Venue" name="test2Venue" />
-        </div>
-        <div class="mb-3">
-            <label>Date</label>
-            <input type="date" class="form-control" [(ngModel)]="test2Date" name="test2Date" />
-        </div>
-        <div class="row mb-3">
-            <div class="col">
-                <label>Start Time</label>
-                <input type="time" class="form-control" [(ngModel)]="test2StartTime" name="test2StartTime" min="06:00"
-                    max="22:00" />
-            </div>
-            <div class="col">
-                <label>End Time</label>
-                <input type="time" class="form-control" [(ngModel)]="test2EndTime" name="test2EndTime" min="06:00"
-                    max="22:00" />
-            </div>
-        </div>
-
-        <!-- 📘 SUPPLEMENTARY -->
-        <hr />
-        <h6>Supplementary</h6>
-        <div class="mb-3">
-            <label>Venue</label>
-            <input type="text" class="form-control" [(ngModel)]="supplementaryVenue" name="supplementaryVenue" />
-        </div>
-        <div class="mb-3">
-            <label>Date</label>
-            <input type="date" class="form-control" [(ngModel)]="supplementaryDate" name="supplementaryDate" />
-        </div>
-        <div class="row mb-3">
-            <div class="col">
-                <label>Start Time</label>
-                <input type="time" class="form-control" [(ngModel)]="supplementaryStartTime"
-                    name="supplementaryStartTime" min="06:00" max="22:00" />
-            </div>
-            <div class="col">
-                <label>End Time</label>
-                <input type="time" class="form-control" [(ngModel)]="supplementaryEndTime" name="supplementaryEndTime"
-                    min="06:00" max="22:00" />
-            </div>
+        <!-- ➕ Add Assessment -->
+        <div class="mb-3 text-end">
+            <button class="btn btn-outline-primary" (click)="addAssessment()" type="button">
+                + Add Assessment
+            </button>
         </div>
     </form>
 </div>

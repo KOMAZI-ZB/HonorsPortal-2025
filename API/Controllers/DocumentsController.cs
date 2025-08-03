@@ -29,8 +29,8 @@ public class DocumentsController(
         var announcement = new CreateAnnouncementDto
         {
             Type = "DocumentUpload",
-            Title = "New Document Uploaded",
-            Message = $"A new document has been uploaded to module ID {dto.ModuleId}.",
+            Title = "New Module Document Uploaded",
+            Message = $"A new document has been uploaded with title: {dto.Title}.",
             Image = null,
             ModuleId = dto.ModuleId
         };

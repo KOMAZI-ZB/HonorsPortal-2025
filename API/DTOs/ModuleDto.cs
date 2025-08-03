@@ -13,18 +13,6 @@ public class ModuleDto
     public string[]? StartTimes { get; set; }
     public string[]? EndTimes { get; set; }
 
-    public string? Test1Venue { get; set; }
-    public DateOnly? Test1Date { get; set; }
-    public TimeOnly? Test1StartTime { get; set; }
-    public TimeOnly? Test1EndTime { get; set; }
-
-    public string? Test2Venue { get; set; }
-    public DateOnly? Test2Date { get; set; }
-    public TimeOnly? Test2StartTime { get; set; }
-    public TimeOnly? Test2EndTime { get; set; }
-
-    public string? SupplementaryVenue { get; set; }
-    public DateOnly? SupplementaryDate { get; set; }
-    public TimeOnly? SupplementaryStartTime { get; set; }
-    public TimeOnly? SupplementaryEndTime { get; set; }
+    // ✅ Required for preloading assessments
+    public List<AssessmentDto>? Assessments { get; set; }
 }

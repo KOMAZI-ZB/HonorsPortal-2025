@@ -23,22 +23,7 @@ public class ModulesController(DataContext context) : BaseApiController
             ClassVenue = dto.ClassVenue,
             WeekDays = dto.WeekDays != null ? string.Join(",", dto.WeekDays) : null,
             StartTimes = dto.StartTimes != null ? string.Join(",", dto.StartTimes) : null,
-            EndTimes = dto.EndTimes != null ? string.Join(",", dto.EndTimes) : null,
-
-            Test1Venue = dto.Test1Venue,
-            Test1Date = dto.Test1Date,
-            Test1StartTime = dto.Test1StartTime,
-            Test1EndTime = dto.Test1EndTime,
-
-            Test2Venue = dto.Test2Venue,
-            Test2Date = dto.Test2Date,
-            Test2StartTime = dto.Test2StartTime,
-            Test2EndTime = dto.Test2EndTime,
-
-            SupplementaryVenue = dto.SupplementaryVenue,
-            SupplementaryDate = dto.SupplementaryDate,
-            SupplementaryStartTime = dto.SupplementaryStartTime,
-            SupplementaryEndTime = dto.SupplementaryEndTime
+            EndTimes = dto.EndTimes != null ? string.Join(",", dto.EndTimes) : null
         };
 
         context.Modules.Add(module);
@@ -62,19 +47,7 @@ public class ModulesController(DataContext context) : BaseApiController
             ClassVenue = m.ClassVenue,
             WeekDays = m.WeekDays?.Split(',') ?? [],
             StartTimes = m.StartTimes?.Split(',') ?? [],
-            EndTimes = m.EndTimes?.Split(',') ?? [],
-            Test1Venue = m.Test1Venue,
-            Test1Date = m.Test1Date,
-            Test1StartTime = m.Test1StartTime,
-            Test1EndTime = m.Test1EndTime,
-            Test2Venue = m.Test2Venue,
-            Test2Date = m.Test2Date,
-            Test2StartTime = m.Test2StartTime,
-            Test2EndTime = m.Test2EndTime,
-            SupplementaryVenue = m.SupplementaryVenue,
-            SupplementaryDate = m.SupplementaryDate,
-            SupplementaryStartTime = m.SupplementaryStartTime,
-            SupplementaryEndTime = m.SupplementaryEndTime
+            EndTimes = m.EndTimes?.Split(',') ?? []
         }).ToList();
     }
 
@@ -96,19 +69,7 @@ public class ModulesController(DataContext context) : BaseApiController
                 ClassVenue = m.ClassVenue,
                 WeekDays = m.WeekDays?.Split(',') ?? [],
                 StartTimes = m.StartTimes?.Split(',') ?? [],
-                EndTimes = m.EndTimes?.Split(',') ?? [],
-                Test1Venue = m.Test1Venue,
-                Test1Date = m.Test1Date,
-                Test1StartTime = m.Test1StartTime,
-                Test1EndTime = m.Test1EndTime,
-                Test2Venue = m.Test2Venue,
-                Test2Date = m.Test2Date,
-                Test2StartTime = m.Test2StartTime,
-                Test2EndTime = m.Test2EndTime,
-                SupplementaryVenue = m.SupplementaryVenue,
-                SupplementaryDate = m.SupplementaryDate,
-                SupplementaryStartTime = m.SupplementaryStartTime,
-                SupplementaryEndTime = m.SupplementaryEndTime
+                EndTimes = m.EndTimes?.Split(',') ?? []
             }).ToList());
         }
 
@@ -127,19 +88,7 @@ public class ModulesController(DataContext context) : BaseApiController
             ClassVenue = m.ClassVenue,
             WeekDays = m.WeekDays?.Split(',') ?? [],
             StartTimes = m.StartTimes?.Split(',') ?? [],
-            EndTimes = m.EndTimes?.Split(',') ?? [],
-            Test1Venue = m.Test1Venue,
-            Test1Date = m.Test1Date,
-            Test1StartTime = m.Test1StartTime,
-            Test1EndTime = m.Test1EndTime,
-            Test2Venue = m.Test2Venue,
-            Test2Date = m.Test2Date,
-            Test2StartTime = m.Test2StartTime,
-            Test2EndTime = m.Test2EndTime,
-            SupplementaryVenue = m.SupplementaryVenue,
-            SupplementaryDate = m.SupplementaryDate,
-            SupplementaryStartTime = m.SupplementaryStartTime,
-            SupplementaryEndTime = m.SupplementaryEndTime
+            EndTimes = m.EndTimes?.Split(',') ?? []
         }).ToList());
     }
 
@@ -152,16 +101,18 @@ public class ModulesController(DataContext context) : BaseApiController
 
         var userLinks = await context.UserModules.Where(x => x.ModuleId == id).ToListAsync();
         var docs = await context.Documents.Where(x => x.ModuleId == id).ToListAsync();
-        var announcements = await context.Announcements.Where(x => x.ModuleId == id).ToListAsync(); // ✅ Added line
+        var announcements = await context.Announcements.Where(x => x.ModuleId == id).ToListAsync();
+        var assessments = await context.Assessments.Where(x => x.ModuleId == id).ToListAsync();
 
         context.UserModules.RemoveRange(userLinks);
         context.Documents.RemoveRange(docs);
-        context.Announcements.RemoveRange(announcements); // ✅ Added line
+        context.Announcements.RemoveRange(announcements);
+        context.Assessments.RemoveRange(assessments);
+
         context.Modules.Remove(module);
 
         await context.SaveChangesAsync();
         return Ok(new { message = "Module deleted." });
-
     }
 
     [Authorize(Roles = "Admin,Lecturer,Coordinator")]
@@ -175,43 +126,37 @@ public class ModulesController(DataContext context) : BaseApiController
             module.ClassVenue != dto.ClassVenue ||
             module.WeekDays != string.Join(",", dto.WeekDays ?? []) ||
             module.StartTimes != string.Join(",", dto.StartTimes ?? []) ||
-            module.EndTimes != string.Join(",", dto.EndTimes ?? []) ||
-            module.Test1Venue != dto.Test1Venue ||
-            module.Test1Date != dto.Test1Date ||
-            module.Test1StartTime != dto.Test1StartTime ||
-            module.Test1EndTime != dto.Test1EndTime ||
-            module.Test2Venue != dto.Test2Venue ||
-            module.Test2Date != dto.Test2Date ||
-            module.Test2StartTime != dto.Test2StartTime ||
-            module.Test2EndTime != dto.Test2EndTime ||
-            module.SupplementaryVenue != dto.SupplementaryVenue ||
-            module.SupplementaryDate != dto.SupplementaryDate ||
-            module.SupplementaryStartTime != dto.SupplementaryStartTime ||
-            module.SupplementaryEndTime != dto.SupplementaryEndTime;
+            module.EndTimes != string.Join(",", dto.EndTimes ?? []);
 
         module.ModuleCode = dto.ModuleCode ?? module.ModuleCode;
         module.ModuleName = dto.ModuleName ?? module.ModuleName;
         module.Semester = dto.Semester != 0 ? dto.Semester : module.Semester;
-
         module.ClassVenue = dto.ClassVenue;
         module.WeekDays = dto.WeekDays != null ? string.Join(",", dto.WeekDays) : null;
         module.StartTimes = dto.StartTimes != null ? string.Join(",", dto.StartTimes) : null;
         module.EndTimes = dto.EndTimes != null ? string.Join(",", dto.EndTimes) : null;
 
-        module.Test1Venue = dto.Test1Venue;
-        module.Test1Date = dto.Test1Date;
-        module.Test1StartTime = dto.Test1StartTime;
-        module.Test1EndTime = dto.Test1EndTime;
+        // 🔁 Replace all assessments with the new ones
+        var existingAssessments = await context.Assessments.Where(a => a.ModuleId == id).ToListAsync();
+        context.Assessments.RemoveRange(existingAssessments);
 
-        module.Test2Venue = dto.Test2Venue;
-        module.Test2Date = dto.Test2Date;
-        module.Test2StartTime = dto.Test2StartTime;
-        module.Test2EndTime = dto.Test2EndTime;
-
-        module.SupplementaryVenue = dto.SupplementaryVenue;
-        module.SupplementaryDate = dto.SupplementaryDate;
-        module.SupplementaryStartTime = dto.SupplementaryStartTime;
-        module.SupplementaryEndTime = dto.SupplementaryEndTime;
+        if (dto.Assessments != null)
+        {
+            foreach (var a in dto.Assessments)
+            {
+                context.Assessments.Add(new Assessment
+                {
+                    Title = a.Title,
+                    Date = DateOnly.Parse(a.Date),
+                    StartTime = a.StartTime,
+                    EndTime = a.EndTime,
+                    DueTime = a.DueTime,
+                    Venue = a.Venue,
+                    IsTimed = a.IsTimed,
+                    ModuleId = id
+                });
+            }
+        }
 
         Announcement? announcement = null;
         if (scheduleChanged)
@@ -219,7 +164,7 @@ public class ModulesController(DataContext context) : BaseApiController
             announcement = new Announcement
             {
                 Title = $"Schedule Updated for {module.ModuleCode}",
-                Message = $"The timetable or test schedule for module {module.ModuleCode} has been changed. Please check your timetable for updates.",
+                Message = $"The class timetable for module {module.ModuleCode} has been changed. Please check your schedule.",
                 Type = "ScheduleUpdate",
                 ModuleId = module.Id,
                 CreatedBy = User.GetUsername(),
@@ -260,19 +205,63 @@ public class ModulesController(DataContext context) : BaseApiController
             ClassVenue = m.ClassVenue,
             WeekDays = m.WeekDays?.Split(',') ?? [],
             StartTimes = m.StartTimes?.Split(',') ?? [],
-            EndTimes = m.EndTimes?.Split(',') ?? [],
-            Test1Venue = m.Test1Venue,
-            Test1Date = m.Test1Date,
-            Test1StartTime = m.Test1StartTime,
-            Test1EndTime = m.Test1EndTime,
-            Test2Venue = m.Test2Venue,
-            Test2Date = m.Test2Date,
-            Test2StartTime = m.Test2StartTime,
-            Test2EndTime = m.Test2EndTime,
-            SupplementaryVenue = m.SupplementaryVenue,
-            SupplementaryDate = m.SupplementaryDate,
-            SupplementaryStartTime = m.SupplementaryStartTime,
-            SupplementaryEndTime = m.SupplementaryEndTime
+            EndTimes = m.EndTimes?.Split(',') ?? []
         }).ToList();
+    }
+
+    [Authorize(Roles = "Admin,Lecturer,Coordinator")]
+    [HttpGet("{id}/assessments")]
+    public async Task<ActionResult<IEnumerable<AssessmentDto>>> GetAssessmentsByModule(int id)
+    {
+        var assessments = await context.Assessments
+            .Where(a => a.ModuleId == id)
+            .ToListAsync();
+
+        var results = assessments.Select(a => new AssessmentDto
+        {
+            Title = a.Title,
+            Date = a.Date.ToString("yyyy-MM-dd"),
+            StartTime = a.StartTime,
+            EndTime = a.EndTime,
+            DueTime = a.DueTime,
+            Venue = a.Venue,
+            IsTimed = a.IsTimed
+        });
+
+        return Ok(results);
+    }
+
+    [Authorize(Roles = "Admin,Lecturer,Coordinator")]
+    [HttpGet("{id}")]
+    public async Task<ActionResult<ModuleDto>> GetModuleById(int id)
+    {
+        var module = await context.Modules
+            .Include(m => m.Assessments)
+            .FirstOrDefaultAsync(m => m.Id == id);
+
+        if (module == null) return NotFound();
+
+        return new ModuleDto
+        {
+            Id = module.Id,
+            ModuleCode = module.ModuleCode,
+            ModuleName = module.ModuleName,
+            Semester = module.Semester,
+            ClassVenue = module.ClassVenue,
+            WeekDays = module.WeekDays?.Split(',') ?? [],
+            StartTimes = module.StartTimes?.Split(',') ?? [],
+            EndTimes = module.EndTimes?.Split(',') ?? [],
+            Assessments = module.Assessments.Select(a => new AssessmentDto
+            {
+                Id = a.Id,
+                Title = a.Title,
+                Date = a.Date.ToString("yyyy-MM-dd"),
+                StartTime = a.StartTime,
+                EndTime = a.EndTime,
+                DueTime = a.DueTime,
+                Venue = a.Venue,
+                IsTimed = a.IsTimed
+            }).ToList()
+        };
     }
 }

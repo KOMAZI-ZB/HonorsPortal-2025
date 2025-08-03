@@ -1,28 +1,29 @@
 <div class="login-container">
     <!-- Logo -->
-    <img src="assets/ufslogo.png" alt="UFS Logo" class="ufs-logo" />
+    <img src="assets/ufslogo.jpg" alt="UFS Logo" class="ufs-logo" />
 
     <!-- Title -->
-    <h2 class="portal-title">Sign in with Usernumber and Password</h2>
+    <h2 class="portal-title">Sign in with your Username and Password</h2>
 
     <!-- Login Form -->
     <form (ngSubmit)="login()" #loginForm="ngForm" class="login-form">
 
         <!-- User Number Field -->
         <div class="mb-3">
-            <input name="userNumber" [(ngModel)]="model.userNumber" class="form-control text-center" type="text"
-                placeholder="User Number" autocomplete="username" required />
+            <input name="userNumber" [(ngModel)]="model.userNumber" class="form-control" type="text"
+                placeholder="Username" autocomplete="username" required />
             <div class="text-danger mt-1" *ngIf="userNumberError">{{ userNumberError }}</div>
         </div>
 
         <!-- Password Field -->
         <div class="mb-3 input-group">
             <input [type]="showPassword ? 'text' : 'password'" name="password" [(ngModel)]="model.password"
-                class="form-control text-center" placeholder="Password" autocomplete="current-password" required />
+                class="form-control" placeholder="Password" autocomplete="current-password" required />
             <span class="input-group-text" (click)="togglePasswordVisibility()" style="cursor: pointer;">
                 <i class="fas" [ngClass]="showPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
             </span>
         </div>
+
         <div class="text-danger mt-1" *ngIf="passwordError">{{ passwordError }}</div>
 
         <button class="btn btn-primary w-100" type="submit">Login</button>

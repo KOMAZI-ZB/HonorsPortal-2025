@@ -9,6 +9,7 @@ public class AppUser : IdentityUser<int>
     public required string FirstName { get; set; }
     public required string LastName { get; set; }
     public required string UserNumber { get; set; }
+    public DateOnly? JoinDate { get; set; } // ✅ Added JoinDate
 
     public ICollection<AppUserRole> UserRoles { get; set; } = new List<AppUserRole>();
 

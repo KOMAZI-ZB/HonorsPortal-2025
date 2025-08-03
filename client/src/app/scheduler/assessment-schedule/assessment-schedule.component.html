@@ -1,0 +1,62 @@
+<div class="container mt-4">
+    <!-- ✅ Filter + Download -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <label for="semester">Semester:</label>
+            <select id="semester" class="form-select d-inline-block w-auto ms-2" [(ngModel)]="semester"
+                (change)="onSemesterChange()">
+                <option [value]="1">Semester 1</option>
+                <option [value]="2">Semester 2</option>
+            </select>
+        </div>
+        <button class="btn btn-success" (click)="downloadScheduleAsPdf()">
+            Download (PDF)
+        </button>
+    </div>
+
+    <!-- ✅ PDF Content -->
+    <div id="pdfContent" class="mt-4 p-4 bg-white">
+        <div class="text-center mb-3">
+            <img src="assets/ufslogo.jpg" alt="UFS Logo" />
+            <h2>Assessment Schedule</h2>
+        </div>
+
+        <!-- ✅ Tables grouped by month -->
+        <div *ngIf="groupedMonths.length > 0; else noData">
+            <div *ngFor="let month of groupedMonths">
+                <!-- Month header -->
+                <table class="table table-bordered text-center align-middle mb-5">
+                    <thead class="table-dark">
+                        <tr>
+                            <th colspan="7" class="text-center fs-5">{{ month }}</th>
+                        </tr>
+                        <tr class="table-light">
+                            <th>Module Code</th>
+                            <th>Title</th>
+                            <th>Date</th>
+                            <th>Start Time</th>
+                            <th>End Time</th>
+                            <th>Due Time</th>
+                            <th>Venue</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let item of groupedAssessments[month]">
+                            <td>{{ item.moduleCode }}</td>
+                            <td>{{ item.title }}</td>
+                            <td>{{ item.date | date: 'fullDate' }}</td>
+                            <td>{{ formatTime(item.startTime) }}</td>
+                            <td>{{ formatTime(item.endTime) }}</td>
+                            <td>{{ formatTime(item.dueTime) }}</td>
+                            <td>{{ item.venue || '-' }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <ng-template #noData>
+            <div class="text-muted text-center">No assessments scheduled.</div>
+        </ng-template>
+    </div>
+</div>

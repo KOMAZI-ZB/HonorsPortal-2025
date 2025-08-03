@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250710144701_InitialCreate")]
+    [Migration("20250802015322_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -109,6 +109,9 @@ namespace API.Data.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<DateOnly?>("JoinDate")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -178,6 +181,44 @@ namespace API.Data.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetUserRoles", (string)null);
+                });
+
+            modelBuilder.Entity("API.Entities.Assessment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DueTime")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("EndTime")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsTimed")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ModuleId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("StartTime")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Venue")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ModuleId");
+
+                    b.ToTable("Assessments");
                 });
 
             modelBuilder.Entity("API.Entities.Document", b =>
@@ -295,42 +336,6 @@ namespace API.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("StartTimes")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateOnly?>("SupplementaryDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<TimeOnly?>("SupplementaryEndTime")
-                        .HasColumnType("TEXT");
-
-                    b.Property<TimeOnly?>("SupplementaryStartTime")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("SupplementaryVenue")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateOnly?>("Test1Date")
-                        .HasColumnType("TEXT");
-
-                    b.Property<TimeOnly?>("Test1EndTime")
-                        .HasColumnType("TEXT");
-
-                    b.Property<TimeOnly?>("Test1StartTime")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Test1Venue")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateOnly?>("Test2Date")
-                        .HasColumnType("TEXT");
-
-                    b.Property<TimeOnly?>("Test2EndTime")
-                        .HasColumnType("TEXT");
-
-                    b.Property<TimeOnly?>("Test2StartTime")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Test2Venue")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("WeekDays")
@@ -495,6 +500,17 @@ namespace API.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("API.Entities.Assessment", b =>
+                {
+                    b.HasOne("API.Entities.Module", "Module")
+                        .WithMany("Assessments")
+                        .HasForeignKey("ModuleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Module");
+                });
+
             modelBuilder.Entity("API.Entities.Document", b =>
                 {
                     b.HasOne("API.Entities.Module", "Module")
@@ -573,6 +589,8 @@ namespace API.Data.Migrations
 
             modelBuilder.Entity("API.Entities.Module", b =>
                 {
+                    b.Navigation("Assessments");
+
                     b.Navigation("UserModules");
                 });
 #pragma warning restore 612, 618

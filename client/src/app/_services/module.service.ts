@@ -8,37 +8,37 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class ModuleService {
-  private baseUrl = environment.apiUrl;
+  private baseUrl = environment.apiUrl + 'modules/';
 
   constructor(private http: HttpClient) { }
 
-  // ✅ Admin: Get full list of all modules in system
+  // ✅ Admin: Get all modules in the system
   getAllModules(): Observable<Module[]> {
-    return this.http.get<Module[]>(`${this.baseUrl}modules`);
+    return this.http.get<Module[]>(this.baseUrl);
   }
 
-  // ✅ Admin or Student: Get modules based on semester (uses role-aware backend logic)
+  // ✅ Admin or Student: Get modules by semester
   getModulesBySemester(semester: number): Observable<Module[]> {
-    return this.http.get<Module[]>(`${this.baseUrl}modules/semester/${semester}`);
+    return this.http.get<Module[]>(`${this.baseUrl}semester/${semester}`);
   }
 
-  // ✅ Admin: Add a new module (used in admin panel)
+  // ✅ Admin: Add a new module
   addModule(moduleData: Partial<Module>): Observable<Module> {
-    return this.http.post<Module>(`${this.baseUrl}modules`, moduleData);
+    return this.http.post<Module>(this.baseUrl, moduleData);
   }
 
-  // ✅ Admin: Update module details (class/test schedule updates)
+  // ✅ Admin: Update existing module with updated class schedule & assessments
   updateModule(id: number, moduleData: Partial<Module>): Observable<any> {
-    return this.http.put(`${this.baseUrl}modules/${id}`, moduleData);
+    return this.http.put(`${this.baseUrl}${id}`, moduleData);
   }
 
-  // ✅ Admin: Delete a module from the system
+  // ✅ Admin: Delete module
   deleteModule(id: number): Observable<any> {
-    return this.http.delete(`${this.baseUrl}modules/${id}`);
+    return this.http.delete(`${this.baseUrl}${id}`);
   }
 
-  // ✅ Lecturer/Coordinator: Get list of modules assigned to them
+  // ✅ Lecturer/Coordinator: Get modules assigned to the current user
   getAssignedModules(): Observable<Module[]> {
-    return this.http.get<Module[]>(`${this.baseUrl}modules/assigned`);
+    return this.http.get<Module[]>(`${this.baseUrl}assigned`);
   }
 }

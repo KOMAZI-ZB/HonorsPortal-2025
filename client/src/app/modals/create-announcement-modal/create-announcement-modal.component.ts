@@ -33,23 +33,17 @@ export class CreateAnnouncementModalComponent implements OnInit {
 
   initForm() {
     this.form = this.fb.group({
-      type: [this.currentUserRole === 'Admin' ? 'System' : 'General', Validators.required],
+      type: ['General', Validators.required], // Default is always General
       title: ['', [Validators.required, Validators.minLength(3)]],
       message: ['', [Validators.required, Validators.minLength(5)]],
       moduleId: [null],
       image: [null]
     });
-
-    if (this.currentUserRole !== 'Admin') {
-      this.form.controls['type'].disable(); // only Admins can choose between System/General
-    }
   }
 
   onFileSelected(event: any) {
     const file = event.target.files[0];
-    if (file) {
-      this.imageFile = file;
-    }
+    if (file) this.imageFile = file;
   }
 
   submit() {
@@ -59,12 +53,11 @@ export class CreateAnnouncementModalComponent implements OnInit {
     }
 
     const formData = new FormData();
-    const values = this.form.getRawValue();
-
-    formData.append('type', values.type);
-    formData.append('title', values.title);
-    formData.append('message', values.message);
-    if (values.moduleId) formData.append('moduleId', values.moduleId.toString());
+    formData.append('type', this.form.get('type')?.value); // Will now reflect selected value
+    formData.append('title', this.form.get('title')?.value);
+    formData.append('message', this.form.get('message')?.value);
+    if (this.form.get('moduleId')?.value)
+      formData.append('moduleId', this.form.get('moduleId')?.value.toString());
     if (this.imageFile) formData.append('image', this.imageFile);
 
     this.announcementService.create(formData).subscribe({

@@ -5,7 +5,6 @@ import { AnnouncementsComponent } from './announcements/announcements.component'
 import { RepositoryComponent } from './repository/repository.component';
 import { FaqComponent } from './faq/faq.component';
 import { ClassScheduleComponent } from './scheduler/class-schedule/class-schedule.component';
-import { TestScheduleComponent } from './scheduler/test-schedule/test-schedule.component';
 import { LabScheduleComponent } from './scheduler/lab-schedule/lab-schedule.component';
 import { SchedulerComponent } from './scheduler/scheduler/scheduler.component';
 import { TestErrorsComponent } from './errors/test-errors/test-errors.component';
@@ -25,6 +24,9 @@ import { adminGuard } from './_guards/admin.guard';
 import { lecturerGuard } from './_guards/lecturer.guard';
 import { nonadminGuard } from './_guards/nonadmin.guard'; // ✅ Unified non-admin guard
 import { ModulesComponent } from './modules/modules.component';
+
+// ✅ New Assessment Schedule Component
+import { AssessmentScheduleComponent } from './scheduler/assessment-schedule/assessment-schedule.component';
 
 export const routes: Routes = [
     { path: '', component: HomeComponent },
@@ -57,8 +59,8 @@ export const routes: Routes = [
                 canActivate: [nonadminGuard],
                 children: [
                     { path: 'class', component: ClassScheduleComponent },
-                    { path: 'test', component: TestScheduleComponent },
                     { path: 'lab', component: LabScheduleComponent },
+                    { path: 'assessment', component: AssessmentScheduleComponent },
                     { path: '', redirectTo: 'class', pathMatch: 'full' }
                 ]
             },
