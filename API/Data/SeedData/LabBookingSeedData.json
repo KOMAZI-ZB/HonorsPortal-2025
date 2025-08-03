@@ -5,7 +5,8 @@
         "weekDays": "Monday",
         "startTime": "08:00:00",
         "endTime": "09:30:00",
-        "bookingDate": "2025-06-17"
+        "bookingDate": "2025-08-05",
+        "description": "Project consultation"
     },
     {
         "id": 2,
@@ -13,7 +14,8 @@
         "weekDays": "Wednesday",
         "startTime": "11:00:00",
         "endTime": "12:00:00",
-        "bookingDate": "2025-06-18"
+        "bookingDate": "2025-08-05",
+        "description": "Exam preparation session"
     },
     {
         "id": 3,
@@ -21,7 +23,8 @@
         "weekDays": "Friday",
         "startTime": "14:00:00",
         "endTime": "15:30:00",
-        "bookingDate": "2025-06-20"
+        "bookingDate": "2025-08-06",
+        "description": "Research data analysis"
     },
     {
         "id": 4,
@@ -29,7 +32,8 @@
         "weekDays": "Tuesday",
         "startTime": "09:00:00",
         "endTime": "10:30:00",
-        "bookingDate": "2025-06-17"
+        "bookingDate": "2025-08-07",
+        "description": "Final year report writing"
     },
     {
         "id": 5,
@@ -37,7 +41,8 @@
         "weekDays": "Thursday",
         "startTime": "13:00:00",
         "endTime": "14:00:00",
-        "bookingDate": "2025-06-19"
+        "bookingDate": "2025-08-06",
+        "description": "Supervisor meeting"
     },
     {
         "id": 6,
@@ -45,6 +50,7 @@
         "weekDays": "Saturday",
         "startTime": "12:00:00",
         "endTime": "13:00:00",
-        "bookingDate": "2025-06-21"
+        "bookingDate": "2025-08-05",
+        "description": "Lab maintenance"
     }
 ]

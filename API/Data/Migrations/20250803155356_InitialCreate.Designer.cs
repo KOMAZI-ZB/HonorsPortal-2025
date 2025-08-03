@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250802015322_InitialCreate")]
+    [Migration("20250803155356_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -289,6 +289,9 @@ namespace API.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<DateOnly>("BookingDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
                         .HasColumnType("TEXT");
 
                     b.Property<TimeOnly>("EndTime")

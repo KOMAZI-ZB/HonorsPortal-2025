@@ -12,15 +12,20 @@ import { FormsModule } from '@angular/forms';
 export class BookLabSlotModalComponent {
   @Input() weekdays: string[] = [];
   @Input() availableTimeSlots: string[] = [];
-  @Output() confirmBooking = new EventEmitter<{ day: string, time: string }>();
+  @Output() confirmBooking = new EventEmitter<{ day: string, time: string, description: string }>();
   @Output() cancel = new EventEmitter<void>();
 
   selectedDay: string = '';
   selectedTime: string = '';
+  description: string = ''; // ✅ New field
 
   submit() {
     if (this.selectedDay && this.selectedTime) {
-      this.confirmBooking.emit({ day: this.selectedDay, time: this.selectedTime });
+      this.confirmBooking.emit({
+        day: this.selectedDay,
+        time: this.selectedTime,
+        description: this.description.trim()
+      });
     }
   }
 

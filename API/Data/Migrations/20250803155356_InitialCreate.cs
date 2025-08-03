@@ -81,6 +81,7 @@ namespace API.Data.Migrations
                     WeekDays = table.Column<string>(type: "TEXT", maxLength: 20, nullable: false),
                     StartTime = table.Column<TimeOnly>(type: "TEXT", nullable: false),
                     EndTime = table.Column<TimeOnly>(type: "TEXT", nullable: false),
+                    Description = table.Column<string>(type: "TEXT", nullable: true),
                     BookingDate = table.Column<DateOnly>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>

@@ -10,5 +10,8 @@ public class LabBookingDto
     public TimeOnly StartTime { get; set; }
     public TimeOnly EndTime { get; set; }
     public DateOnly BookingDate { get; set; }
+
+    // ✅ ADD THIS:
+    public string? Description { get; set; }
 }
 

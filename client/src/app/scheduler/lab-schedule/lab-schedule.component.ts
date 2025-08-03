@@ -18,7 +18,7 @@ export class LabScheduleComponent implements OnInit {
   bookings: LabBooking[] = [];
   timeSlots: string[] = [];
   weekdays: string[] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  currentWeekStart: Date = this.getMondayOfCurrentWeek();
+  currentWeekStart: Date = this.getUpcomingSunday();
   showBookingModal = false;
   showUnbookingModal = false;
   selectedBookingToDelete: LabBooking | null = null;
@@ -50,35 +50,39 @@ export class LabScheduleComponent implements OnInit {
     }
   }
 
-  getMondayOfCurrentWeek(): Date {
-    const date = new Date();
-    const day = date.getDay();
-    const diff = date.getDate() - day + (day === 0 ? -6 : 1);
-    return new Date(date.setDate(diff));
+  getUpcomingSunday(): Date {
+    const today = new Date();
+    const day = today.getDay(); // Sunday = 0
+    const sunday = new Date(today);
+    sunday.setDate(today.getDate() - day);
+    sunday.setHours(0, 0, 0, 0);
+    return sunday;
   }
 
+  // ✅ Fix: use a daysMap to align correctly with bookingDate
   getBookingDateForDay(day: string): Date {
-    const dayIndex = this.weekdays.indexOf(day);
+    const daysMap: Record<string, number> = {
+      'Monday': 1,
+      'Tuesday': 2,
+      'Wednesday': 3,
+      'Thursday': 4,
+      'Friday': 5,
+      'Saturday': 6
+    };
+
     const date = new Date(this.currentWeekStart);
-    date.setDate(date.getDate() + dayIndex);
+    const offset = daysMap[day] ?? 0;
+    date.setDate(this.currentWeekStart.getDate() + offset);
     return date;
   }
 
   getBookingLabel(day: string, time: string): string | null {
-    const date = this.getBookingDateForDay(day);
-    const yyyy = date.getFullYear();
-    const mm = (date.getMonth() + 1).toString().padStart(2, '0');
-    const dd = date.getDate().toString().padStart(2, '0');
-    const formattedDate = `${yyyy}-${mm}-${dd}`;
-    const start = time.split(' - ')[0];
+    const booking = this.getBookingObject(day, time);
+    return booking ? this.truncateDescription(booking.description ?? '') : null;
+  }
 
-    const match = this.bookings.find(b =>
-      b.weekDays === day &&
-      b.startTime.startsWith(start) &&
-      b.bookingDate === formattedDate
-    );
-
-    return match ? 'Booked' : null;
+  truncateDescription(desc: string): string {
+    return desc.length > 25 ? desc.slice(0, 25) + '…' : desc;
   }
 
   getBookingObject(day: string, time: string): LabBooking | null {
@@ -129,7 +133,7 @@ export class LabScheduleComponent implements OnInit {
     this.showUnbookingModal = false;
   }
 
-  handleBookingConfirmed(data: { day: string; time: string }) {
+  handleBookingConfirmed(data: { day: string; time: string; description?: string }) {
     const start = data.time.split(' - ')[0];
     const end = data.time.split(' - ')[1];
 
@@ -146,7 +150,8 @@ export class LabScheduleComponent implements OnInit {
       weekDays: data.day,
       startTime: formattedStartTime,
       endTime: formattedEndTime,
-      bookingDate: formattedDate
+      bookingDate: formattedDate,
+      description: data.description?.slice(0, 25) ?? ''
     };
 
     this.labbookingService.createBooking(dto).subscribe({

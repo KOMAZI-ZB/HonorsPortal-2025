@@ -288,6 +288,9 @@ namespace API.Data.Migrations
                     b.Property<DateOnly>("BookingDate")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Description")
+                        .HasColumnType("TEXT");
+
                     b.Property<TimeOnly>("EndTime")
                         .HasColumnType("TEXT");
 

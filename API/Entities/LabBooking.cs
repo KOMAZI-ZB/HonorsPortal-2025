@@ -13,6 +13,8 @@ public class LabBooking
     public TimeOnly StartTime { get; set; }
 
     public TimeOnly EndTime { get; set; }
+    public string? Description { get; set; }
+
 
     public DateOnly BookingDate { get; set; }
 

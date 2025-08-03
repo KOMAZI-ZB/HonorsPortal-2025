@@ -23,11 +23,11 @@
             <h2>Lab Schedule</h2>
         </div>
 
-        <table class="table table-bordered text-center align-middle">
+        <table class="table table-bordered text-center align-middle" style="table-layout: fixed;">
             <thead class="table-light">
                 <tr>
-                    <th style="width: 140px;">Time</th>
-                    <th *ngFor="let day of weekdays">{{ day }}</th>
+                    <th style="width: 120px;">Time</th>
+                    <th *ngFor="let day of weekdays" style="width: 140px;">{{ day }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -36,8 +36,8 @@
                     <td *ngFor="let day of weekdays">
                         <ng-container *ngIf="getBookingObject(day, slot) as booking; else emptyCell">
                             <button class="btn btn-outline-dark btn-sm w-100" (click)="triggerUnbookModal(booking)"
-                                style="cursor: pointer; white-space: normal;">
-                                {{ getBookingLabel(day, slot) }}
+                                style="cursor: pointer; white-space: normal; text-wrap: pretty; word-break: break-word;">
+                                {{ booking.description || 'Booked' }}
                             </button>
                         </ng-container>
                         <ng-template #emptyCell>

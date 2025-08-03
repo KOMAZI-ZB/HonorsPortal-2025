@@ -29,3 +29,7 @@
     pointer-events: none;
     border: 1px dashed #aaa;
 }
+
+.assessment-card h3 {
+    white-space: nowrap;
+}

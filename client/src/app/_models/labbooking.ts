@@ -5,4 +5,6 @@ export interface LabBooking {
     startTime: string;    // 'HH:mm' format
     endTime: string;      // 'HH:mm' format
     bookingDate: string;  // 'yyyy-MM-dd' format
+    description?: string;
+
 }

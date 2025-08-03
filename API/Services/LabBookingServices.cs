@@ -47,7 +47,8 @@ public class LabBookingService(DataContext context, IMapper mapper) : ILabBookin
             WeekDays = dto.WeekDays,
             StartTime = dto.StartTime,
             EndTime = dto.EndTime,
-            BookingDate = dto.BookingDate
+            BookingDate = dto.BookingDate,
+            Description = dto.Description // ✅ NEW: Add this line
         };
 
         _context.LabBookings.Add(booking);
