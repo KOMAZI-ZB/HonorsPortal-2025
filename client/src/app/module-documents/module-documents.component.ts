@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router'; // ✅ Added Router
 import { CommonModule } from '@angular/common';
 import { DocumentService } from '../_services/document.service';
 import { Document } from '../_models/document';
@@ -32,7 +32,8 @@ export class ModuleDocumentsComponent implements OnInit {
     private route: ActivatedRoute,
     private documentService: DocumentService,
     private modalService: BsModalService,
-    private accountService: AccountService
+    private accountService: AccountService,
+    private router: Router // ✅ Inject Router
   ) { }
 
   ngOnInit(): void {
@@ -93,5 +94,9 @@ export class ModuleDocumentsComponent implements OnInit {
       this.roles.includes('Coordinator') ||
       this.roles.includes('Admin')
     );
+  }
+
+  goBack(): void {
+    this.router.navigate(['/modules']); // ✅ Navigation logic
   }
 }

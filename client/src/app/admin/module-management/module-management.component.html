@@ -1,8 +1,12 @@
-<!-- src/app/module-management/module-management.component.html -->
 <div class="row">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Module Management</h2>
         <button class="btn btn-primary" (click)="openAddModuleModal()">Add Module</button>
+    </div>
+
+    <div class="d-flex justify-content-end mb-3">
+        <input type="text" class="form-control w-25 search-input" [(ngModel)]="searchTerm" (input)="filterModules()"
+            placeholder="Search by code or keyword..." />
     </div>
 
     <table class="table table-striped">
@@ -18,7 +22,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr *ngFor="let mod of modules; trackBy: trackById">
+            <tr *ngFor="let mod of filteredModules; trackBy: trackById">
                 <td>{{ mod.moduleCode }}</td>
                 <td>{{ mod.moduleName }}</td>
                 <td>{{ mod.semester }}</td>

@@ -1,4 +1,12 @@
 <div class="container mt-4">
+
+    <!-- ✅ Professional Back Arrow Button -->
+    <div class="mb-3">
+        <button class="btn back-button" (click)="goBack()">
+            <i class="bi bi-arrow-left back-icon"></i>
+        </button>
+    </div>
+
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h5 class="mb-0">Module Documents</h5>
         <button *ngIf="hasUploadRights()" class="btn btn-primary" (click)="openUploadModal()">
@@ -25,8 +33,6 @@
                         class="btn btn-sm btn-success me-2">
                         Download
                     </a>
-
-
                     <button *ngIf="hasUploadRights()" class="btn btn-sm btn-danger" (click)="deleteDocument(doc.id)">
                         Delete
                     </button>

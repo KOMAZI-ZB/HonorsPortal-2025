@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms'; // ✅ Needed for [(ngModel)]
 import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 import { User } from '../../_models/user';
 
@@ -12,12 +13,14 @@ import { AdminService } from '../../_services/admin.service';
 @Component({
   selector: 'app-user-management',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule], // ✅ FormsModule for ngModel
   templateUrl: './user-management.component.html',
   styleUrls: ['./user-management.component.css']
 })
 export class UserManagementComponent implements OnInit {
   users: User[] = [];
+  filteredUsers: User[] = [];
+  searchTerm: string = '';
   modalRef?: BsModalRef;
 
   constructor(
@@ -33,8 +36,19 @@ export class UserManagementComponent implements OnInit {
     this.adminService.getAllUsers().subscribe({
       next: users => {
         this.users = users;
+        this.filteredUsers = users;
       }
     });
+  }
+
+  filterUsers(): void {
+    const term = this.searchTerm.toLowerCase();
+    this.filteredUsers = this.users.filter(user =>
+      user.userNumber.toLowerCase().includes(term) ||
+      user.name.toLowerCase().includes(term) ||
+      user.surname.toLowerCase().includes(term) ||
+      user.roles.some(role => role.toLowerCase().includes(term))
+    );
   }
 
   trackByUserNumber(index: number, user: User): string {

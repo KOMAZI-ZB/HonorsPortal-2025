@@ -1,6 +1,6 @@
-// src/app/module-management/module-management.component.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms'; // ✅ Required for [(ngModel)]
 import { ModuleService } from '../../_services/module.service';
 import { Module } from '../../_models/module';
 import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
@@ -13,12 +13,14 @@ import { EditNameModalComponent } from '../../modals/edit-name-modal/edit-name-m
 @Component({
   selector: 'app-module-management',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule], // ✅ Include FormsModule here
   templateUrl: './module-management.component.html',
   styleUrls: ['./module-management.component.css']
 })
 export class ModuleManagementComponent implements OnInit {
   modules: Module[] = [];
+  filteredModules: Module[] = [];
+  searchTerm: string = '';
   modalRef?: BsModalRef;
 
   constructor(
@@ -32,8 +34,19 @@ export class ModuleManagementComponent implements OnInit {
 
   loadModules() {
     this.moduleService.getAllModules().subscribe({
-      next: modules => (this.modules = modules)
+      next: modules => {
+        this.modules = modules;
+        this.filteredModules = modules;
+      }
     });
+  }
+
+  filterModules(): void {
+    const term = this.searchTerm.toLowerCase();
+    this.filteredModules = this.modules.filter(mod =>
+      mod.moduleCode.toLowerCase().includes(term) ||
+      mod.moduleName.toLowerCase().includes(term)
+    );
   }
 
   openAddModuleModal() {

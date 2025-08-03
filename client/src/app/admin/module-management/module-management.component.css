@@ -1,0 +1,8 @@
+/* Style for the search bar */
+.search-input {
+    border: 2px solid #333;
+    /* You can darken or lighten this */
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-weight: 500;
+}

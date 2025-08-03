@@ -4,10 +4,15 @@
         <button class="btn btn-primary" (click)="openAddUserModal()">Add User</button>
     </div>
 
+    <div class="d-flex justify-content-end mb-3">
+        <input type="text" class="form-control w-25 search-input" [(ngModel)]="searchTerm" (input)="filterUsers()"
+            placeholder="Search by usernumber, name, or role..." />
+    </div>
+
     <table class="table table-striped">
         <thead>
             <tr>
-                <th>User Number</th>
+                <th>Usernumber</th>
                 <th>Name</th>
                 <th>Surname</th>
                 <th>Email</th>
@@ -18,7 +23,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr *ngFor="let user of users; trackBy: trackByUserNumber">
+            <tr *ngFor="let user of filteredUsers; trackBy: trackByUserNumber">
                 <td>{{ user.userNumber }}</td>
                 <td>{{ user.name }}</td>
                 <td>{{ user.surname }}</td>

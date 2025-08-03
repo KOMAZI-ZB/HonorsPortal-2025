@@ -33,22 +33,33 @@ public class AnnouncementService : IAnnouncementService
 
     public async Task<PagedList<AnnouncementDto>> GetAllPaginatedAsync(QueryParams queryParams)
     {
-        // Fetch join date for filtering
+        // ✅ Fetch user with registered modules
         var user = await _context.Users
-            .Where(u => u.UserNumber == queryParams.CurrentUserNumber)
-            .Select(u => new { u.JoinDate })
-            .FirstOrDefaultAsync();
+            .Include(u => u.UserModules)
+            .FirstOrDefaultAsync(u => u.UserNumber == queryParams.CurrentUserNumber);
+
+        if (user == null)
+        {
+            return new PagedList<AnnouncementDto>(new List<AnnouncementDto>(), 0, queryParams.PageNumber, queryParams.PageSize);
+        }
+
+
+        var joinDate = user.JoinDate;
+        var registeredModuleIds = user.UserModules.Select(um => um.ModuleId).ToList();
 
         var query = _context.Announcements.AsQueryable();
 
-        // ✅ CORRECTED: Filter announcements created ON or AFTER the user's join date
-        if (user?.JoinDate is not null)
+        // ✅ Filter by join date
+        if (joinDate is not null)
         {
-            var joinDateTime = user.JoinDate.Value.ToDateTime(TimeOnly.MinValue);
+            var joinDateTime = joinDate.Value.ToDateTime(TimeOnly.MinValue);
             query = query.Where(a => a.CreatedAt >= joinDateTime);
         }
 
-        // ✅ Apply filtering based on the dropdown selection
+        // ✅ Filter by module registration (null = global announcement, or user must be registered)
+        query = query.Where(a => a.ModuleId == null || registeredModuleIds.Contains(a.ModuleId.Value));
+
+        // ✅ Filter by type (announcement/notification)
         if (!string.IsNullOrEmpty(queryParams.TypeFilter))
         {
             var filter = queryParams.TypeFilter.ToLower();
@@ -96,11 +107,10 @@ public class AnnouncementService : IAnnouncementService
             imagePath = uploadResult.SecureUrl.AbsoluteUri;
         }
 
-        // ✅ Title is no longer modified — keep it exactly as user typed
         var announcement = new Announcement
         {
             Type = dto.Type,
-            Title = dto.Title.Trim(), // Use raw title without suffix
+            Title = dto.Title.Trim(),
             Message = dto.Message,
             ImagePath = imagePath,
             CreatedBy = createdByUserNumber,
