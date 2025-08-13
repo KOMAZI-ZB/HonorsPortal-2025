@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ClassSchedule } from '../../_models/class-schedule';
 import { SchedulerService } from '../../_services/scheduler.service';
+import { AccountService } from '../../_services/account.service';
 import html2pdf from 'html2pdf.js';
 
 interface TimeBlock {
@@ -24,10 +25,33 @@ export class ClassScheduleComponent implements OnInit {
   timeBlocks: TimeBlock[] = [];
   blockMap: { [key: string]: { moduleCode: string; classVenue?: string }[] } = {};
 
-  constructor(private schedulerService: SchedulerService) { }
+  constructor(
+    private schedulerService: SchedulerService,
+    public accountService: AccountService   // ✅ added (same pattern as Lab)
+  ) { }
 
   ngOnInit(): void {
     this.loadSchedule();
+  }
+
+  // ✅ Same helpers as Lab schedule
+  get user() {
+    return this.accountService.currentUser();
+  }
+
+  get userFullName(): string {
+    const u: any = this.user || {};
+    const pick = (...cands: any[]) =>
+      cands.map(v => (v ?? '').toString().trim()).find(v => v.length > 0) || '';
+
+    let first = pick(u.name);
+    let last = pick(u.surname);
+
+    if (first && last) return `${first} ${last}`;
+    if (first) return first;
+    if (last) return last;
+
+    return pick(u.displayName, u.username, u.userNumber);
   }
 
   loadSchedule(): void {

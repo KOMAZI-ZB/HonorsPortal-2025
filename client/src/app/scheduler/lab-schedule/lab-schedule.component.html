@@ -7,27 +7,38 @@
             </button>
         </div>
         <ng-template #readonlyMsg></ng-template>
-        <div>
+        <!-- 👇 Added ms-auto so this stays on the far right even when the left button is absent (students) -->
+        <div class="ms-auto">
             <button class="btn btn-success" (click)="downloadScheduleAsPdf()">
                 Download PDF
             </button>
         </div>
     </div>
 
-    <!-- Weekly Grid Table with Logo and Heading (PDF only) -->
+    <!-- Weekly Grid Table with Logo + Title + User (PDF only header) -->
     <div id="labScheduleTable" class="table-responsive mt-3 p-4 bg-white">
 
-        <!-- ✅ Only shown in PDF -->
-        <div class="pdf-only text-center mb-3">
-            <img src="assets/ufslogo.jpg" alt="UFS Logo" />
-            <h2>Lab Schedule</h2>
+        <!-- ✅ PDF header: title left, logo centered, user right -->
+        <div class="pdf-only pdf-header mb-3">
+            <div class="pdf-left">
+                <div class="pdf-title-left">Lab Schedule</div>
+            </div>
+
+            <div class="pdf-center">
+                <img src="assets/ufslogo.jpg" alt="UFS Logo" class="pdf-logo" />
+            </div>
+
+            <div class="pdf-right">
+                <div class="pdf-user">{{ userFullName }}</div>
+            </div>
         </div>
 
-        <table class="table table-bordered text-center align-middle" style="table-layout: fixed;">
+        <!-- Table -->
+        <table class="table table-bordered text-center align-middle" style="table-layout: auto; width: 100%;">
             <thead class="table-light">
                 <tr>
-                    <th style="width: 120px;">Time</th>
-                    <th *ngFor="let day of weekdays" style="width: 140px;">{{ day }}</th>
+                    <th>Time</th>
+                    <th *ngFor="let day of weekdays">{{ day }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -35,11 +46,31 @@
                     <td><strong>{{ slot }}</strong></td>
                     <td *ngFor="let day of weekdays">
                         <ng-container *ngIf="getBookingObject(day, slot) as booking; else emptyCell">
-                            <button class="btn btn-outline-dark btn-sm w-100" (click)="triggerUnbookModal(booking)"
-                                style="cursor: pointer; white-space: normal; text-wrap: pretty; word-break: break-word;">
-                                {{ booking.description || 'Booked' }}
-                            </button>
+
+                            <!-- ✅ For STUDENTS: non-interactive -->
+                            <ng-container *ngIf="isStudent(); else staffButton">
+                                <button class="btn btn-dark btn-sm w-100 non-interactive" [attr.aria-disabled]="true"
+                                    tabindex="-1"
+                                    style="white-space: normal; text-wrap: pretty; word-break: break-word;">
+                                    {{ booking.description || 'Booked' }}
+                                </button>
+                            </ng-container>
+
+                            <!-- ✅ For staff: interactive -->
+                            <ng-template #staffButton>
+                                <button class="btn btn-outline-dark btn-sm w-100" (click)="triggerUnbookModal(booking)"
+                                    style="cursor: pointer; white-space: normal; text-wrap: pretty; word-break: break-word;">
+                                    {{ booking.description || 'Booked' }}
+                                </button>
+                            </ng-template>
+
+                            <!-- "Booked by" line -->
+                            <div class="small text-muted mt-1" *ngIf="booking.firstName || booking.lastName"
+                                style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                Booked by: {{ booking.firstName }} {{ booking.lastName }}
+                            </div>
                         </ng-container>
+
                         <ng-template #emptyCell>
                             <span class="text-muted">-</span>
                         </ng-template>

@@ -5,8 +5,48 @@
     text-transform: none;
 }
 
-/* ✅ Logo and heading section (PDF) */
-#labScheduleTable .pdf-only img {
+/* ✅ Non-interactive look for students */
+.non-interactive {
+    pointer-events: none;
+    cursor: default !important;
+}
+
+/* ===========================
+   PDF Header Layout (UPDATED)
+   =========================== */
+.pdf-header {
+    display: flex;
+    align-items: flex-end;
+    /* ✅ Align to bottom so they sit on top of table neatly */
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+    /* Space just above table */
+}
+
+/* Left column: title */
+.pdf-left {
+    flex: 1 1 0%;
+    display: flex;
+    align-items: flex-end;
+}
+
+.pdf-title-left {
+    font-size: 24px;
+    /* ✅ Same as user name */
+    font-weight: 600;
+    text-align: left;
+}
+
+/* Center column: logo centered */
+.pdf-center {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pdf-logo {
     width: 400px;
     height: auto;
     margin-bottom: 10px;
@@ -15,11 +55,20 @@
     margin-right: auto;
 }
 
-#labScheduleTable .pdf-only h2 {
-    font-size: 32px;
-    margin-top: 30px;
-    margin-bottom: 20px;
-    text-align: center;
+/* Right column: user name */
+.pdf-right {
+    flex: 1 1 0%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+}
+
+.pdf-user {
+    font-size: 24px;
+    /* ✅ Match title size */
+    font-weight: 600;
+    white-space: nowrap;
+    text-align: right;
 }
 
 /* Table container */
@@ -29,29 +78,44 @@
     border-radius: 10px;
 }
 
-/* ✅ Table borders and cell alignment - now using black borders */
+/* Force table layout */
+#labScheduleTable table {
+    table-layout: auto;
+    width: 100%;
+}
+
+/* Table borders */
 .table-bordered td,
 .table-bordered th {
     vertical-align: middle;
     text-align: center;
     border: 1px solid #000;
-    /* Black borders */
     padding: 12px;
     font-size: 16px;
 }
 
-/* ✅ First row (thead) background color to blue with white text */
+/* Thead styling */
 .table thead th {
     background-color: #007bff;
-    /* Bootstrap primary blue */
     color: white;
     font-weight: bold;
 }
 
-/* Time column (first column in tbody) */
+/* First column */
 .table tbody td:first-child {
     font-weight: bold;
     background-color: #f8f9fa;
+}
+
+/* Booked by text */
+.booked-by {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-top: 4px;
 }
 
 /* Print settings */

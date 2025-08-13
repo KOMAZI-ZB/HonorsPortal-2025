@@ -1,17 +1,65 @@
-/* ✅ Logo styling inside PDF export */
+/* ===========================
+   Header (mirrors Lab/Class)
+   =========================== */
+.pdf-header {
+    display: flex;
+    align-items: flex-end;
+    /* sit neatly on top of the tables */
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.pdf-left {
+    flex: 1 1 0%;
+    display: flex;
+    align-items: flex-end;
+}
+
+.pdf-title-left {
+    font-size: 24px;
+    /* ✅ Same as user name */
+    font-weight: 600;
+    text-align: left;
+}
+
+.pdf-center {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pdf-logo {
+    width: 400px;
+    height: auto;
+    margin-bottom: 10px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.pdf-right {
+    flex: 1 1 0%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+}
+
+.pdf-user {
+    font-size: 24px;
+    /* ✅ Match title size */
+    font-weight: 600;
+    white-space: nowrap;
+    text-align: right;
+}
+
+/* ✅ Logo styling inside PDF export (kept for compatibility with other views) */
 #pdfContent img {
     width: 400px;
     height: auto;
     display: block;
     margin: 0 auto 10px;
-}
-
-/* ✅ Heading styling */
-#pdfContent h2 {
-    font-size: 32px;
-    margin-top: 30px;
-    margin-bottom: 20px;
-    text-align: center;
 }
 
 /* ✅ White background and padding */

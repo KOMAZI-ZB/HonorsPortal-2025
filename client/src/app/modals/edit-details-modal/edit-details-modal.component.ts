@@ -36,6 +36,10 @@ export class EditDetailsModalComponent implements OnInit {
 
   assessments: Assessment[] = [];
 
+  // ✅ Minimal state for tabs
+  activeTab: 'venue' | 'contact' | 'assessments' = 'venue';
+  setTab(t: 'venue' | 'contact' | 'assessments') { this.activeTab = t; }
+
   constructor(
     private http: HttpClient,
     private toastr: ToastrService,

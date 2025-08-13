@@ -2,7 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
 import { HasRoleDirective } from '../_directives/has-role.directive';
-import { NgIf } from '@angular/common';
+import { NgIf, NgClass } from '@angular/common'; // <-- add NgClass
 import { AccountService } from '../_services/account.service';
 
 @Component({
@@ -13,7 +13,8 @@ import { AccountService } from '../_services/account.service';
     RouterLink,
     RouterLinkActive,
     HasRoleDirective,
-    NgIf
+    NgIf,
+    NgClass // <-- add NgClass
   ],
   templateUrl: './nav.component.html',
   styleUrls: ['./nav.component.css']

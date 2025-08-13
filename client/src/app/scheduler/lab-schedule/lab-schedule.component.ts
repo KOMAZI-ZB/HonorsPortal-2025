@@ -41,13 +41,62 @@ export class LabScheduleComponent implements OnInit {
     return this.accountService.roles();
   }
 
-  generateTimeSlots() {
-    const startHour = 6;
-    for (let i = 0; i < 15; i++) {
-      const from = `${(startHour + i).toString().padStart(2, '0')}:00`;
-      const to = `${(startHour + i + 1).toString().padStart(2, '0')}:00`;
-      this.timeSlots.push(`${from} - ${to}`);
+  // ✅ Helper: specifically detect Student for non-interactive UI
+  isStudent(): boolean {
+    return this.roles.includes('Student');
+  }
+
+  // ✅ Full name for PDF header:
+  // Prefer account fields (name + surname). If either is missing,
+  // fall back to the current user's booking (firstName + lastName).
+  // Then safe fallbacks (displayName/username/userNumber).
+  get userFullName(): string {
+    const u: any = this.user || {};
+    const pick = (...cands: any[]) =>
+      cands.map(v => (v ?? '').toString().trim()).find(v => v.length > 0) || '';
+
+    // 1) Primary: account payload (matches your User interface)
+    let first = pick(u.name);       // <-- first name is "name" on User
+    let last = pick(u.surname);    // <-- last name is "surname" on User
+
+    // 2) If missing, fall back to a booking for this user
+    if (!first || !last) {
+      const meNumber = pick(u.userNumber);
+      const mine = this.bookings.find(b => (b.userNumber ?? '') === meNumber);
+      if (mine) {
+        if (!first) first = pick(mine.firstName);
+        if (!last) last = pick(mine.lastName);
+      }
     }
+
+    if (first && last) return `${first} ${last}`;
+    if (first) return first;
+    if (last) return last;
+
+    // 3) Final safety fallbacks
+    return pick(u.displayName, u.username, u.userNumber);
+  }
+
+  // ⏰ Updated: make one-hour slots that start at :10 (e.g., 06:10–07:10, 07:10–08:10, ...)
+  generateTimeSlots() {
+    const slots: string[] = [];
+    const startHour = 6;     // 06:xx
+    const startMinute = 10;  // :10 offset
+    const totalSlots = 15;   // keep same count as before
+
+    const pad = (n: number) => n.toString().padStart(2, '0');
+
+    for (let i = 0; i < totalSlots; i++) {
+      const fromDate = new Date(0, 0, 0, startHour + i, startMinute, 0, 0);
+      const toDate = new Date(fromDate.getTime() + 60 * 60 * 1000); // +1 hour
+
+      const from = `${pad(fromDate.getHours())}:${pad(fromDate.getMinutes())}`;
+      const to = `${pad(toDate.getHours())}:${pad(toDate.getMinutes())}`;
+
+      slots.push(`${from} - ${to}`);
+    }
+
+    this.timeSlots = slots;
   }
 
   getUpcomingSunday(): Date {

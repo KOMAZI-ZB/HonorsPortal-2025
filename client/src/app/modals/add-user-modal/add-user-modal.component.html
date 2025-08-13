@@ -6,8 +6,9 @@
 <div class="modal-body">
     <form>
         <div class="mb-3">
-            <label>User Number</label>
-            <input type="text" class="form-control" [(ngModel)]="userNumber" name="userNumber" required />
+            <label>User Name</label>
+            <input #usernameInput type="text" class="form-control" [(ngModel)]="userNumber" name="userNumber"
+                required />
         </div>
 
         <div class="mb-3">
@@ -26,7 +27,7 @@
         </div>
 
         <div class="mb-3">
-            <label>Password (optional)</label>
+            <label>Password</label>
             <div class="input-group">
                 <input [type]="showPassword ? 'text' : 'password'" class="form-control" [(ngModel)]="password"
                     name="password" />

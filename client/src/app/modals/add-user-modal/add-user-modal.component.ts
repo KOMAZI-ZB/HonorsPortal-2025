@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { BsModalRef } from 'ngx-bootstrap/modal';
@@ -14,7 +14,7 @@ import { ToastrService } from 'ngx-toastr';
   templateUrl: './add-user-modal.component.html',
   styleUrls: ['./add-user-modal.component.css']
 })
-export class AddUserModalComponent implements OnInit {
+export class AddUserModalComponent implements OnInit, AfterViewInit {
   constructor(
     private adminService: AdminService,
     private moduleService: ModuleService,
@@ -22,6 +22,10 @@ export class AddUserModalComponent implements OnInit {
     public modalRef: BsModalRef
   ) { }
 
+  // 🔹 Focus handle for the first field
+  @ViewChild('usernameInput') usernameInput!: ElementRef<HTMLInputElement>;
+
+  // 🔹 Ensure not prefilled
   userNumber = '';
   firstName = '';
   lastName = '';
@@ -39,12 +43,24 @@ export class AddUserModalComponent implements OnInit {
   roles = ['Student', 'Lecturer', 'Coordinator', 'Admin'];
 
   ngOnInit(): void {
+    // Keep fields empty on open
+    this.userNumber = '';
+    this.firstName = '';
+    this.lastName = '';
+    this.email = '';
+    this.password = '';
+
     this.moduleService.getAllModules().subscribe({
       next: modules => {
         this.semester1Modules = modules.filter(m => m.semester === 1);
         this.semester2Modules = modules.filter(m => m.semester === 2);
       }
     });
+  }
+
+  ngAfterViewInit(): void {
+    // Put cursor in the first field after view is ready
+    setTimeout(() => this.usernameInput?.nativeElement.focus(), 0);
   }
 
   toggleModule(id: number, list: number[], event: any) {

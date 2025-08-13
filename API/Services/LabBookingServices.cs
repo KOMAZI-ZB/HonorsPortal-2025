@@ -15,20 +15,48 @@ public class LabBookingService(DataContext context, IMapper mapper) : ILabBookin
 
     public async Task<IEnumerable<LabBookingDto>> GetAllBookingsAsync()
     {
-        return await _context.LabBookings
-            .OrderBy(b => b.BookingDate)
-            .ThenBy(b => b.StartTime)
-            .ProjectTo<LabBookingDto>(_mapper.ConfigurationProvider)
-            .ToListAsync();
+        // Join LabBookings to Users so we can include FirstName/LastName in the DTO
+        return await (
+            from b in _context.LabBookings
+            join u in _context.Users on b.UserNumber equals u.UserNumber into gj
+            from u in gj.DefaultIfEmpty()
+            orderby b.BookingDate, b.StartTime
+            select new LabBookingDto
+            {
+                Id = b.Id,
+                UserNumber = b.UserNumber,
+                WeekDays = b.WeekDays,
+                StartTime = b.StartTime,
+                EndTime = b.EndTime,
+                BookingDate = b.BookingDate,
+                Description = b.Description,
+                FirstName = u != null ? u.FirstName : null,
+                LastName = u != null ? u.LastName : null
+            }
+        ).ToListAsync();
     }
 
     public async Task<IEnumerable<LabBookingDto>> GetBookingsByUserAsync(string userNumber)
     {
-        return await _context.LabBookings
-            .Where(b => b.UserNumber == userNumber)
-            .OrderByDescending(b => b.BookingDate)
-            .ProjectTo<LabBookingDto>(_mapper.ConfigurationProvider)
-            .ToListAsync();
+        return await (
+            from b in _context.LabBookings
+            join u in _context.Users on b.UserNumber equals u.UserNumber into gj
+            from u in gj.DefaultIfEmpty()
+            where b.UserNumber == userNumber
+            orderby b.BookingDate descending
+            select new LabBookingDto
+            {
+                Id = b.Id,
+                UserNumber = b.UserNumber,
+                WeekDays = b.WeekDays,
+                StartTime = b.StartTime,
+                EndTime = b.EndTime,
+                BookingDate = b.BookingDate,
+                Description = b.Description,
+                FirstName = u != null ? u.FirstName : null,
+                LastName = u != null ? u.LastName : null
+            }
+        ).ToListAsync();
     }
 
     public async Task<bool> CreateBookingAsync(string userNumber, CreateLabBookingDto dto)
@@ -48,7 +76,7 @@ public class LabBookingService(DataContext context, IMapper mapper) : ILabBookin
             StartTime = dto.StartTime,
             EndTime = dto.EndTime,
             BookingDate = dto.BookingDate,
-            Description = dto.Description // ✅ NEW: Add this line
+            Description = dto.Description
         };
 
         _context.LabBookings.Add(booking);

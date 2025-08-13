@@ -2,7 +2,7 @@
     {
         "Id": 1,
         "ModuleCode": "CSIS6809",
-        "ModuleName": "Computer Information Technology",
+        "ModuleName": "Computer Science and Informatics Research Project",
         "Semester": 1,
         "ClassVenue": "B108",
         "WeekDays": "Monday,Wednesday",
@@ -374,5 +374,11 @@
         "ModuleCode": "CSIS6863",
         "ModuleName": "Capita Selecta",
         "Semester": 2
+    },
+    {
+        "Id": 53,
+        "ModuleCode": "BCIS6809",
+        "ModuleName": "Computer Information Systems Research Project",
+        "Semester": 1
     }
 ]

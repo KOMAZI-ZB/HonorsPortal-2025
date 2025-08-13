@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AssessmentSchedule } from '../../_models/assessment-schedule';
 import { SchedulerService } from '../../_services/scheduler.service';
+import { AccountService } from '../../_services/account.service';
 import html2pdf from 'html2pdf.js';
 
 @Component({
@@ -18,10 +19,33 @@ export class AssessmentScheduleComponent implements OnInit {
   groupedMonths: string[] = [];
   semester: number = 1;
 
-  constructor(private schedulerService: SchedulerService) { }
+  constructor(
+    private schedulerService: SchedulerService,
+    public accountService: AccountService      // ✅ added (same as Lab/Class)
+  ) { }
 
   ngOnInit(): void {
     this.loadSchedule();
+  }
+
+  // ✅ same helpers as Lab/Class
+  get user() {
+    return this.accountService.currentUser();
+  }
+
+  get userFullName(): string {
+    const u: any = this.user || {};
+    const pick = (...cands: any[]) =>
+      cands.map(v => (v ?? '').toString().trim()).find(v => v.length > 0) || '';
+
+    let first = pick(u.name);
+    let last = pick(u.surname);
+
+    if (first && last) return `${first} ${last}`;
+    if (first) return first;
+    if (last) return last;
+
+    return pick(u.displayName, u.username, u.userNumber);
   }
 
   onSemesterChange(): void {

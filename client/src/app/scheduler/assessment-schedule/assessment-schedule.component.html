@@ -16,15 +16,25 @@
 
     <!-- ✅ PDF Content -->
     <div id="pdfContent" class="mt-4 p-4 bg-white">
-        <div class="text-center mb-3">
-            <img src="assets/ufslogo.jpg" alt="UFS Logo" />
-            <h2>Assessment Schedule</h2>
+
+        <!-- ✅ Header: title left | logo center | user right (mirrors Lab/Class) -->
+        <div class="pdf-header mb-3">
+            <div class="pdf-left">
+                <h2 class="pdf-title-left">Assessment Schedule</h2>
+            </div>
+
+            <div class="pdf-center">
+                <img src="assets/ufslogo.jpg" alt="UFS Logo" class="pdf-logo" />
+            </div>
+
+            <div class="pdf-right">
+                <div class="pdf-user">{{ userFullName }}</div>
+            </div>
         </div>
 
         <!-- ✅ Tables grouped by month -->
         <div *ngIf="groupedMonths.length > 0; else noData">
             <div *ngFor="let month of groupedMonths">
-                <!-- Month header -->
                 <table class="table table-bordered text-center align-middle mb-5">
                     <thead class="table-dark">
                         <tr>
@@ -36,7 +46,7 @@
                             <th>Date</th>
                             <th>Start Time</th>
                             <th>End Time</th>
-                            <th>Due Time</th>
+                            <th>Submission Deadline</th>
                             <th>Venue</th>
                         </tr>
                     </thead>
