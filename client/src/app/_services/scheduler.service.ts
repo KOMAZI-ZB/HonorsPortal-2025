@@ -5,23 +5,17 @@ import { environment } from '../../environments/environment';
 import { ClassSchedule } from '../_models/class-schedule';
 import { AssessmentSchedule } from '../_models/assessment-schedule';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class SchedulerService {
   private baseUrl = environment.apiUrl + 'scheduler/';
 
   constructor(private http: HttpClient) { }
 
-  // ✅ Get personalized class timetable for the current user
   getClassSchedule(semester: number): Observable<ClassSchedule[]> {
     return this.http.get<ClassSchedule[]>(`${this.baseUrl}class/${semester}`);
   }
 
-  // ✅ Get personalized assessment schedule for the current user
   getAssessmentSchedule(semester: number): Observable<AssessmentSchedule[]> {
     return this.http.get<AssessmentSchedule[]>(`${this.baseUrl}assessment/${semester}`);
   }
-
-  // 🔒 Additional endpoints like lab bookings are handled in LabbookingService
 }

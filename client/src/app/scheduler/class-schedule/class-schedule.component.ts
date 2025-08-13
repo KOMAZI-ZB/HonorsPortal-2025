@@ -6,10 +6,8 @@ import { SchedulerService } from '../../_services/scheduler.service';
 import { AccountService } from '../../_services/account.service';
 import html2pdf from 'html2pdf.js';
 
-interface TimeBlock {
-  startTime: string;
-  endTime: string;
-}
+interface TimeBlock { startTime: string; endTime: string; }
+interface CellEntry { moduleCode: string; venue?: string; }
 
 @Component({
   selector: 'app-class-schedule',
@@ -20,116 +18,84 @@ interface TimeBlock {
 })
 export class ClassScheduleComponent implements OnInit {
   schedules: ClassSchedule[] = [];
-  semester: number = 1;
+  semester = 1;
   weekdays: string[] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+
   timeBlocks: TimeBlock[] = [];
-  blockMap: { [key: string]: { moduleCode: string; classVenue?: string }[] } = {};
+  blockMap: { [key: string]: CellEntry[] } = {};
 
   constructor(
     private schedulerService: SchedulerService,
-    public accountService: AccountService   // ✅ added (same pattern as Lab)
+    public accountService: AccountService
   ) { }
 
-  ngOnInit(): void {
-    this.loadSchedule();
-  }
+  ngOnInit(): void { this.loadSchedule(); }
 
-  // ✅ Same helpers as Lab schedule
-  get user() {
-    return this.accountService.currentUser();
-  }
+  get user() { return this.accountService.currentUser(); }
 
   get userFullName(): string {
     const u: any = this.user || {};
     const pick = (...cands: any[]) =>
       cands.map(v => (v ?? '').toString().trim()).find(v => v.length > 0) || '';
-
-    let first = pick(u.name);
-    let last = pick(u.surname);
-
+    const first = pick(u.name);
+    const last = pick(u.surname);
     if (first && last) return `${first} ${last}`;
-    if (first) return first;
-    if (last) return last;
-
-    return pick(u.displayName, u.username, u.userNumber);
+    return first || last || pick(u.displayName, u.username, u.userNumber);
   }
 
   loadSchedule(): void {
     this.schedulerService.getClassSchedule(this.semester).subscribe({
-      next: (response) => {
-        this.schedules = response;
+      next: (rows) => {
+        this.schedules = rows;
         this.generateTimeBlocks();
         this.buildBlockMap();
       },
-      error: (err) => console.log(err)
+      error: (err) => console.error(err)
     });
   }
 
-  onSemesterChange(): void {
-    this.loadSchedule();
-  }
+  onSemesterChange(): void { this.loadSchedule(); }
 
   generateTimeBlocks(): void {
     const seen = new Set<string>();
     const blocks: TimeBlock[] = [];
-
-    this.schedules.forEach(schedule => {
-      const starts = schedule.startTimes || [];
-      const ends = schedule.endTimes || [];
-
-      for (let i = 0; i < starts.length; i++) {
-        const start = starts[i];
-        const end = ends[i];
-        if (start && end) {
-          const key = `${start}-${end}`;
-          if (!seen.has(key)) {
-            seen.add(key);
-            blocks.push({ startTime: start, endTime: end });
-          }
-        }
+    for (const s of this.schedules) {
+      if (!s.startTime || !s.endTime) continue;
+      const key = `${s.startTime}-${s.endTime}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        blocks.push({ startTime: s.startTime, endTime: s.endTime });
       }
-    });
-
+    }
     this.timeBlocks = blocks.sort((a, b) => a.startTime.localeCompare(b.startTime));
   }
 
   buildBlockMap(): void {
     this.blockMap = {};
-
-    this.timeBlocks.forEach(block => {
-      this.weekdays.forEach(day => {
+    for (const block of this.timeBlocks) {
+      for (const day of this.weekdays) {
         const key = `${block.startTime}-${block.endTime}-${day}`;
-        const entries: { moduleCode: string; classVenue?: string }[] = [];
-
-        this.schedules.forEach(schedule => {
-          const index = (schedule.weekDays || []).findIndex(d => d.toLowerCase() === day.toLowerCase());
-          if (index === -1) return;
-
-          const start = schedule.startTimes?.[index];
-          const end = schedule.endTimes?.[index];
-
-          const isExactMatch = start === block.startTime && end === block.endTime;
-          if (isExactMatch) {
-            const exists = entries.some(e => e.moduleCode === schedule.moduleCode);
-            if (!exists) {
-              entries.push({ moduleCode: schedule.moduleCode, classVenue: schedule.classVenue });
-            }
+        const entries: CellEntry[] = [];
+        for (const s of this.schedules) {
+          if (s.weekDay?.toLowerCase() !== day.toLowerCase()) continue;
+          const isExact = s.startTime === block.startTime && s.endTime === block.endTime;
+          if (!isExact) continue;
+          if (!entries.some(e => e.moduleCode === s.moduleCode)) {
+            entries.push({ moduleCode: s.moduleCode, venue: s.venue });
           }
-        });
-
+        }
         this.blockMap[key] = entries;
-      });
-    });
+      }
+    }
   }
 
-  getModulesByBlock(block: TimeBlock, day: string): { moduleCode: string; classVenue?: string }[] {
-    const key = `${block.startTime}-${block.endTime}-${day}`;
-    return this.blockMap[key] || [];
+  getModulesByBlock(block: TimeBlock, day: string): CellEntry[] {
+    return this.blockMap[`${block.startTime}-${block.endTime}-${day}`] || [];
   }
 
   getMaxEntriesForBlock(block: TimeBlock): number {
     return Math.max(
-      ...this.weekdays.map(day => this.getModulesByBlock(block, day).length),
+      ...this.weekdays.map(d => this.getModulesByBlock(block, d).length),
       1
     );
   }
@@ -140,22 +106,16 @@ export class ClassScheduleComponent implements OnInit {
       '#ede7f6', '#f3e5f5', '#f9fbe7', '#e0f7fa',
       '#ffe0b2', '#c8e6c9', '#d1c4e9', '#b2ebf2'
     ];
-
-    const hash = moduleCode
-      .toUpperCase()
-      .split('')
-      .reduce((acc, char) => acc + char.charCodeAt(0), 0);
-
+    const hash = moduleCode.toUpperCase().split('')
+      .reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
     return colors[hash % colors.length];
   }
 
   downloadScheduleAsPdf(): void {
     const content = document.getElementById('pdfContent');
     if (!content) return;
-
     html2pdf().set({
-      margin: 0.5,
-      filename: 'Class_Schedule.pdf',
+      margin: 0.5, filename: 'Class_Schedule.pdf',
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 2 },
       jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
@@ -164,8 +124,7 @@ export class ClassScheduleComponent implements OnInit {
 
   formatTime(time: string): string {
     if (!time) return '-';
-    const [hour, minute] = time.split(':');
-    return `${hour}:${minute}`;
+    const [h, m] = time.split(':');
+    return `${h}:${m}`;
   }
-
 }

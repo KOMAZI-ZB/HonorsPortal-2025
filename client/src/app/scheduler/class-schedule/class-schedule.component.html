@@ -16,7 +16,6 @@
 
     <!-- PDF Export Content Only -->
     <div id="pdfContent" class="table-responsive mt-3 p-4 bg-white">
-
         <!-- ✅ Header: title left | logo center | user right -->
         <div class="pdf-header mb-3">
             <div class="pdf-left">
@@ -61,13 +60,17 @@
 
                             <ng-container *ngFor="let day of weekdays">
                                 <ng-container *ngIf="getModulesByBlock(block, day).length > rowIndex">
-                                    <td
-                                        [ngStyle]="{'background-color': getColorForModule(getModulesByBlock(block, day)[rowIndex].moduleCode)}">
+                                    <td [ngStyle]="{
+                      'background-color':
+                        getColorForModule(getModulesByBlock(block, day)[rowIndex].moduleCode)
+                    }">
                                         {{ getModulesByBlock(block, day)[rowIndex].moduleCode }}
                                     </td>
-                                    <td
-                                        [ngStyle]="{'background-color': getColorForModule(getModulesByBlock(block, day)[rowIndex].moduleCode)}">
-                                        {{ getModulesByBlock(block, day)[rowIndex].classVenue || '-' }}
+                                    <td [ngStyle]="{
+                      'background-color':
+                        getColorForModule(getModulesByBlock(block, day)[rowIndex].moduleCode)
+                    }">
+                                        {{ getModulesByBlock(block, day)[rowIndex].venue || '-' }}
                                     </td>
                                 </ng-container>
                                 <ng-container *ngIf="getModulesByBlock(block, day).length <= rowIndex">

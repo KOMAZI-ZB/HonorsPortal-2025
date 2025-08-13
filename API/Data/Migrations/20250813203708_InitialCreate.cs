@@ -280,6 +280,29 @@ namespace API.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ClassSessions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ModuleId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Venue = table.Column<string>(type: "TEXT", nullable: false),
+                    WeekDay = table.Column<string>(type: "TEXT", nullable: false),
+                    StartTime = table.Column<string>(type: "TEXT", nullable: false),
+                    EndTime = table.Column<string>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ClassSessions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ClassSessions_Modules_ModuleId",
+                        column: x => x.ModuleId,
+                        principalTable: "Modules",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Documents",
                 columns: table => new
                 {
@@ -382,6 +405,12 @@ namespace API.Data.Migrations
                 column: "ModuleId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ClassSessions_ModuleId_Venue_WeekDay_StartTime_EndTime",
+                table: "ClassSessions",
+                columns: new[] { "ModuleId", "Venue", "WeekDay", "StartTime", "EndTime" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Documents_ModuleId",
                 table: "Documents",
                 column: "ModuleId");
@@ -415,6 +444,9 @@ namespace API.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "Assessments");
+
+            migrationBuilder.DropTable(
+                name: "ClassSessions");
 
             migrationBuilder.DropTable(
                 name: "Documents");

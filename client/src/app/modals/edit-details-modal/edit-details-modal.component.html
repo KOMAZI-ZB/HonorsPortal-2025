@@ -5,13 +5,10 @@
 
 <div class="modal-body">
     <form>
-        <!-- 🧭 Tabs -->
+        <!-- Tabs -->
         <ul class="nav nav-tabs mb-3">
             <li class="nav-item">
-                <a class="nav-link" [class.active]="activeTab==='venue'" (click)="setTab('venue')">Venue</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" [class.active]="activeTab==='contact'" (click)="setTab('contact')">Contact
+                <a class="nav-link" [class.active]="activeTab==='contact'" (click)="setTab('contact')">Venues & Contact
                     Sessions</a>
             </li>
             <li class="nav-item">
@@ -21,56 +18,62 @@
         </ul>
 
         <div class="border border-top-0 rounded-bottom p-3">
-            <!-- ================= Venue ================= -->
-            <div [hidden]="activeTab !== 'venue'">
-                <h6>Class Schedule</h6>
-                <div class="mb-3">
-                    <label>Venue</label>
-                    <input type="text" class="form-control" [(ngModel)]="classVenue" name="classVenue" />
-                </div>
-            </div>
-
-            <!-- ================= Contact Sessions ================= -->
+            <!-- ========== Venues & Sessions ========== -->
             <div [hidden]="activeTab !== 'contact'">
-                <h6>Class Days &amp; Times</h6>
-                <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="mb-0">Class Venues & Days/Times</h6>
+                    <button type="button" class="btn btn-outline-primary btn-sm" (click)="addVenue()">+ Add
+                        Venue</button>
+                </div>
+
+                <div *ngFor="let v of venues; let vi = index" class="border rounded p-2 mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="flex-grow-1 me-2">
+                            <label class="form-label">Venue</label>
+                            <input class="form-control" [(ngModel)]="v.venue" [name]="'venue-'+vi"
+                                placeholder="e.g., B108" />
+                        </div>
+                        <button type="button" class="btn btn-outline-danger btn-sm mt-4"
+                            (click)="removeVenue(vi)">Remove</button>
+                    </div>
+
+                    <div class="mb-2"><strong>Days & Times</strong></div>
+
                     <div *ngFor="let day of weekDays" class="border rounded p-2 mb-2">
                         <div class="form-check mb-2">
-                            <input type="checkbox" class="form-check-input" [checked]="selectedDaysMap[day].checked"
-                                (change)="toggleDay(day)" [id]="day" />
-                            <label class="form-check-label fw-bold" [for]="day">{{ day }}</label>
+                            <input type="checkbox" class="form-check-input" [checked]="v.days[day].checked"
+                                (change)="toggleDay(vi, day)" [id]="'day-'+vi+'-'+day" />
+                            <label class="form-check-label fw-bold" [for]="'day-'+vi+'-'+day">{{ day }}</label>
                         </div>
 
-                        <div *ngIf="selectedDaysMap[day]?.checked" class="row">
+                        <div *ngIf="v.days[day].checked" class="row">
                             <div class="col">
                                 <label>Start Time</label>
-                                <input type="time" class="form-control" [(ngModel)]="selectedDaysMap[day].startTime"
-                                    [name]="'start-' + day" min="06:00" max="21:00" />
+                                <input type="time" class="form-control" [(ngModel)]="v.days[day].startTime"
+                                    [name]="'start-'+vi+'-'+day" min="06:00" max="21:00" />
                             </div>
                             <div class="col">
                                 <label>End Time</label>
-                                <input type="time" class="form-control" [(ngModel)]="selectedDaysMap[day].endTime"
-                                    [name]="'end-' + day" min="06:00" max="22:00" />
+                                <input type="time" class="form-control" [(ngModel)]="v.days[day].endTime"
+                                    [name]="'end-'+vi+'-'+day" min="06:00" max="22:00" />
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- ================= Assessments ================= -->
+            <!-- ========== Assessments (unchanged UI) ========== -->
             <div [hidden]="activeTab !== 'assessments'">
                 <hr />
                 <h6>Assessments</h6>
 
                 <div *ngFor="let assessment of assessments; let i = index" class="border rounded mb-3">
-                    <!-- Collapsible Header -->
                     <button class="btn btn-light w-100 text-start p-3" type="button" data-bs-toggle="collapse"
                         [attr.data-bs-target]="'#collapse' + i" [attr.aria-expanded]="true"
                         [attr.aria-controls]="'collapse' + i">
                         <strong>📘 Assessment {{ i + 1 }}: {{ assessment.title || 'Untitled' }}</strong>
                     </button>
 
-                    <!-- Collapsible Body -->
                     <div class="collapse show p-3" [id]="'collapse' + i">
                         <div class="mb-2">
                             <label>Title</label>
@@ -86,7 +89,7 @@
                         <div class="mb-2">
                             <label>
                                 <input type="checkbox" [(ngModel)]="assessment.isTimed" [name]="'isTimed' + i" />
-                                Timed Assessment (e.g., Venue &amp; Time)
+                                Timed Assessment (e.g., Venue & Time)
                             </label>
                         </div>
 
@@ -117,14 +120,12 @@
                         </div>
 
                         <div class="text-end mt-3">
-                            <button class="btn btn-sm btn-outline-danger" (click)="removeAssessment(i)" type="button">
-                                Remove
-                            </button>
+                            <button class="btn btn-sm btn-outline-danger" (click)="removeAssessment(i)"
+                                type="button">Remove</button>
                         </div>
                     </div>
                 </div>
 
-                <!-- ➕ Add Assessment -->
                 <div class="mb-3 text-end">
                     <button class="btn btn-outline-primary" (click)="addAssessment()" type="button">
                         + Add Assessment

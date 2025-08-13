@@ -4,40 +4,84 @@
         "ModuleCode": "CSIS6809",
         "ModuleName": "Computer Science and Informatics Research Project",
         "Semester": 1,
-        "ClassVenue": "B108",
-        "WeekDays": "Monday,Wednesday",
-        "StartTimes": "09:00:00,10:00:00",
-        "EndTimes": "10:00:00,11:00:00"
+        "ClassSessions": [
+            {
+                "Venue": "EXR1",
+                "WeekDay": "Monday",
+                "StartTime": "09:00:00",
+                "EndTime": "10:00:00"
+            },
+            {
+                "Venue": "STABILIS",
+                "WeekDay": "Wednesday",
+                "StartTime": "10:00:00",
+                "EndTime": "11:00:00"
+            }
+        ],
+        "Assessments": []
     },
     {
         "Id": 2,
         "ModuleCode": "CSIS6813",
         "ModuleName": "Introduction to Research",
         "Semester": 1,
-        "ClassVenue": "B108",
-        "WeekDays": "Monday,Wednesday",
-        "StartTimes": "09:00:00,10:00:00",
-        "EndTimes": "10:00:00,11:00:00"
+        "ClassSessions": [
+            {
+                "Venue": "B108",
+                "WeekDay": "Monday",
+                "StartTime": "09:00:00",
+                "EndTime": "10:00:00"
+            },
+            {
+                "Venue": "EXR2",
+                "WeekDay": "Wednesday",
+                "StartTime": "10:00:00",
+                "EndTime": "11:00:00"
+            }
+        ],
+        "Assessments": []
     },
     {
         "Id": 3,
         "ModuleCode": "CSIC6813",
         "ModuleName": "Artificial Intelligence",
         "Semester": 1,
-        "ClassVenue": "B108",
-        "WeekDays": "Monday,Wednesday",
-        "StartTimes": "09:00:00,10:00:00",
-        "EndTimes": "10:00:00,11:00:00"
+        "ClassSessions": [
+            {
+                "Venue": "FG",
+                "WeekDay": "Monday",
+                "StartTime": "09:00:00",
+                "EndTime": "10:00:00"
+            },
+            {
+                "Venue": "FG3",
+                "WeekDay": "Wednesday",
+                "StartTime": "10:00:00",
+                "EndTime": "11:00:00"
+            }
+        ],
+        "Assessments": []
     },
     {
         "Id": 4,
         "ModuleCode": "CSIC6833",
         "ModuleName": "Robotics",
         "Semester": 1,
-        "ClassVenue": "B108",
-        "WeekDays": "Monday,Wednesday",
-        "StartTimes": "09:00:00,10:00:00",
-        "EndTimes": "10:00:00,11:00:00"
+        "ClassSessions": [
+            {
+                "Venue": "EXR2",
+                "WeekDay": "Monday",
+                "StartTime": "09:00:00",
+                "EndTime": "10:00:00"
+            },
+            {
+                "Venue": "Lab-3",
+                "WeekDay": "Wednesday",
+                "StartTime": "10:00:00",
+                "EndTime": "11:00:00"
+            }
+        ],
+        "Assessments": []
     },
     {
         "Id": 5,

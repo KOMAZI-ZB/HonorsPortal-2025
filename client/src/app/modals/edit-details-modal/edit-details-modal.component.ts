@@ -2,6 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BsModalRef } from 'ngx-bootstrap/modal';
 import { Module } from '../../_models/module';
+import { ClassSession } from '../../_models/class-session';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { ToastrService } from 'ngx-toastr';
@@ -17,6 +18,13 @@ interface Assessment {
   venue?: string;
 }
 
+type DayState = { checked: boolean; startTime: string; endTime: string; };
+
+interface VenueConfig {
+  venue: string;
+  days: { [day: string]: DayState };
+}
+
 @Component({
   selector: 'app-edit-details-modal',
   standalone: true,
@@ -29,16 +37,16 @@ export class EditDetailsModalComponent implements OnInit {
   @Input() bsModalRef!: BsModalRef<EditDetailsModalComponent>;
 
   baseUrl = environment.apiUrl;
-  classVenue = '';
 
   weekDays: string[] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-  selectedDaysMap: { [day: string]: { checked: boolean; startTime: string; endTime: string } } = {};
+
+  // ✅ Replaces single classVenue + selectedDaysMap
+  venues: VenueConfig[] = [];
 
   assessments: Assessment[] = [];
 
-  // ✅ Minimal state for tabs
-  activeTab: 'venue' | 'contact' | 'assessments' = 'venue';
-  setTab(t: 'venue' | 'contact' | 'assessments') { this.activeTab = t; }
+  activeTab: 'contact' | 'assessments' = 'contact';
+  setTab(t: 'contact' | 'assessments') { this.activeTab = t; }
 
   constructor(
     private http: HttpClient,
@@ -47,27 +55,40 @@ export class EditDetailsModalComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.classVenue = this.module.classVenue || '';
-
-    this.weekDays.forEach(day => {
-      this.selectedDaysMap[day] = { checked: false, startTime: '', endTime: '' };
-    });
-
-    const weekDayList = this.module.weekDays || [];
-    const startTimes = this.module.startTimes || [];
-    const endTimes = this.module.endTimes || [];
-
-    weekDayList.forEach((day, i) => {
-      if (this.selectedDaysMap[day]) {
-        this.selectedDaysMap[day].checked = true;
-        this.selectedDaysMap[day].startTime = startTimes[i] || '';
-        this.selectedDaysMap[day].endTime = endTimes[i] || '';
-      }
-    });
-
-    // 🆕 Fetch the full module from the backend (ensures assessments are fresh and complete)
+    // Preload sessions from backend to ensure fresh complete data (also fetch assessments)
     this.http.get<Module>(`${this.baseUrl}modules/${this.module.id}`).subscribe({
-      next: updated => {
+      next: (updated) => {
+        this.module = updated;
+
+        // Build VenueConfig[] from classSessions
+        const sessions = (updated.classSessions || []) as ClassSession[];
+        const byVenue = new Map<string, VenueConfig>();
+
+        const makeEmptyDays = (): { [d: string]: DayState } => {
+          const obj: { [d: string]: DayState } = {};
+          this.weekDays.forEach(d => obj[d] = { checked: false, startTime: '', endTime: '' });
+          return obj;
+        };
+
+        for (const s of sessions) {
+          if (!byVenue.has(s.venue)) {
+            byVenue.set(s.venue, { venue: s.venue, days: makeEmptyDays() });
+          }
+          const cfg = byVenue.get(s.venue)!;
+          if (cfg.days[s.weekDay]) {
+            cfg.days[s.weekDay].checked = true;
+            cfg.days[s.weekDay].startTime = s.startTime?.length === 5 ? s.startTime + ':00' : (s.startTime || '');
+            cfg.days[s.weekDay].endTime = s.endTime?.length === 5 ? s.endTime + ':00' : (s.endTime || '');
+          }
+        }
+
+        this.venues = Array.from(byVenue.values());
+        if (this.venues.length === 0) {
+          // Start with one empty venue row to guide the user
+          this.addVenue();
+        }
+
+        // Assessments
         this.assessments = (updated.assessments || []).map(a => ({
           title: a.title,
           date: a.date,
@@ -78,8 +99,10 @@ export class EditDetailsModalComponent implements OnInit {
           venue: a.venue || ''
         }));
       },
-      error: err => {
+      error: (err) => {
         console.error('❌ Failed to fetch module data:', err);
+        // fallback if GET fails: create one empty venue config
+        this.addVenue();
         this.assessments = [];
       }
     });
@@ -88,6 +111,27 @@ export class EditDetailsModalComponent implements OnInit {
   private formatTimeString(time: string): string | null {
     if (!time) return null;
     return time.length === 5 ? time + ':00' : time;
+  }
+
+  // Venue list management
+  addVenue(): void {
+    const days: { [d: string]: DayState } = {};
+    this.weekDays.forEach(d => days[d] = { checked: false, startTime: '', endTime: '' });
+    this.venues.push({ venue: '', days });
+  }
+
+  removeVenue(index: number): void {
+    this.venues.splice(index, 1);
+    if (this.venues.length === 0) this.addVenue();
+  }
+
+  toggleDay(vIndex: number, day: string): void {
+    const state = this.venues[vIndex].days[day];
+    state.checked = !state.checked;
+    if (!state.checked) {
+      state.startTime = '';
+      state.endTime = '';
+    }
   }
 
   addAssessment() {
@@ -106,12 +150,31 @@ export class EditDetailsModalComponent implements OnInit {
   }
 
   submit() {
-    const selectedDays = this.weekDays.filter(day => this.selectedDaysMap[day].checked);
-    const startTimes = selectedDays.map(day => this.formatTimeString(this.selectedDaysMap[day].startTime) || '');
-    const endTimes = selectedDays.map(day => this.formatTimeString(this.selectedDaysMap[day].endTime) || '');
+    // Build classSessions from venues
+    const classSessions: ClassSession[] = [];
 
-    const cleanedAssessments = this.assessments.filter(a => a.date && a.date.trim() !== '');
+    for (const v of this.venues) {
+      const venueName = (v.venue || '').trim();
+      if (!venueName) continue; // ignore empty venue rows
 
+      for (const day of this.weekDays) {
+        const st = v.days[day];
+        if (!st.checked) continue;
+        const start = this.formatTimeString(st.startTime) || '';
+        const end = this.formatTimeString(st.endTime) || '';
+        if (!start || !end) continue;
+
+        classSessions.push({
+          venue: venueName,
+          weekDay: day,
+          startTime: start,
+          endTime: end
+        });
+      }
+    }
+
+    // Process assessments
+    const cleanedAssessments = this.assessments.filter(a => (a.date || '').trim() !== '');
     const processedAssessments = cleanedAssessments.map(a => ({
       title: a.title,
       date: a.date,
@@ -122,11 +185,9 @@ export class EditDetailsModalComponent implements OnInit {
       venue: a.isTimed ? a.venue : null
     }));
 
-    const payload = {
-      classVenue: this.classVenue || null,
-      weekDays: selectedDays,
-      startTimes,
-      endTimes,
+    // Payload: only the new fields (no legacy venue/arrays)
+    const payload: any = {
+      classSessions,
       assessments: processedAssessments
     };
 
@@ -146,19 +207,5 @@ export class EditDetailsModalComponent implements OnInit {
     });
   }
 
-  toggleDay(day: string): void {
-    const entry = this.selectedDaysMap[day];
-    if (!entry) return;
-
-    entry.checked = !entry.checked;
-
-    if (!entry.checked) {
-      entry.startTime = '';
-      entry.endTime = '';
-    }
-  }
-
-  cancel() {
-    this.modalRef.hide();
-  }
+  cancel() { this.modalRef.hide(); }
 }

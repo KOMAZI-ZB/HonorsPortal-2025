@@ -218,6 +218,39 @@ namespace API.Data.Migrations
                     b.ToTable("Assessments");
                 });
 
+            modelBuilder.Entity("API.Entities.ClassSession", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("EndTime")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("ModuleId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("StartTime")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Venue")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("WeekDay")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ModuleId", "Venue", "WeekDay", "StartTime", "EndTime")
+                        .IsUnique();
+
+                    b.ToTable("ClassSessions");
+                });
+
             modelBuilder.Entity("API.Entities.Document", b =>
                 {
                     b.Property<int>("Id")
@@ -511,6 +544,17 @@ namespace API.Data.Migrations
                     b.Navigation("Module");
                 });
 
+            modelBuilder.Entity("API.Entities.ClassSession", b =>
+                {
+                    b.HasOne("API.Entities.Module", "Module")
+                        .WithMany("ClassSessions")
+                        .HasForeignKey("ModuleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Module");
+                });
+
             modelBuilder.Entity("API.Entities.Document", b =>
                 {
                     b.HasOne("API.Entities.Module", "Module")
@@ -590,6 +634,8 @@ namespace API.Data.Migrations
             modelBuilder.Entity("API.Entities.Module", b =>
                 {
                     b.Navigation("Assessments");
+
+                    b.Navigation("ClassSessions");
 
                     b.Navigation("UserModules");
                 });

@@ -15,6 +15,9 @@ namespace API.Data
         public DbSet<Module> Modules { get; set; }
         public DbSet<UserModule> UserModules { get; set; }
 
+        // ✅ NEW: Per-venue/day/time sessions for classes
+        public DbSet<ClassSession> ClassSessions { get; set; }
+
         // ✅ Phase 3 Tables
         public DbSet<Document> Documents { get; set; }
 
@@ -67,11 +70,31 @@ namespace API.Data
                  .WithOne(um => um.Module)
                  .HasForeignKey(um => um.ModuleId)
                  .IsRequired();
+
+                // ✅ Module ↔ ClassSession
+                b.HasMany(m => m.ClassSessions)
+                 .WithOne(s => s.Module)
+                 .HasForeignKey(s => s.ModuleId)
+                 .IsRequired()
+                 .OnDelete(DeleteBehavior.Cascade);
             });
 
             // ✅ Composite Key for UserModule
             builder.Entity<UserModule>()
                 .HasKey(um => new { um.AppUserId, um.ModuleId });
+
+            // ✅ Constraints for ClassSession
+            builder.Entity<ClassSession>(b =>
+            {
+                b.Property(s => s.Venue).IsRequired();
+                b.Property(s => s.WeekDay).IsRequired();
+                b.Property(s => s.StartTime).IsRequired();
+                b.Property(s => s.EndTime).IsRequired();
+
+                // Optional: prevent duplicate identical rows per module
+                b.HasIndex(s => new { s.ModuleId, s.Venue, s.WeekDay, s.StartTime, s.EndTime })
+                 .IsUnique();
+            });
 
             // ✅ Constraints for FAQ
             builder.Entity<FaqEntry>(b =>
@@ -109,7 +132,6 @@ namespace API.Data
             });
 
             // ✅ Constraints for Assessments
-            // ✅ Constraints for Assessments
             builder.Entity<Assessment>(b =>
             {
                 b.Property(a => a.Title).IsRequired();
@@ -117,12 +139,11 @@ namespace API.Data
                 b.Property(a => a.IsTimed).IsRequired();
 
                 b.HasOne(a => a.Module)
-                 .WithMany(m => m.Assessments)  // ✅ explicitly name the nav prop on Module
+                 .WithMany(m => m.Assessments)
                  .HasForeignKey(a => a.ModuleId)
                  .IsRequired()
                  .OnDelete(DeleteBehavior.Cascade);
             });
-
         }
     }
 }

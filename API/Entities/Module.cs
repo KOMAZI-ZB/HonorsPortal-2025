@@ -10,14 +10,16 @@ namespace API.Entities
         public string ModuleName { get; set; } = string.Empty;
         public int Semester { get; set; }
 
+        // ❌ Legacy single-venue/parallel arrays (kept temporarily for compatibility; no longer used for schedule)
         public string? ClassVenue { get; set; }
+        public string? WeekDays { get; set; }   // e.g. "Monday,Wednesday"
+        public string? StartTimes { get; set; } // e.g. "08:00:00,10:00:00"
+        public string? EndTimes { get; set; }   // e.g. "09:00:00,11:00:00"
 
-        // ✅ Day-specific class scheduling
-        public string? WeekDays { get; set; }     // e.g. "Monday,Wednesday,Friday"
-        public string? StartTimes { get; set; }   // e.g. "08:00,10:00,14:00"
-        public string? EndTimes { get; set; }     // e.g. "09:00,11:00,15:00"
+        // ✅ New: per-venue, per-day/time sessions
+        public ICollection<ClassSession> ClassSessions { get; set; } = new List<ClassSession>();
 
-        // ✅ Relationships
+        // Relationships
         public ICollection<UserModule> UserModules { get; set; } = new List<UserModule>();
         public ICollection<Assessment> Assessments { get; set; } = new List<Assessment>();
     }

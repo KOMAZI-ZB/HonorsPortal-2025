@@ -1,16 +1,22 @@
-namespace API.DTOs;
+using System.Collections.Generic;
 
-public class UpdateModuleDto
+namespace API.DTOs
 {
-    public string? ModuleCode { get; set; }
-    public string? ModuleName { get; set; }
-    public int Semester { get; set; }
+    public class UpdateModuleDto
+    {
+        public string? ModuleCode { get; set; }
+        public string? ModuleName { get; set; }
+        public int Semester { get; set; } // 0 = no change
 
-    public string? ClassVenue { get; set; }
+        // Legacy (ignored for schedule)
+        public string? ClassVenue { get; set; }
+        public string[]? WeekDays { get; set; }
+        public string[]? StartTimes { get; set; }
+        public string[]? EndTimes { get; set; }
 
-    public string[]? WeekDays { get; set; }
-    public string[]? StartTimes { get; set; }
-    public string[]? EndTimes { get; set; }
+        // ✅ New
+        public List<ClassSessionDto>? ClassSessions { get; set; }
 
-    public List<AssessmentDto>? Assessments { get; set; }
+        public List<AssessmentDto>? Assessments { get; set; }
+    }
 }

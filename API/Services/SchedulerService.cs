@@ -20,24 +20,29 @@ namespace API.Services
 
         public async Task<IEnumerable<ClassScheduleDto>> GetClassScheduleForUserAsync(int userId, int semester)
         {
-            var modules = await _context.UserModules
-                .Include(um => um.Module)
-                .Where(um => um.AppUserId == userId && um.Module.Semester == semester)
-                .Select(um => um.Module)
-                .ToListAsync();
+            // ✅ Use explicit INNER JOINs to avoid SQL APPLY (not supported by SQLite)
+            var rows = await (
+                from um in _context.UserModules
+                join m in _context.Modules on um.ModuleId equals m.Id
+                join s in _context.ClassSessions on m.Id equals s.ModuleId
+                where um.AppUserId == userId && m.Semester == semester
+                select new ClassScheduleDto
+                {
+                    ModuleCode = m.ModuleCode,
+                    ModuleName = m.ModuleName,
+                    Semester = m.Semester,
+                    Venue = s.Venue,
+                    WeekDay = s.WeekDay,
+                    StartTime = s.StartTime,
+                    EndTime = s.EndTime
+                }
+            )
+            .OrderBy(r => r.StartTime)
+            .ThenBy(r => r.EndTime)
+            .ThenBy(r => r.WeekDay)
+            .ToListAsync();
 
-            var result = modules.Select(m => new ClassScheduleDto
-            {
-                ModuleCode = m.ModuleCode,
-                ModuleName = m.ModuleName,
-                Semester = m.Semester,
-                ClassVenue = m.ClassVenue,
-                WeekDays = m.WeekDays?.Split(',') ?? Array.Empty<string>(),
-                StartTimes = m.StartTimes?.Split(',') ?? Array.Empty<string>(),
-                EndTimes = m.EndTimes?.Split(',') ?? Array.Empty<string>()
-            });
-
-            return result;
+            return rows;
         }
 
         public async Task<IEnumerable<AssessmentDto>> GetAssessmentScheduleForUserAsync(int userId, int semester)
@@ -57,7 +62,7 @@ namespace API.Services
                 {
                     Id = a.Id,
                     Title = a.Title,
-                    Date = a.Date.ToString("yyyy-MM-dd"), // ✅ Convert DateOnly to string
+                    Date = a.Date.ToString("yyyy-MM-dd"),
                     StartTime = a.StartTime,
                     EndTime = a.EndTime,
                     DueTime = a.DueTime,
@@ -66,7 +71,7 @@ namespace API.Services
                     ModuleCode = a.Module.ModuleCode
                 })
                 .OrderBy(a => a.Date)
-                .ThenBy(a => a.StartTime ?? a.DueTime) // If no start time, fallback to due time
+                .ThenBy(a => a.StartTime ?? a.DueTime)
                 .ToList();
 
             return result;
