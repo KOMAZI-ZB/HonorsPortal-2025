@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 import { HomeComponent } from './home/home.component';
 import { RegisterComponent } from './register/register.component';
-import { AnnouncementsComponent } from './announcements/announcements.component';
+import { NotificationsComponent } from './notifications/notifications.component';
 import { RepositoryComponent } from './repository/repository.component';
 import { FaqComponent } from './faq/faq.component';
 import { ClassScheduleComponent } from './scheduler/class-schedule/class-schedule.component';
@@ -35,7 +35,7 @@ export const routes: Routes = [
         runGuardsAndResolvers: 'always',
         canActivate: [authGuard],
         children: [
-            { path: 'announcements', component: AnnouncementsComponent },
+            { path: 'notifications', component: NotificationsComponent },
             { path: 'repository', component: RepositoryComponent },
 
             // ✅ Modules tab restricted to non-admins (students, lecturers/coordinators with modules)

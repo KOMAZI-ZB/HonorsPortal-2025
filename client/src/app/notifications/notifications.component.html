@@ -1,4 +1,4 @@
-<!-- Announcements Header -->
+<!-- Notifications Header -->
 <div class="row align-items-start mb-3">
     <div class="col-md-6">
         <h2 class="mb-0">Notification Board</h2>
@@ -9,23 +9,23 @@
             <div>
                 <label for="filterSelect" class="form-label fw-semibold me-2">Filter:</label>
                 <select id="filterSelect" class="form-select d-inline-block w-auto" [(ngModel)]="typeFilter"
-                    (change)="loadAnnouncements()">
+                    (change)="loadNotifications()">
                     <option value="">All</option>
-                    <option value="announcement">Announcements</option>
+                    <option value="notification">Notifications</option>
                     <option value="notification">Notifications</option>
                 </select>
             </div>
 
-            <!-- Post Announcement Button -->
+            <!-- Post Notification Button -->
             <button *ngIf="currentUserRole !== 'Student'" class="btn btn-primary" (click)="openPostModal()">
-                Post Announcement
+                Post Notification
             </button>
         </div>
     </div>
 </div>
 
-<!-- Announcement Feed -->
-<div *ngFor="let ann of announcements" class="card mb-3 shadow-sm">
+<!-- Notification Feed -->
+<div *ngFor="let ann of notifications" class="card mb-3 shadow-sm">
     <div class="card-body">
         <!-- Header Row -->
         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -42,7 +42,7 @@
                     Mark as read
                 </button>
                 <button *ngIf="canDelete(ann)" class="btn btn-sm btn-outline-danger"
-                    (click)="deleteAnnouncement(ann.id)">
+                    (click)="deleteNotification(ann.id)">
                     Delete
                 </button>
             </div>

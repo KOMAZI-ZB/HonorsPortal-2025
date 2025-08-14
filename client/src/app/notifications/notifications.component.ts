@@ -1,24 +1,24 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router'; // not used here but fine if present elsewhere
 import { CommonModule } from '@angular/common';
-import { Announcement } from '../_models/announcement';
-import { AnnouncementService } from '../_services/announcement.service';
+import { Notification } from '../_models/notification';
+import { NotificationService } from '../_services/notification.service';
 import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
-import { CreateAnnouncementModalComponent } from '../modals/create-announcement-modal/create-announcement-modal.component';
+import { CreateNotificationModalComponent } from '../modals/create-notification-modal/create-notification-modal.component';
 import { ConfirmDeleteModalComponent } from '../modals/confirm-delete-modal/confirm-delete-modal.component';
 import { AccountService } from '../_services/account.service';
 import { Pagination } from '../_models/pagination';
 import { FormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'app-announcements',
+  selector: 'app-notifications',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './announcements.component.html',
-  styleUrls: ['./announcements.component.css']
+  templateUrl: './notifications.component.html',
+  styleUrls: ['./notifications.component.css']
 })
-export class AnnouncementsComponent implements OnInit {
-  announcements: Announcement[] = [];
+export class NotificationsComponent implements OnInit {
+  notifications: Notification[] = [];
   pagination: Pagination | null = null;
   pageNumber = 1;
   pageSize = 10;
@@ -34,7 +34,7 @@ export class AnnouncementsComponent implements OnInit {
   showImageModal: boolean = false;
 
   constructor(
-    private announcementService: AnnouncementService,
+    private notificationService: NotificationService,
     private modalService: BsModalService,
     private accountService: AccountService
   ) { }
@@ -43,19 +43,19 @@ export class AnnouncementsComponent implements OnInit {
     const user = this.accountService.currentUser();
     this.currentUserNumber = user?.userNumber || '';
     this.currentUserRole = this.accountService.getUserRole();
-    this.loadAnnouncements();
+    this.loadNotifications();
   }
 
-  loadAnnouncements() {
-    this.announcementService
-      .getPaginatedAnnouncements(
+  loadNotifications() {
+    this.notificationService
+      .getPaginatedNotifications(
         this.pageNumber,
         this.pageSize,
         this.typeFilter
       )
       .subscribe({
         next: response => {
-          this.announcements = response.body ?? [];
+          this.notifications = response.body ?? [];
           this.pagination = JSON.parse(response.headers.get('Pagination')!);
         },
         error: err => console.error(err)
@@ -64,35 +64,35 @@ export class AnnouncementsComponent implements OnInit {
 
   pageChanged(newPage: number) {
     this.pageNumber = newPage;
-    this.loadAnnouncements();
+    this.loadNotifications();
   }
 
   openPostModal() {
-    this.bsModalRef = this.modalService.show(CreateAnnouncementModalComponent, {
+    this.bsModalRef = this.modalService.show(CreateNotificationModalComponent, {
       class: 'modal-lg'
     });
 
     this.bsModalRef.onHidden?.subscribe(() => {
-      this.loadAnnouncements();
+      this.loadNotifications();
     });
   }
 
-  canDelete(announcement: Announcement): boolean {
+  canDelete(notification: Notification): boolean {
     return (
-      announcement.createdBy === this.currentUserNumber &&
+      notification.createdBy === this.currentUserNumber &&
       (this.currentUserRole === 'Admin' ||
         this.currentUserRole === 'Lecturer' ||
         this.currentUserRole === 'Coordinator')
     );
   }
 
-  deleteAnnouncement(id: number) {
+  deleteNotification(id: number) {
     this.bsModalRef = this.modalService.show(ConfirmDeleteModalComponent, {
       class: 'modal-sm',
       initialState: {
         onConfirm: () => {
-          this.announcementService.delete(id).subscribe({
-            next: () => this.loadAnnouncements(),
+          this.notificationService.delete(id).subscribe({
+            next: () => this.loadNotifications(),
             error: err => console.error(err)
           });
         }
@@ -113,14 +113,14 @@ export class AnnouncementsComponent implements OnInit {
   // ✅ Badge label formatter (used in template only)
   formatBadgeLabel(type: string): string {
     const readable = type.replace(/([a-z])([A-Z])/g, '$1 $2').toUpperCase();
-    const isAnnouncement = type.toLowerCase() === 'general' || type.toLowerCase() === 'system';
-    return isAnnouncement ? `${readable} ANNOUNCEMENT` : `${readable} NOTIFICATION`;
+    const isNotification = type.toLowerCase() === 'general' || type.toLowerCase() === 'system';
+    return isNotification ? `${readable} NOTIFICATION` : `${readable} NOTIFICATION`;
   }
 
   // 🆕 Mark a single item as read (optional feature)
-  markAsRead(a: Announcement) {
+  markAsRead(a: Notification) {
     if (a.isRead) return;
-    this.announcementService.markAsRead(a.id).subscribe({
+    this.notificationService.markAsRead(a.id).subscribe({
       next: () => (a.isRead = true),
       error: err => console.error(err)
     });

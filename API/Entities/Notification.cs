@@ -1,6 +1,6 @@
 namespace API.Entities
 {
-    public class Announcement
+    public class Notification
     {
         public int Id { get; set; }
 

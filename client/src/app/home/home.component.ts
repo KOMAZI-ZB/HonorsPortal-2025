@@ -29,7 +29,7 @@ export class HomeComponent {
     this.accountService.login(this.model).subscribe({
       next: () => {
         const role = this.accountService.getUserRole();
-        this.router.navigateByUrl(role === 'Admin' ? '/admin' : '/announcements');
+        this.router.navigateByUrl(role === 'Admin' ? '/admin' : '/notifications');
       },
       error: error => {
         const errObj = error?.error;

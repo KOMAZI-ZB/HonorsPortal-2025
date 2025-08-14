@@ -11,7 +11,7 @@ import { BsModalRef } from 'ngx-bootstrap/modal';
 })
 export class ConfirmDeleteModalComponent {
   title: string = 'Confirm Deletion';
-  message: string = 'Are you sure you want to delete this announcement?';
+  message: string = 'Are you sure you want to delete this notification?';
   onConfirm: () => void = () => { };
 
   constructor(public bsModalRef: BsModalRef) { }

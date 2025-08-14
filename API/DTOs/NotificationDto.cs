@@ -1,6 +1,6 @@
 namespace API.DTOs;
 
-public class AnnouncementDto
+public class NotificationDto
 {
     public int Id { get; set; }
     public string Type { get; set; } = string.Empty;

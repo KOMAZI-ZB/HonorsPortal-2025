@@ -1,7 +1,7 @@
 import { Component, OnInit, AfterViewInit, OnDestroy, ElementRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
-import { AnnouncementService } from '../../_services/announcement.service';
+import { NotificationService } from '../../_services/notification.service';
 import { ToastrService } from 'ngx-toastr';
 import { AccountService } from '../../_services/account.service';
 import { CommonModule } from '@angular/common';
@@ -10,13 +10,13 @@ import { ModuleService } from '../../_services/module.service';
 import { Module } from '../../_models/module';
 
 @Component({
-  selector: 'app-create-announcement-modal',
+  selector: 'app-create-notification-modal',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './create-announcement-modal.component.html',
-  styleUrls: ['./create-announcement-modal.component.css']
+  templateUrl: './create-notification-modal.component.html',
+  styleUrls: ['./create-notification-modal.component.css']
 })
-export class CreateAnnouncementModalComponent implements OnInit, AfterViewInit, OnDestroy {
+export class CreateNotificationModalComponent implements OnInit, AfterViewInit, OnDestroy {
   form!: FormGroup;
   imageFile?: File;
   currentUserRole: string = '';
@@ -37,9 +37,9 @@ export class CreateAnnouncementModalComponent implements OnInit, AfterViewInit, 
   get isAdmin() { return this.currentUserRole === 'Admin'; }
 
   constructor(
-    public bsModalRef: BsModalRef<CreateAnnouncementModalComponent>,
+    public bsModalRef: BsModalRef<CreateNotificationModalComponent>,
     private fb: FormBuilder,
-    private announcementService: AnnouncementService,
+    private notificationService: NotificationService,
     private toastr: ToastrService,
     private accountService: AccountService,
     private bsModalService: BsModalService,
@@ -206,10 +206,10 @@ export class CreateAnnouncementModalComponent implements OnInit, AfterViewInit, 
 
     if (this.imageFile) formData.append('image', this.imageFile);
 
-    this.announcementService.create(formData).subscribe({
+    this.notificationService.create(formData).subscribe({
       next: () => {
-        this.toastr.success('Announcement posted');
-        localStorage.setItem('newAnnouncement', 'true');
+        this.toastr.success('Notification posted');
+        localStorage.setItem('newNotification', 'true');
 
         // mark pristine and allow silent close
         this.justSaved = true;
@@ -217,7 +217,7 @@ export class CreateAnnouncementModalComponent implements OnInit, AfterViewInit, 
         this.originalHide();
       },
       error: err => {
-        this.toastr.error('Failed to post announcement');
+        this.toastr.error('Failed to post notification');
         console.error(err);
       }
     });

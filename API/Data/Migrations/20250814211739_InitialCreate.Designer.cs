@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250814183204_InitialCreate")]
+    [Migration("20250814211739_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -19,73 +19,6 @@ namespace API.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.4");
-
-            modelBuilder.Entity("API.Entities.Announcement", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Audience")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ImagePath")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int?>("ModuleId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ModuleId");
-
-                    b.ToTable("Announcements");
-                });
-
-            modelBuilder.Entity("API.Entities.AnnouncementRead", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("AnnouncementId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("ReadAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AnnouncementId");
-
-                    b.HasIndex("UserId", "AnnouncementId")
-                        .IsUnique();
-
-                    b.ToTable("AnnouncementReads");
-                });
 
             modelBuilder.Entity("API.Entities.AppRole", b =>
                 {
@@ -417,6 +350,73 @@ namespace API.Data.Migrations
                     b.ToTable("Modules");
                 });
 
+            modelBuilder.Entity("API.Entities.Notification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Audience")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ImagePath")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("ModuleId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ModuleId");
+
+                    b.ToTable("Notifications");
+                });
+
+            modelBuilder.Entity("API.Entities.NotificationRead", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("NotificationId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("ReadAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NotificationId");
+
+                    b.HasIndex("UserId", "NotificationId")
+                        .IsUnique();
+
+                    b.ToTable("NotificationReads");
+                });
+
             modelBuilder.Entity("API.Entities.Repository", b =>
                 {
                     b.Property<int>("Id")
@@ -543,30 +543,6 @@ namespace API.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("API.Entities.Announcement", b =>
-                {
-                    b.HasOne("API.Entities.Module", "Module")
-                        .WithMany()
-                        .HasForeignKey("ModuleId");
-
-                    b.Navigation("Module");
-                });
-
-            modelBuilder.Entity("API.Entities.AnnouncementRead", b =>
-                {
-                    b.HasOne("API.Entities.Announcement", null)
-                        .WithMany()
-                        .HasForeignKey("AnnouncementId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("API.Entities.AppUser", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("API.Entities.AppUserRole", b =>
                 {
                     b.HasOne("API.Entities.AppRole", "Role")
@@ -615,6 +591,30 @@ namespace API.Data.Migrations
                         .HasForeignKey("ModuleId");
 
                     b.Navigation("Module");
+                });
+
+            modelBuilder.Entity("API.Entities.Notification", b =>
+                {
+                    b.HasOne("API.Entities.Module", "Module")
+                        .WithMany()
+                        .HasForeignKey("ModuleId");
+
+                    b.Navigation("Module");
+                });
+
+            modelBuilder.Entity("API.Entities.NotificationRead", b =>
+                {
+                    b.HasOne("API.Entities.Notification", null)
+                        .WithMany()
+                        .HasForeignKey("NotificationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("API.Entities.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("API.Entities.UserModule", b =>

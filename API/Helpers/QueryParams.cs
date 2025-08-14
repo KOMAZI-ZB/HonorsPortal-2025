@@ -10,7 +10,7 @@ public class QueryParams
 
     public bool? HasModulesOnly { get; set; }
 
-    // For Announcement or document sorting (if extended in future)
+    // For Notification or document sorting (if extended in future)
     public string? SortBy { get; set; }  // e.g., "date", "type"
 
     // For test grouping or specific type filtering
@@ -26,6 +26,6 @@ public class QueryParams
     // ✅ NEW: Required to filter based on user's join date
     public string? CurrentUserNumber { get; set; }
 
-    // ✅ NEW: Filter by type e.g. Announcement, Notification
+    // ✅ NEW: Filter by type e.g. Notification, Notification
     public string? TypeFilter { get; set; }
 }

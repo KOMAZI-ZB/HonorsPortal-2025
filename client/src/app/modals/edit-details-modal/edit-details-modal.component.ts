@@ -244,9 +244,9 @@ export class EditDetailsModalComponent implements OnInit, AfterViewInit, OnDestr
     this.http.put<any>(`${this.baseUrl}modules/${this.module.id}`, payload).subscribe({
       next: response => {
         this.toastr.success('Module details updated');
-        if (response.announcement) {
-          this.toastr.info(`An announcement was triggered for ${this.module.moduleCode}`, 'Schedule Updated');
-          console.log('🔔 Announcement:', response.announcement);
+        if (response.notification) {
+          this.toastr.info(`An notification was triggered for ${this.module.moduleCode}`, 'Schedule Updated');
+          console.log('🔔 Notification:', response.notification);
         }
         this.justSaved = true;
         this.originalHide();

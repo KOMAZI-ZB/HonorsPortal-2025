@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Http;
 
 namespace API.DTOs;
 
-public class CreateAnnouncementDto
+public class CreateNotificationDto
 {
-    [Required(ErrorMessage = "Announcement type is required.")]
+    [Required(ErrorMessage = "Notification type is required.")]
     public string Type { get; set; } = "General";
 
     [Required(ErrorMessage = "Title is required.")]

@@ -11,12 +11,12 @@ namespace API.Controllers;
 [Authorize]
 public class RepositoryController(
     IDocumentService documentService,
-    IAnnouncementService announcementService,
+    INotificationService notificationService,
     IRepositoryService repositoryService,
     IMapper mapper) : BaseApiController
 {
     private readonly IDocumentService _documentService = documentService;
-    private readonly IAnnouncementService _announcementService = announcementService;
+    private readonly INotificationService _notificationService = notificationService;
     private readonly IRepositoryService _repositoryService = repositoryService;
     private readonly IMapper _mapper = mapper;
 
@@ -36,7 +36,7 @@ public class RepositoryController(
         if (result == null)
             return BadRequest("Upload failed.");
 
-        var announcement = new CreateAnnouncementDto
+        var notification = new CreateNotificationDto
         {
             Type = "RepositoryUpdate",
             Title = "Internal Repository Updated",
@@ -45,7 +45,7 @@ public class RepositoryController(
             ModuleId = null
         };
 
-        await _announcementService.CreateAsync(announcement, userNumber);
+        await _notificationService.CreateAsync(notification, userNumber);
         return Ok(result);
     }
 

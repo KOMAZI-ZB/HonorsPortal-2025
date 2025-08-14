@@ -23,11 +23,11 @@ export class NavComponent implements OnInit {
   accountService = inject(AccountService);
   private router = inject(Router);
 
-  hasNewAnnouncement = false;
+  hasNewNotification = false;
 
   ngOnInit() {
-    const seen = localStorage.getItem('announcementsSeen');
-    this.hasNewAnnouncement = seen !== 'true';
+    const seen = localStorage.getItem('notificationsSeen');
+    this.hasNewNotification = seen !== 'true';
   }
 
   logout() {
@@ -35,10 +35,10 @@ export class NavComponent implements OnInit {
     this.router.navigateByUrl('/');
   }
 
-  markAnnouncementsAsSeen() {
-    this.hasNewAnnouncement = false;
-    localStorage.setItem('announcementsSeen', 'true');
-    localStorage.setItem('lastSeenAnnouncement', new Date().toISOString());
+  markNotificationsAsSeen() {
+    this.hasNewNotification = false;
+    localStorage.setItem('notificationsSeen', 'true');
+    localStorage.setItem('lastSeenNotification', new Date().toISOString());
   }
 
   get showLecturerPanel(): boolean {

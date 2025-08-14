@@ -105,20 +105,20 @@ public class Seed
         await context.SaveChangesAsync();
     }
 
-    public static async Task SeedAnnouncements(DataContext context)
+    public static async Task SeedNotifications(DataContext context)
     {
-        if (await context.Announcements.AnyAsync()) return;
+        if (await context.Notifications.AnyAsync()) return;
 
-        var dataPath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "SeedData", "AnnouncementSeedData.json");
+        var dataPath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "SeedData", "NotificationSeedData.json");
         if (!File.Exists(dataPath)) return;
 
         var json = await File.ReadAllTextAsync(dataPath);
         var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-        var announcements = JsonSerializer.Deserialize<List<Announcement>>(json, options);
+        var notifications = JsonSerializer.Deserialize<List<Notification>>(json, options);
 
-        if (announcements is null) return;
+        if (notifications is null) return;
 
-        context.Announcements.AddRange(announcements);
+        context.Notifications.AddRange(notifications);
         await context.SaveChangesAsync();
     }
 

@@ -25,7 +25,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IDocumentService, DocumentRepository>();
         services.AddScoped<IFAQService, FAQService>();
-        services.AddScoped<IAnnouncementService, AnnouncementService>();
+        services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<ILabBookingService, LabBookingService>();
         services.AddScoped<ISchedulerService, SchedulerService>();
         services.AddScoped<IRepositoryService, RepositoryService>(); // ✅ NEW

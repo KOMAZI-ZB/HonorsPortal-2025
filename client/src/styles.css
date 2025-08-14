@@ -53,7 +53,7 @@
     --bs-nav-tabs-border-width: 0px;
 }
 
-.announcement-badge {
+.notification-badge {
     background-color: #0063df !important;
     color: #ffffff !important;
     font-size: 0.75rem;

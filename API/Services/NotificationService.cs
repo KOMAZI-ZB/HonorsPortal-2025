@@ -10,13 +10,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Services;
 
-public class AnnouncementService : IAnnouncementService
+public class NotificationService : INotificationService
 {
     private readonly DataContext _context;
     private readonly IMapper _mapper;
     private readonly Cloudinary _cloudinary;
 
-    public AnnouncementService(DataContext context, IMapper mapper, IConfiguration config)
+    public NotificationService(DataContext context, IMapper mapper, IConfiguration config)
     {
         _context = context;
         _mapper = mapper;
@@ -30,7 +30,7 @@ public class AnnouncementService : IAnnouncementService
         _cloudinary = new Cloudinary(acc);
     }
 
-    public async Task<PagedList<AnnouncementDto>> GetAllPaginatedAsync(QueryParams queryParams)
+    public async Task<PagedList<NotificationDto>> GetAllPaginatedAsync(QueryParams queryParams)
     {
         // ✅ Fetch current user with modules and roles
         var user = await _context.Users
@@ -39,7 +39,7 @@ public class AnnouncementService : IAnnouncementService
 
         if (user == null)
         {
-            return new PagedList<AnnouncementDto>(new List<AnnouncementDto>(), 0, queryParams.PageNumber, queryParams.PageSize);
+            return new PagedList<NotificationDto>(new List<NotificationDto>(), 0, queryParams.PageNumber, queryParams.PageSize);
         }
 
         var userId = user.Id;
@@ -55,7 +55,7 @@ public class AnnouncementService : IAnnouncementService
         bool isStudent = roles.Contains("Student");
         bool isStaff = roles.Contains("Lecturer") || roles.Contains("Coordinator") || roles.Contains("Admin");
 
-        var query = _context.Announcements.AsQueryable();
+        var query = _context.Notifications.AsQueryable();
 
         // ✅ Filter by join date
         if (joinDate is not null)
@@ -67,11 +67,11 @@ public class AnnouncementService : IAnnouncementService
         // ✅ Base module scoping (global = null, else must be a registered module)
         query = query.Where(a => a.ModuleId == null || registeredModuleIds.Contains(a.ModuleId.Value));
 
-        // ✅ Filter by type (announcement vs notification)
+        // ✅ Filter by type (notification vs notification)
         if (!string.IsNullOrEmpty(queryParams.TypeFilter))
         {
             var filter = queryParams.TypeFilter.ToLower();
-            if (filter == "announcement")
+            if (filter == "notification")
             {
                 query = query.Where(a =>
                     a.Type.ToLower() == "general" || a.Type.ToLower() == "system");
@@ -92,12 +92,12 @@ public class AnnouncementService : IAnnouncementService
         );
 
         // ✅ Left-join read receipts to compute IsRead
-        var readsForUser = _context.AnnouncementReads.Where(r => r.UserId == userId);
+        var readsForUser = _context.NotificationReads.Where(r => r.UserId == userId);
 
         var dtoQuery = from a in query.OrderByDescending(a => a.CreatedAt)
-                       join r in readsForUser on a.Id equals r.AnnouncementId into gj
+                       join r in readsForUser on a.Id equals r.NotificationId into gj
                        from read in gj.DefaultIfEmpty()
-                       select new AnnouncementDto
+                       select new NotificationDto
                        {
                            Id = a.Id,
                            Type = a.Type,
@@ -111,14 +111,14 @@ public class AnnouncementService : IAnnouncementService
                            IsRead = read != null
                        };
 
-        return await PagedList<AnnouncementDto>.CreateAsync(
+        return await PagedList<NotificationDto>.CreateAsync(
             dtoQuery,
             queryParams.PageNumber,
             queryParams.PageSize
         );
     }
 
-    public async Task<AnnouncementDto?> CreateAsync(CreateAnnouncementDto dto, string createdByUserNumber)
+    public async Task<NotificationDto?> CreateAsync(CreateNotificationDto dto, string createdByUserNumber)
     {
         // Upload image if present
         string? imagePath = null;
@@ -128,7 +128,7 @@ public class AnnouncementService : IAnnouncementService
             var uploadParams = new RawUploadParams
             {
                 File = new FileDescription(dto.Image.FileName, stream),
-                Folder = "academic-portal-announcements"
+                Folder = "academic-portal-notifications"
             };
 
             var uploadResult = await _cloudinary.UploadAsync(uploadParams);
@@ -187,7 +187,7 @@ public class AnnouncementService : IAnnouncementService
             audience = "ModuleStudents";
         }
 
-        var announcement = new Announcement
+        var notification = new Notification
         {
             Type = dto.Type,
             Title = dto.Title.Trim(),
@@ -199,36 +199,36 @@ public class AnnouncementService : IAnnouncementService
             Audience = audience
         };
 
-        _context.Announcements.Add(announcement);
+        _context.Notifications.Add(notification);
         await _context.SaveChangesAsync();
 
-        return _mapper.Map<AnnouncementDto>(announcement);
+        return _mapper.Map<NotificationDto>(notification);
     }
 
     public async Task<bool> DeleteAsync(int id, string requesterUserNumber, bool isAdmin)
     {
-        var announcement = await _context.Announcements.FindAsync(id);
-        if (announcement == null) return false;
+        var notification = await _context.Notifications.FindAsync(id);
+        if (notification == null) return false;
 
-        if (!isAdmin && announcement.CreatedBy != requesterUserNumber)
+        if (!isAdmin && notification.CreatedBy != requesterUserNumber)
             return false;
 
-        _context.Announcements.Remove(announcement);
+        _context.Notifications.Remove(notification);
         return await _context.SaveChangesAsync() > 0;
     }
 
-    public async Task<bool> MarkAsReadAsync(int announcementId, int userId)
+    public async Task<bool> MarkAsReadAsync(int notificationId, int userId)
     {
-        var exists = await _context.Announcements.AnyAsync(a => a.Id == announcementId);
+        var exists = await _context.Notifications.AnyAsync(a => a.Id == notificationId);
         if (!exists) return false;
 
-        var already = await _context.AnnouncementReads
-            .AnyAsync(r => r.AnnouncementId == announcementId && r.UserId == userId);
+        var already = await _context.NotificationReads
+            .AnyAsync(r => r.NotificationId == notificationId && r.UserId == userId);
         if (already) return true; // idempotent
 
-        _context.AnnouncementReads.Add(new AnnouncementRead
+        _context.NotificationReads.Add(new NotificationRead
         {
-            AnnouncementId = announcementId,
+            NotificationId = notificationId,
             UserId = userId,
             ReadAt = DateTime.UtcNow
         });

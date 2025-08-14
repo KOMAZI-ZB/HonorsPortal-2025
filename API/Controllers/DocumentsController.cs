@@ -10,10 +10,10 @@ namespace API.Controllers;
 [Authorize]
 public class DocumentsController(
     IDocumentService documentService,
-    IAnnouncementService announcementService) : BaseApiController
+    INotificationService notificationService) : BaseApiController
 {
     private readonly IDocumentService _documentService = documentService;
-    private readonly IAnnouncementService _announcementService = announcementService;
+    private readonly INotificationService _notificationService = notificationService;
 
     // ✅ Upload a document to a module (Lecturer, Coordinator, Admin)
     [Authorize(Roles = "Lecturer,Coordinator,Admin")]
@@ -26,7 +26,7 @@ public class DocumentsController(
         if (result == null)
             return BadRequest("Upload failed.");
 
-        var announcement = new CreateAnnouncementDto
+        var notification = new CreateNotificationDto
         {
             Type = "DocumentUpload",
             Title = "New Module Document Uploaded",
@@ -35,7 +35,7 @@ public class DocumentsController(
             ModuleId = dto.ModuleId
         };
 
-        await _announcementService.CreateAsync(announcement, userNumber);
+        await _notificationService.CreateAsync(notification, userNumber);
 
         return Ok(result);
     }

@@ -5,7 +5,7 @@ import {
 } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DocumentService } from '../../_services/document.service';
-import { AnnouncementService } from '../../_services/announcement.service';
+import { NotificationService } from '../../_services/notification.service';
 import { ToastrService } from 'ngx-toastr';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 import { NgIf, NgClass } from '@angular/common';
@@ -35,7 +35,7 @@ export class UploadDocumentModalComponent implements OnInit, OnChanges, AfterVie
   constructor(
     private fb: FormBuilder,
     private documentService: DocumentService,
-    private announcementService: AnnouncementService,
+    private notificationService: NotificationService,
     private toastr: ToastrService,
     public bsModalRef: BsModalRef,
     private bsModalService: BsModalService,

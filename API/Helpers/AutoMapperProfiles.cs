@@ -41,8 +41,8 @@ namespace API.Helpers
             CreateMap<UploadDocumentDto, Document>();
             CreateMap<FaqEntry, FaqEntryDto>();
 
-            // Announcements — simple map (IsRead is computed in queries)
-            CreateMap<Announcement, AnnouncementDto>();
+            // Notifications — simple map (IsRead is computed in queries)
+            CreateMap<Notification, NotificationDto>();
 
             // Lab Booking (unchanged)
             CreateMap<LabBooking, LabBookingDto>().ReverseMap();

@@ -1,4 +1,4 @@
-export interface Announcement {
+export interface Notification {
     id: number;
     type: string;
     title: string;

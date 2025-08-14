@@ -50,7 +50,7 @@ try
     await Seed.SeedModules(context);
     await Seed.SeedUsers(userManager, roleManager, context);
     await Seed.SeedFaqs(context);
-    await Seed.SeedAnnouncements(context);
+    await Seed.SeedNotifications(context);
     await Seed.SeedLabBookings(context);
     await Seed.SeedRepositories(context); // ✅ NEW: Seeding recommended repositories
     await Seed.SeedAssessments(context); // ✅ NEW: Seeding assessments

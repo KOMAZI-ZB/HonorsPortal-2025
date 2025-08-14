@@ -245,13 +245,13 @@ public class ModulesController(DataContext context) : BaseApiController
 
         var userLinks = await context.UserModules.Where(x => x.ModuleId == id).ToListAsync();
         var docs = await context.Documents.Where(x => x.ModuleId == id).ToListAsync();
-        var announcements = await context.Announcements.Where(x => x.ModuleId == id).ToListAsync();
+        var notifications = await context.Notifications.Where(x => x.ModuleId == id).ToListAsync();
         var assessments = await context.Assessments.Where(x => x.ModuleId == id).ToListAsync();
         var sessions = await context.ClassSessions.Where(x => x.ModuleId == id).ToListAsync();
 
         context.UserModules.RemoveRange(userLinks);
         context.Documents.RemoveRange(docs);
-        context.Announcements.RemoveRange(announcements);
+        context.Notifications.RemoveRange(notifications);
         context.Assessments.RemoveRange(assessments);
         context.ClassSessions.RemoveRange(sessions);
         context.Modules.Remove(module);
@@ -334,7 +334,7 @@ public class ModulesController(DataContext context) : BaseApiController
 
         await context.SaveChangesAsync();
 
-        // compare sessions to decide announcement
+        // compare sessions to decide notification
         var current = await context.ClassSessions.Where(s => s.ModuleId == id)
             .Select(s => new { s.Venue, s.WeekDay, s.StartTime, s.EndTime })
             .OrderBy(x => x.Venue).ThenBy(x => x.WeekDay).ThenBy(x => x.StartTime).ThenBy(x => x.EndTime)
@@ -345,10 +345,10 @@ public class ModulesController(DataContext context) : BaseApiController
                 o.Venue != c.Venue || o.WeekDay != c.WeekDay || o.StartTime != c.StartTime || o.EndTime != c.EndTime)
                .Any(diff => diff);
 
-        Announcement? announcement = null;
+        Notification? notification = null;
         if (scheduleChanged)
         {
-            announcement = new Announcement
+            notification = new Notification
             {
                 Title = $"Schedule Updated for {module.ModuleCode}",
                 Message = $"The class timetable (venues/days/times) for {module.ModuleCode} has changed. Please check your schedule.",
@@ -357,11 +357,11 @@ public class ModulesController(DataContext context) : BaseApiController
                 CreatedBy = User.GetUsername(),
                 CreatedAt = DateTime.UtcNow
             };
-            context.Announcements.Add(announcement);
+            context.Notifications.Add(notification);
             await context.SaveChangesAsync();
         }
 
-        return Ok(new { message = "Module updated successfully.", announcement });
+        return Ok(new { message = "Module updated successfully.", notification });
     }
 
     // ⬇️ Restored EXACTLY as before (same route and roles)

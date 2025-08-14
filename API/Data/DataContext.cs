@@ -25,10 +25,10 @@ namespace API.Data
         public DbSet<FaqEntry> FaqEntries { get; set; }
 
         // ✅ Phase 5 Tables
-        public DbSet<Announcement> Announcements { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
-        // ✅ NEW: Announcement read receipts
-        public DbSet<AnnouncementRead> AnnouncementReads { get; set; }
+        // ✅ NEW: Notification read receipts
+        public DbSet<NotificationRead> NotificationReads { get; set; }
 
         // ✅ Phase 6 Tables
         public DbSet<LabBooking> LabBookings { get; set; }
@@ -106,8 +106,8 @@ namespace API.Data
                 b.Property(f => f.LastUpdated).IsRequired();
             });
 
-            // ✅ Constraints for Announcements
-            builder.Entity<Announcement>(b =>
+            // ✅ Constraints for Notifications
+            builder.Entity<Notification>(b =>
             {
                 b.Property(a => a.Type).IsRequired();
                 b.Property(a => a.Title).IsRequired();
@@ -116,13 +116,13 @@ namespace API.Data
                 b.Property(a => a.Audience).IsRequired(); // NEW
             });
 
-            // ✅ AnnouncementRead receipts (unique per user/announcement)
-            builder.Entity<AnnouncementRead>(b =>
+            // ✅ NotificationRead receipts (unique per user/notification)
+            builder.Entity<NotificationRead>(b =>
             {
-                b.HasIndex(x => new { x.UserId, x.AnnouncementId }).IsUnique();
-                b.HasOne<Announcement>()
+                b.HasIndex(x => new { x.UserId, x.NotificationId }).IsUnique();
+                b.HasOne<Notification>()
                  .WithMany()
-                 .HasForeignKey(x => x.AnnouncementId)
+                 .HasForeignKey(x => x.NotificationId)
                  .OnDelete(DeleteBehavior.Cascade);
                 b.HasOne<AppUser>()
                  .WithMany()

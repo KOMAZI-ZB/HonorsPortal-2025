@@ -231,31 +231,6 @@ namespace API.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Announcements",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Type = table.Column<string>(type: "TEXT", nullable: false),
-                    Title = table.Column<string>(type: "TEXT", nullable: false),
-                    Message = table.Column<string>(type: "TEXT", nullable: false),
-                    ImagePath = table.Column<string>(type: "TEXT", nullable: true),
-                    CreatedBy = table.Column<string>(type: "TEXT", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    ModuleId = table.Column<int>(type: "INTEGER", nullable: true),
-                    Audience = table.Column<string>(type: "TEXT", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Announcements", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Announcements_Modules_ModuleId",
-                        column: x => x.ModuleId,
-                        principalTable: "Modules",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Assessments",
                 columns: table => new
                 {
@@ -330,6 +305,31 @@ namespace API.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Notifications",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Type = table.Column<string>(type: "TEXT", nullable: false),
+                    Title = table.Column<string>(type: "TEXT", nullable: false),
+                    Message = table.Column<string>(type: "TEXT", nullable: false),
+                    ImagePath = table.Column<string>(type: "TEXT", nullable: true),
+                    CreatedBy = table.Column<string>(type: "TEXT", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    ModuleId = table.Column<int>(type: "INTEGER", nullable: true),
+                    Audience = table.Column<string>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Notifications", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Notifications_Modules_ModuleId",
+                        column: x => x.ModuleId,
+                        principalTable: "Modules",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "UserModules",
                 columns: table => new
                 {
@@ -355,47 +355,31 @@ namespace API.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "AnnouncementReads",
+                name: "NotificationReads",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    AnnouncementId = table.Column<int>(type: "INTEGER", nullable: false),
+                    NotificationId = table.Column<int>(type: "INTEGER", nullable: false),
                     UserId = table.Column<int>(type: "INTEGER", nullable: false),
                     ReadAt = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AnnouncementReads", x => x.Id);
+                    table.PrimaryKey("PK_NotificationReads", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_AnnouncementReads_Announcements_AnnouncementId",
-                        column: x => x.AnnouncementId,
-                        principalTable: "Announcements",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_AnnouncementReads_AspNetUsers_UserId",
+                        name: "FK_NotificationReads_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_NotificationReads_Notifications_NotificationId",
+                        column: x => x.NotificationId,
+                        principalTable: "Notifications",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AnnouncementReads_AnnouncementId",
-                table: "AnnouncementReads",
-                column: "AnnouncementId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AnnouncementReads_UserId_AnnouncementId",
-                table: "AnnouncementReads",
-                columns: new[] { "UserId", "AnnouncementId" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Announcements_ModuleId",
-                table: "Announcements",
-                column: "ModuleId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -457,6 +441,22 @@ namespace API.Data.Migrations
                 column: "ModuleId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_NotificationReads_NotificationId",
+                table: "NotificationReads",
+                column: "NotificationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_NotificationReads_UserId_NotificationId",
+                table: "NotificationReads",
+                columns: new[] { "UserId", "NotificationId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Notifications_ModuleId",
+                table: "Notifications",
+                column: "ModuleId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UserModules_ModuleId",
                 table: "UserModules",
                 column: "ModuleId");
@@ -465,9 +465,6 @@ namespace API.Data.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "AnnouncementReads");
-
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
@@ -499,16 +496,19 @@ namespace API.Data.Migrations
                 name: "LabBookings");
 
             migrationBuilder.DropTable(
+                name: "NotificationReads");
+
+            migrationBuilder.DropTable(
                 name: "Repositories");
 
             migrationBuilder.DropTable(
                 name: "UserModules");
 
             migrationBuilder.DropTable(
-                name: "Announcements");
+                name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "AspNetRoles");
+                name: "Notifications");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
