@@ -6,6 +6,8 @@ import { ToastrService } from 'ngx-toastr';
 import { AccountService } from '../../_services/account.service';
 import { CommonModule } from '@angular/common';
 import { ConfirmCloseModalComponent } from '../confirm-close-modal/confirm-close-modal.component';
+import { ModuleService } from '../../_services/module.service';
+import { Module } from '../../_models/module';
 
 @Component({
   selector: 'app-create-announcement-modal',
@@ -26,6 +28,14 @@ export class CreateAnnouncementModalComponent implements OnInit, AfterViewInit, 
   private backdropCapture?: (ev: MouseEvent) => void;
   private escCapture?: (ev: KeyboardEvent) => void;
 
+  // 🆕 Target audience options + modules for selection
+  audiences = ['All', 'Students', 'Staff', 'ModuleStudents'] as const;
+  modules: Module[] = [];
+
+  get isLecturer() { return this.currentUserRole === 'Lecturer'; }
+  get isCoordinator() { return this.currentUserRole === 'Coordinator'; }
+  get isAdmin() { return this.currentUserRole === 'Admin'; }
+
   constructor(
     public bsModalRef: BsModalRef<CreateAnnouncementModalComponent>,
     private fb: FormBuilder,
@@ -33,16 +43,44 @@ export class CreateAnnouncementModalComponent implements OnInit, AfterViewInit, 
     private toastr: ToastrService,
     private accountService: AccountService,
     private bsModalService: BsModalService,
-    private elRef: ElementRef<HTMLElement>
+    private elRef: ElementRef<HTMLElement>,
+    private moduleService: ModuleService
   ) { }
 
   ngOnInit(): void {
     this.currentUserRole = this.accountService.getUserRole();
     this.initForm();
 
+    // Load selectable modules:
+    // - Lecturers/Coordinators: only modules assigned to them
+    // - Admin: all modules
+    if (this.isLecturer || this.isCoordinator) {
+      this.moduleService.getAssignedModules().subscribe({
+        next: (mods) => (this.modules = mods || []),
+        error: (e) => console.error('Failed to load assigned modules', e)
+      });
+    } else if (this.isAdmin) {
+      this.moduleService.getAllModules().subscribe({
+        next: (mods) => (this.modules = mods || []),
+        error: (e) => console.error('Failed to load modules', e)
+      });
+    }
+
+    // Intercept close
     this.originalHide = this.bsModalRef.hide.bind(this.bsModalRef);
     this.bsModalRef.hide = () => this.attemptClose();
     this.justSaved = false;
+
+    // Dynamic validators: when audience = ModuleStudents, moduleId is required
+    this.form.get('audience')?.valueChanges.subscribe(aud => {
+      this.applyModuleRequirement();
+    });
+
+    // Lecturers are constrained: force audience to ModuleStudents and require moduleId
+    if (this.isLecturer) {
+      this.form.get('audience')?.setValue('ModuleStudents', { emitEvent: true });
+      this.applyModuleRequirement();
+    }
   }
 
   ngAfterViewInit(): void {
@@ -77,19 +115,49 @@ export class CreateAnnouncementModalComponent implements OnInit, AfterViewInit, 
     if (this.escCapture) document.removeEventListener('keydown', this.escCapture, true);
   }
 
-  initForm() {
+  private initForm() {
+    // Default audience:
+    // - Lecturer: ModuleStudents (enforced)
+    // - Others: All
+    const defaultAudience = this.isLecturer ? 'ModuleStudents' : 'All';
+
     this.form = this.fb.group({
       type: ['General', Validators.required],
       title: ['', [Validators.required, Validators.minLength(3)]],
       message: ['', [Validators.required, Validators.minLength(5)]],
-      moduleId: [null],
+      audience: [defaultAudience, Validators.required],          // 🆕
+      moduleId: [null],                                          // required dynamically in some cases
       image: [null]
     });
+
+    // For Lecturers, prevent changing the audience away from ModuleStudents in the UI.
+    if (this.isLecturer) {
+      this.form.get('audience')?.disable({ emitEvent: false });
+    }
+
+    this.applyModuleRequirement();
+  }
+
+  private applyModuleRequirement() {
+    const audience = (this.form.get('audience')?.value || '').toString();
+    const moduleCtrl = this.form.get('moduleId');
+    const mustSelectModule = this.isLecturer || audience === 'ModuleStudents';
+
+    if (mustSelectModule) {
+      moduleCtrl?.setValidators([Validators.required]);
+    } else {
+      moduleCtrl?.clearValidators();
+    }
+    moduleCtrl?.updateValueAndValidity({ emitEvent: false });
   }
 
   onFileSelected(event: any) {
     const file = event.target.files[0];
-    if (file) this.imageFile = file;
+    if (file) {
+      this.imageFile = file;
+      // Mark dirty to trigger confirm-close when needed
+      this.form.markAsDirty();
+    }
   }
 
   private hasUnsavedChanges(): boolean {
@@ -121,11 +189,21 @@ export class CreateAnnouncementModalComponent implements OnInit, AfterViewInit, 
     }
 
     const formData = new FormData();
+    // If audience control is disabled (Lecturer), we still want to send its value
+    const audienceValue = this.isLecturer
+      ? 'ModuleStudents'
+      : (this.form.get('audience')?.value || 'All');
+
     formData.append('type', this.form.get('type')?.value);
     formData.append('title', this.form.get('title')?.value);
     formData.append('message', this.form.get('message')?.value);
-    if (this.form.get('moduleId')?.value)
-      formData.append('moduleId', this.form.get('moduleId')?.value.toString());
+    formData.append('audience', audienceValue); // 🆕
+
+    const moduleId = this.form.get('moduleId')?.value;
+    if (moduleId !== null && moduleId !== undefined && moduleId !== '') {
+      formData.append('moduleId', moduleId.toString());
+    }
+
     if (this.imageFile) formData.append('image', this.imageFile);
 
     this.announcementService.create(formData).subscribe({

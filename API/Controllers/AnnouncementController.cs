@@ -17,7 +17,12 @@ public class AnnouncementsController(IAnnouncementService announcementService) :
     private static readonly string[] AllowedTypes = new[]
     {
         "General", "System",
-        "DocumentUpload", "RepositoryUpdate", "SchedulerUpdate"
+        "DocumentUpload", "RepositoryUpdate", "SchedulerUpdate", "ScheduleUpdate"
+    };
+
+    private static readonly string[] AllowedAudiences = new[]
+    {
+        "All", "Students", "Staff", "ModuleStudents"
     };
 
     [HttpGet]
@@ -37,11 +42,29 @@ public class AnnouncementsController(IAnnouncementService announcementService) :
     {
         var userNumber = User.GetUsername();
 
+        // Type guard
         if (!AllowedTypes.Any(t => string.Equals(t, dto.Type, StringComparison.OrdinalIgnoreCase)))
             return BadRequest("Invalid announcement type.");
 
+        // Audience guard (default safely to All if not provided)
+        if (string.IsNullOrWhiteSpace(dto.Audience)) dto.Audience = "All";
+        if (!AllowedAudiences.Any(a => string.Equals(a, dto.Audience, StringComparison.OrdinalIgnoreCase)))
+            return BadRequest("Invalid audience. Allowed: All, Students, Staff, ModuleStudents.");
+
+        // Only Admins may post 'System'
         if (dto.Type.Equals("System", StringComparison.OrdinalIgnoreCase) && !User.IsInRole("Admin"))
             return Forbid("Only Admins can post System announcements.");
+
+        // Role-based constraint for Lecturers:
+        // Lecturers may only post module-scoped items, visible to STUDENTS of that module.
+        if (User.IsInRole("Lecturer"))
+        {
+            if (dto.ModuleId is null)
+                return BadRequest("Lecturers must select a specific Module for their post.");
+
+            // Force audience to ModuleStudents for lecturers
+            dto.Audience = "ModuleStudents";
+        }
 
         var result = await _announcementService.CreateAsync(dto, userNumber);
         return Ok(result);
@@ -59,5 +82,15 @@ public class AnnouncementsController(IAnnouncementService announcementService) :
             return Forbid("You are not authorized to delete this announcement.");
 
         return Ok(new { message = "Announcement deleted successfully." });
+    }
+
+    // ✅ Optional: mark announcement/notification as read
+    [HttpPost("{id}/read")]
+    public async Task<ActionResult> MarkRead(int id)
+    {
+        var userId = int.Parse(User.GetUserId());
+        var ok = await _announcementService.MarkAsReadAsync(id, userId);
+        if (!ok) return NotFound(new { message = "Announcement not found." });
+        return Ok(new { message = "Marked as read." });
     }
 }

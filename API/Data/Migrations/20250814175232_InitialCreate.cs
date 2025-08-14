@@ -241,7 +241,8 @@ namespace API.Data.Migrations
                     ImagePath = table.Column<string>(type: "TEXT", nullable: true),
                     CreatedBy = table.Column<string>(type: "TEXT", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    ModuleId = table.Column<int>(type: "INTEGER", nullable: true)
+                    ModuleId = table.Column<int>(type: "INTEGER", nullable: true),
+                    Audience = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -352,6 +353,44 @@ namespace API.Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "AnnouncementReads",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    AnnouncementId = table.Column<int>(type: "INTEGER", nullable: false),
+                    UserId = table.Column<int>(type: "INTEGER", nullable: false),
+                    ReadAt = table.Column<DateTime>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AnnouncementReads", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AnnouncementReads_Announcements_AnnouncementId",
+                        column: x => x.AnnouncementId,
+                        principalTable: "Announcements",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AnnouncementReads_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AnnouncementReads_AnnouncementId",
+                table: "AnnouncementReads",
+                column: "AnnouncementId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AnnouncementReads_UserId_AnnouncementId",
+                table: "AnnouncementReads",
+                columns: new[] { "UserId", "AnnouncementId" },
+                unique: true);
+
             migrationBuilder.CreateIndex(
                 name: "IX_Announcements_ModuleId",
                 table: "Announcements",
@@ -426,7 +465,7 @@ namespace API.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Announcements");
+                name: "AnnouncementReads");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
@@ -463,6 +502,9 @@ namespace API.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "UserModules");
+
+            migrationBuilder.DropTable(
+                name: "Announcements");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

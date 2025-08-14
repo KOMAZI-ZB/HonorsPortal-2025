@@ -23,6 +23,10 @@ namespace API.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Audience")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
@@ -53,6 +57,31 @@ namespace API.Data.Migrations
                     b.HasIndex("ModuleId");
 
                     b.ToTable("Announcements");
+                });
+
+            modelBuilder.Entity("API.Entities.AnnouncementRead", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AnnouncementId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("ReadAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AnnouncementId");
+
+                    b.HasIndex("UserId", "AnnouncementId")
+                        .IsUnique();
+
+                    b.ToTable("AnnouncementReads");
                 });
 
             modelBuilder.Entity("API.Entities.AppRole", b =>
@@ -515,6 +544,21 @@ namespace API.Data.Migrations
                         .HasForeignKey("ModuleId");
 
                     b.Navigation("Module");
+                });
+
+            modelBuilder.Entity("API.Entities.AnnouncementRead", b =>
+                {
+                    b.HasOne("API.Entities.Announcement", null)
+                        .WithMany()
+                        .HasForeignKey("AnnouncementId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("API.Entities.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("API.Entities.AppUserRole", b =>

@@ -19,7 +19,7 @@ export class AnnouncementService {
     pageSize: number,
     typeFilter: string = ''
   ): Observable<HttpResponse<Announcement[]>> {
-    let params = setPaginationHeaders(pageNumber, pageSize); // ✅ Removed CurrentUserNumber
+    let params = setPaginationHeaders(pageNumber, pageSize);
 
     if (typeFilter) {
       params = params.append('TypeFilter', typeFilter);
@@ -42,11 +42,13 @@ export class AnnouncementService {
   }
 
   // ✅ Used internally by other features to auto-create system announcements
+  //    Optional audience support (e.g., 'ModuleStudents' for DocumentUpload)
   createFromSystem(data: {
     type: string;
     title: string;
     message: string;
     moduleId?: number | null;
+    audience?: string; // optional
   }): Observable<Announcement> {
     const formData = new FormData();
     formData.append('type', data.type);
@@ -55,6 +57,15 @@ export class AnnouncementService {
     if (data.moduleId !== undefined && data.moduleId !== null) {
       formData.append('moduleId', data.moduleId.toString());
     }
+    if (data.audience) {
+      formData.append('audience', data.audience);
+    }
     return this.create(formData);
+  }
+
+  // 🆕 Mark as read
+  markAsRead(id: number): Observable<any> {
+    return this.http.post(`${this.baseUrl}announcements/${id}/read`, {});
+    // server is idempotent; safe to call multiple times
   }
 }

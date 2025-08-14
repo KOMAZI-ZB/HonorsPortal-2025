@@ -27,6 +27,9 @@ namespace API.Data
         // ✅ Phase 5 Tables
         public DbSet<Announcement> Announcements { get; set; }
 
+        // ✅ NEW: Announcement read receipts
+        public DbSet<AnnouncementRead> AnnouncementReads { get; set; }
+
         // ✅ Phase 6 Tables
         public DbSet<LabBooking> LabBookings { get; set; }
 
@@ -91,7 +94,6 @@ namespace API.Data
                 b.Property(s => s.StartTime).IsRequired();
                 b.Property(s => s.EndTime).IsRequired();
 
-                // Optional: prevent duplicate identical rows per module
                 b.HasIndex(s => new { s.ModuleId, s.Venue, s.WeekDay, s.StartTime, s.EndTime })
                  .IsUnique();
             });
@@ -111,6 +113,21 @@ namespace API.Data
                 b.Property(a => a.Title).IsRequired();
                 b.Property(a => a.Message).IsRequired();
                 b.Property(a => a.CreatedBy).IsRequired();
+                b.Property(a => a.Audience).IsRequired(); // NEW
+            });
+
+            // ✅ AnnouncementRead receipts (unique per user/announcement)
+            builder.Entity<AnnouncementRead>(b =>
+            {
+                b.HasIndex(x => new { x.UserId, x.AnnouncementId }).IsUnique();
+                b.HasOne<Announcement>()
+                 .WithMany()
+                 .HasForeignKey(x => x.AnnouncementId)
+                 .OnDelete(DeleteBehavior.Cascade);
+                b.HasOne<AppUser>()
+                 .WithMany()
+                 .HasForeignKey(x => x.UserId)
+                 .OnDelete(DeleteBehavior.Cascade);
             });
 
             // ✅ Constraints for Lab Bookings

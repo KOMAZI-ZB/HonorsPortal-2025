@@ -7,4 +7,8 @@ export interface Announcement {
     createdBy: string;
     createdAt: string;
     moduleId?: number | null;
+
+    // 🆕 Targeting + read receipts
+    audience?: string;    // 'All' | 'Students' | 'Staff' | 'ModuleStudents'
+    isRead?: boolean;
 }

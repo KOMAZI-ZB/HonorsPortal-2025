@@ -8,5 +8,8 @@ namespace API.Interfaces
         Task<PagedList<AnnouncementDto>> GetAllPaginatedAsync(QueryParams queryParams);
         Task<AnnouncementDto?> CreateAsync(CreateAnnouncementDto dto, string createdByUserNumber);
         Task<bool> DeleteAsync(int id, string requesterUserNumber, bool isAdmin);
+
+        // 🆕 Read receipts
+        Task<bool> MarkAsReadAsync(int announcementId, int userId);
     }
 }

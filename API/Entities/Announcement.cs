@@ -1,5 +1,3 @@
-using System;
-
 namespace API.Entities
 {
     public class Announcement
@@ -20,5 +18,9 @@ namespace API.Entities
 
         public int? ModuleId { get; set; }
         public Module? Module { get; set; }
+
+        // 🆕 Targeting
+        // All | Students | Staff | ModuleStudents
+        public string Audience { get; set; } = "All";
     }
 }

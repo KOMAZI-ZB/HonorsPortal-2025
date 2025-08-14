@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router'; // not used here but fine if present elsewhere
 import { CommonModule } from '@angular/common';
 import { Announcement } from '../_models/announcement';
 import { AnnouncementService } from '../_services/announcement.service';
@@ -114,5 +115,14 @@ export class AnnouncementsComponent implements OnInit {
     const readable = type.replace(/([a-z])([A-Z])/g, '$1 $2').toUpperCase();
     const isAnnouncement = type.toLowerCase() === 'general' || type.toLowerCase() === 'system';
     return isAnnouncement ? `${readable} ANNOUNCEMENT` : `${readable} NOTIFICATION`;
+  }
+
+  // 🆕 Mark a single item as read (optional feature)
+  markAsRead(a: Announcement) {
+    if (a.isRead) return;
+    this.announcementService.markAsRead(a.id).subscribe({
+      next: () => (a.isRead = true),
+      error: err => console.error(err)
+    });
   }
 }

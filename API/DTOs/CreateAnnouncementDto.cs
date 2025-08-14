@@ -18,4 +18,9 @@ public class CreateAnnouncementDto
 
     public IFormFile? Image { get; set; }
     public int? ModuleId { get; set; }
+
+    /// <summary>
+    /// Allowed: All, Students, Staff, ModuleStudents
+    /// </summary>
+    public string Audience { get; set; } = "All";
 }

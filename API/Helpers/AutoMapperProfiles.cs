@@ -35,11 +35,13 @@ namespace API.Helpers
                 .ForMember(dest => dest.NormalizedEmail, opt => opt.MapFrom(src => src.Email.ToUpper()))
                 .ForMember(dest => dest.NormalizedUserName, opt => opt.MapFrom(src => src.Email.ToUpper()));
 
-            // Documents, FAQ, Announcements (unchanged)
+            // Documents, FAQ (unchanged)
             CreateMap<Document, DocumentDto>()
                 .ForMember(dest => dest.UploadedByUserNumber, opt => opt.MapFrom(src => src.UploadedByUserNumber));
             CreateMap<UploadDocumentDto, Document>();
             CreateMap<FaqEntry, FaqEntryDto>();
+
+            // Announcements — simple map (IsRead is computed in queries)
             CreateMap<Announcement, AnnouncementDto>();
 
             // Lab Booking (unchanged)

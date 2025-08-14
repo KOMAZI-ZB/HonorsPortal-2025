@@ -32,10 +32,20 @@
             <div class="d-flex align-items-center gap-2">
                 <span class="text-uppercase fw-bold text-primary small">{{ formatBadgeLabel(ann.type) }}</span>
                 <small class="text-muted">{{ ann.createdAt | date: 'medium' }}</small>
+                <small class="ms-2 badge bg-light text-dark" *ngIf="ann.audience">Audience: {{ ann.audience }}</small>
+                <small class="ms-2 badge" [class.bg-success]="ann.isRead" [class.bg-secondary]="!ann.isRead">
+                    {{ ann.isRead ? 'Read' : 'Unread' }}
+                </small>
             </div>
-            <button *ngIf="canDelete(ann)" class="btn btn-sm btn-outline-danger" (click)="deleteAnnouncement(ann.id)">
-                Delete
-            </button>
+            <div class="d-flex align-items-center gap-2">
+                <button *ngIf="!ann.isRead" class="btn btn-sm btn-outline-secondary" (click)="markAsRead(ann)">
+                    Mark as read
+                </button>
+                <button *ngIf="canDelete(ann)" class="btn btn-sm btn-outline-danger"
+                    (click)="deleteAnnouncement(ann.id)">
+                    Delete
+                </button>
+            </div>
         </div>
 
         <!-- Title -->
@@ -46,7 +56,7 @@
 
         <!-- Image (clickable) -->
         <img *ngIf="ann.imagePath" [src]="ann.imagePath" class="img-fluid rounded mt-2"
-            style="max-height: 200px; cursor: pointer;" (click)="openImageModal(ann.imagePath)" />
+            style="max-height: 200px; cursor: pointer;" (click)="openImageModal(ann.imagePath!)" />
     </div>
 </div>
 
