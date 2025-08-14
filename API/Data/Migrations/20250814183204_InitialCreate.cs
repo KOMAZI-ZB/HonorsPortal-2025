@@ -98,6 +98,7 @@ namespace API.Data.Migrations
                     ModuleCode = table.Column<string>(type: "TEXT", nullable: false),
                     ModuleName = table.Column<string>(type: "TEXT", nullable: false),
                     Semester = table.Column<int>(type: "INTEGER", nullable: false),
+                    IsYearModule = table.Column<bool>(type: "INTEGER", nullable: false),
                     ClassVenue = table.Column<string>(type: "TEXT", nullable: true),
                     WeekDays = table.Column<string>(type: "TEXT", nullable: true),
                     StartTimes = table.Column<string>(type: "TEXT", nullable: true),

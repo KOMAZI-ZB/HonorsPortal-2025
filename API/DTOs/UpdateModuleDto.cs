@@ -6,7 +6,7 @@ namespace API.DTOs
     {
         public string? ModuleCode { get; set; }
         public string? ModuleName { get; set; }
-        public int Semester { get; set; } // 0 = no change
+        public int Semester { get; set; } // 0 = no change (legacy behavior)
 
         // Legacy (ignored for schedule)
         public string? ClassVenue { get; set; }
@@ -16,7 +16,9 @@ namespace API.DTOs
 
         // ✅ New
         public List<ClassSessionDto>? ClassSessions { get; set; }
-
         public List<AssessmentDto>? Assessments { get; set; }
+
+        // ✅ NEW: allow toggling Year module explicitly from UI
+        public bool? IsYearModule { get; set; } // true => Semester=0, false => requires Semester 1 or 2
     }
 }

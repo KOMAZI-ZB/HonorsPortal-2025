@@ -389,6 +389,9 @@ namespace API.Data.Migrations
                     b.Property<string>("EndTimes")
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("IsYearModule")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("ModuleCode")
                         .IsRequired()
                         .HasColumnType("TEXT");

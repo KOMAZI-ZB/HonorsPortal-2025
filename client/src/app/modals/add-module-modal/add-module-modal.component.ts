@@ -6,16 +6,13 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { ToastrService } from 'ngx-toastr';
 import { ConfirmCloseModalComponent } from '../confirm-close-modal/confirm-close-modal.component';
+import { AssessmentSchedule } from '../../_models/assessment-schedule'; // ✅ reuse existing model
 
-interface Assessment {
-  title: string;
-  date: string;
-  isTimed: boolean;
-  startTime?: string;
-  endTime?: string;
-  dueTime?: string;
-  venue?: string;
-}
+// ✅ use a narrowed subset of the shared model (no id/moduleCode/semester)
+type Assessment = Pick<
+  AssessmentSchedule,
+  'title' | 'date' | 'isTimed' | 'startTime' | 'endTime' | 'dueTime' | 'venue'
+>;
 
 @Component({
   selector: 'app-add-module-modal',
@@ -43,6 +40,8 @@ export class AddModuleModalComponent implements AfterViewInit, OnDestroy {
   moduleCode = '';
   moduleName = '';
   semester = 1;
+  // ✅ year module toggle (kept as previously added)
+  isYearModule = false;
 
   classVenue = '';
   weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -145,6 +144,7 @@ export class AddModuleModalComponent implements AfterViewInit, OnDestroy {
       moduleCode: this.moduleCode,
       moduleName: this.moduleName,
       semester: this.semester,
+      isYearModule: this.isYearModule, // ✅ included
       classVenue: this.classVenue || null,
       weekDays: chosenDays,
       startTimes: starts,

@@ -15,12 +15,25 @@
             name="moduleName" />
     </div>
 
-    <div class="mb-3">
-        <label>Semester</label>
-        <select class="form-control" [(ngModel)]="semester" (ngModelChange)="markDirty()" name="semester">
-            <option [value]="1">Semester 1</option>
-            <option [value]="2">Semester 2</option>
-        </select>
+    <!-- Semester + Year Module -->
+    <div class="row mb-3">
+        <div class="col-auto">
+            <label>Semester</label>
+            <select class="form-control" [(ngModel)]="semester" (ngModelChange)="markDirty()" name="semester"
+                [disabled]="isYearModule">
+                <option [value]="1">Semester 1</option>
+                <option [value]="2">Semester 2</option>
+            </select>
+        </div>
+        <div class="col d-flex align-items-end">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="isYearModule" [(ngModel)]="isYearModule"
+                    (ngModelChange)="markDirty()" name="isYearModule" />
+                <label class="form-check-label" for="isYearModule">
+                    Is Year module?
+                </label>
+            </div>
+        </div>
     </div>
 
     <!-- Class Schedule -->

@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250814175232_InitialCreate")]
+    [Migration("20250814183204_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -391,6 +391,9 @@ namespace API.Data.Migrations
 
                     b.Property<string>("EndTimes")
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsYearModule")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("ModuleCode")
                         .IsRequired()

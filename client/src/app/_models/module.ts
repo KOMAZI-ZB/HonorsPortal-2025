@@ -5,7 +5,10 @@ export interface Module {
     id: number;
     moduleCode: string;
     moduleName: string;
+
     semester: number;
+    // ✅ NEW
+    isYearModule?: boolean;
 
     // Legacy (no longer used by timetable rendering; safe to keep during transition)
     classVenue?: string;

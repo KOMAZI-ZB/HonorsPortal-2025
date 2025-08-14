@@ -20,6 +20,7 @@ public class ModulesController(DataContext context) : BaseApiController
             ModuleCode = dto.ModuleCode,
             ModuleName = dto.ModuleName,
             Semester = dto.Semester,
+            IsYearModule = dto.IsYearModule, // ✅ NEW
 
             // legacy fields optional/ignored for schedule rendering
             ClassVenue = dto.ClassVenue,
@@ -39,6 +40,24 @@ public class ModulesController(DataContext context) : BaseApiController
                     WeekDay = s.WeekDay,
                     StartTime = s.StartTime,
                     EndTime = s.EndTime
+                });
+            }
+        }
+
+        // ✅ Persist assessments if provided (matches UpdateModule mapping)
+        if (dto.Assessments != null)
+        {
+            foreach (var a in dto.Assessments)
+            {
+                module.Assessments.Add(new Assessment
+                {
+                    Title = a.Title,
+                    Date = DateOnly.Parse(a.Date),
+                    StartTime = a.StartTime,
+                    EndTime = a.EndTime,
+                    DueTime = a.DueTime,
+                    Venue = a.Venue,
+                    IsTimed = a.IsTimed
                 });
             }
         }
@@ -63,6 +82,7 @@ public class ModulesController(DataContext context) : BaseApiController
             ModuleCode = m.ModuleCode,
             ModuleName = m.ModuleName,
             Semester = m.Semester,
+            IsYearModule = m.IsYearModule, // ✅ NEW
             ClassVenue = m.ClassVenue,
             WeekDays = m.WeekDays?.Split(',') ?? [],
             StartTimes = m.StartTimes?.Split(',') ?? [],
@@ -89,7 +109,7 @@ public class ModulesController(DataContext context) : BaseApiController
         if (User.IsInRole("Admin"))
         {
             var allModules = await context.Modules
-                .Where(m => m.Semester == semester)
+                .Where(m => m.Semester == semester || m.IsYearModule) // ✅ include year modules
                 .Include(m => m.ClassSessions)
                 .ToListAsync();
 
@@ -99,6 +119,7 @@ public class ModulesController(DataContext context) : BaseApiController
                 ModuleCode = m.ModuleCode,
                 ModuleName = m.ModuleName,
                 Semester = m.Semester,
+                IsYearModule = m.IsYearModule, // ✅ NEW
                 ClassVenue = m.ClassVenue,
                 WeekDays = m.WeekDays?.Split(',') ?? [],
                 StartTimes = m.StartTimes?.Split(',') ?? [],
@@ -115,7 +136,7 @@ public class ModulesController(DataContext context) : BaseApiController
         }
 
         var assignedModules = await context.UserModules
-            .Where(um => um.AppUserId == userId && um.Module.Semester == semester)
+            .Where(um => um.AppUserId == userId && (um.Module.Semester == semester || um.Module.IsYearModule)) // ✅ include year
             .Include(um => um.Module)
                 .ThenInclude(m => m.ClassSessions)
             .Select(um => um.Module)
@@ -127,6 +148,7 @@ public class ModulesController(DataContext context) : BaseApiController
             ModuleCode = m.ModuleCode,
             ModuleName = m.ModuleName,
             Semester = m.Semester,
+            IsYearModule = m.IsYearModule, // ✅ NEW
             ClassVenue = m.ClassVenue,
             WeekDays = m.WeekDays?.Split(',') ?? [],
             StartTimes = m.StartTimes?.Split(',') ?? [],
@@ -142,23 +164,23 @@ public class ModulesController(DataContext context) : BaseApiController
         }).ToList());
     }
 
-    // ✅ NEW: Coordinator grouped view (assigned vs other)
+    // ✅ Coordinator grouped view (assigned vs other)
     [Authorize(Roles = "Coordinator")]
     [HttpGet("semester/{semester}/grouped")]
     public async Task<ActionResult> GetCoordinatorModulesGrouped(int semester)
     {
         var userId = int.Parse(User.GetUserId());
 
-        // All modules in this semester
+        // All modules in this semester or year modules
         var allModules = await context.Modules
-            .Where(m => m.Semester == semester)
+            .Where(m => m.Semester == semester || m.IsYearModule) // ✅ include year
             .Include(m => m.ClassSessions)
             .ToListAsync();
 
         // Modules where this user is linked as Coordinator
         var managedIds = await context.UserModules
             .Where(um => um.AppUserId == userId
-                         && um.Module.Semester == semester
+                         && (um.Module.Semester == semester || um.Module.IsYearModule) // ✅ include year
                          && um.RoleContext == "Coordinator")
             .Select(um => um.ModuleId)
             .ToListAsync();
@@ -171,6 +193,7 @@ public class ModulesController(DataContext context) : BaseApiController
                 ModuleCode = m.ModuleCode,
                 ModuleName = m.ModuleName,
                 Semester = m.Semester,
+                IsYearModule = m.IsYearModule, // ✅ NEW
                 ClassVenue = m.ClassVenue,
                 WeekDays = m.WeekDays?.Split(',') ?? [],
                 StartTimes = m.StartTimes?.Split(',') ?? [],
@@ -194,6 +217,7 @@ public class ModulesController(DataContext context) : BaseApiController
                 ModuleCode = m.ModuleCode,
                 ModuleName = m.ModuleName,
                 Semester = m.Semester,
+                IsYearModule = m.IsYearModule, // ✅ NEW
                 ClassVenue = m.ClassVenue,
                 WeekDays = m.WeekDays?.Split(',') ?? [],
                 StartTimes = m.StartTimes?.Split(',') ?? [],
@@ -256,6 +280,10 @@ public class ModulesController(DataContext context) : BaseApiController
         module.ModuleCode = dto.ModuleCode ?? module.ModuleCode;
         module.ModuleName = dto.ModuleName ?? module.ModuleName;
         module.Semester = dto.Semester != 0 ? dto.Semester : module.Semester;
+
+        // ✅ NEW: flip year flag if provided
+        if (dto.IsYearModule.HasValue)
+            module.IsYearModule = dto.IsYearModule.Value;
 
         // legacy fields (kept writable)
         module.ClassVenue = dto.ClassVenue;
@@ -357,6 +385,7 @@ public class ModulesController(DataContext context) : BaseApiController
             ModuleCode = m.ModuleCode,
             ModuleName = m.ModuleName,
             Semester = m.Semester,
+            IsYearModule = m.IsYearModule, // ✅ NEW
             ClassVenue = m.ClassVenue,
             WeekDays = m.WeekDays?.Split(',') ?? [],
             StartTimes = m.StartTimes?.Split(',') ?? [],
@@ -412,6 +441,7 @@ public class ModulesController(DataContext context) : BaseApiController
             ModuleCode = module.ModuleCode,
             ModuleName = module.ModuleName,
             Semester = module.Semester,
+            IsYearModule = module.IsYearModule, // ✅ NEW
             ClassVenue = module.ClassVenue,
             WeekDays = module.WeekDays?.Split(',') ?? [],
             StartTimes = module.StartTimes?.Split(',') ?? [],

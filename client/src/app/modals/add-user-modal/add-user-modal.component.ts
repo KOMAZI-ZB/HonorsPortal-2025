@@ -49,6 +49,9 @@ export class AddUserModalComponent implements OnInit, AfterViewInit, OnDestroy {
   private backdropCapture?: (ev: MouseEvent) => void;
   private escCapture?: (ev: KeyboardEvent) => void;
 
+  // ...imports stay the same...
+  // (only ngOnInit filtering changed)
+
   ngOnInit(): void {
     this.userNumber = '';
     this.firstName = '';
@@ -58,14 +61,16 @@ export class AddUserModalComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.moduleService.getAllModules().subscribe({
       next: modules => {
-        this.semester1Modules = modules.filter(m => m.semester === 1);
-        this.semester2Modules = modules.filter(m => m.semester === 2);
+        // ✅ Include year modules in BOTH semester lists
+        this.semester1Modules = modules.filter(m => m.semester === 1 || m.isYearModule);
+        this.semester2Modules = modules.filter(m => m.semester === 2 || m.isYearModule);
       }
     });
 
     this.originalHide = this.modalRef.hide.bind(this.modalRef);
     this.modalRef.hide = () => this.attemptClose();
   }
+
 
   ngAfterViewInit(): void {
     setTimeout(() => this.usernameInput?.nativeElement.focus(), 0);

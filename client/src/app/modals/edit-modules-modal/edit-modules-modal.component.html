@@ -5,23 +5,65 @@
 
 <div class="modal-body">
     <h6>Semester 1 Modules</h6>
+    <small class="text-muted d-block mb-2">Year modules appear in both semester lists.</small>
+
     <div *ngFor="let mod of semester1Modules; trackBy: trackById" class="form-check mb-2">
         <input class="form-check-input" type="checkbox" [checked]="selectedSemester1.includes(mod.id)"
             (change)="toggleModule(mod.id, selectedSemester1, $event)" [id]="'sem1-' + mod.id" />
         <label class="form-check-label" [for]="'sem1-' + mod.id">
             {{ mod.moduleCode }} - {{ mod.moduleName }}
+            <span *ngIf="isYear(mod)" class="badge bg-info ms-2">Year</span>
         </label>
+
+        <!-- Year toggle and (when needed) semester picker -->
+        <span class="ms-3 align-middle">
+            <div class="form-check form-switch d-inline-flex align-items-center">
+                <input class="form-check-input" type="checkbox" [checked]="isYear(mod)"
+                    (change)="onYearToggle(mod, $event)" [id]="'year-' + mod.id" />
+                <label class="form-check-label small ms-1" [for]="'year-' + mod.id">Year</label>
+            </div>
+
+            <span *ngIf="pickingSemesterFor === mod.id" class="ms-2">
+                <select class="form-select form-select-sm d-inline-block w-auto" [(ngModel)]="semesterChoice[mod.id]">
+                    <option [ngValue]="1">Semester 1</option>
+                    <option [ngValue]="2">Semester 2</option>
+                </select>
+                <button class="btn btn-sm btn-primary ms-1" (click)="applySemester(mod)">Apply</button>
+                <button class="btn btn-sm btn-outline-secondary ms-1" (click)="cancelSemesterPick()">Cancel</button>
+            </span>
+        </span>
     </div>
 
     <hr />
 
     <h6>Semester 2 Modules</h6>
+    <small class="text-muted d-block mb-2">Year modules appear in both semester lists.</small>
+
     <div *ngFor="let mod of semester2Modules; trackBy: trackById" class="form-check mb-2">
         <input class="form-check-input" type="checkbox" [checked]="selectedSemester2.includes(mod.id)"
             (change)="toggleModule(mod.id, selectedSemester2, $event)" [id]="'sem2-' + mod.id" />
         <label class="form-check-label" [for]="'sem2-' + mod.id">
             {{ mod.moduleCode }} - {{ mod.moduleName }}
+            <span *ngIf="isYear(mod)" class="badge bg-info ms-2">Year</span>
         </label>
+
+        <!-- Year toggle and (when needed) semester picker -->
+        <span class="ms-3 align-middle">
+            <div class="form-check form-switch d-inline-flex align-items-center">
+                <input class="form-check-input" type="checkbox" [checked]="isYear(mod)"
+                    (change)="onYearToggle(mod, $event)" [id]="'year2-' + mod.id" />
+                <label class="form-check-label small ms-1" [for]="'year2-' + mod.id">Year</label>
+            </div>
+
+            <span *ngIf="pickingSemesterFor === mod.id" class="ms-2">
+                <select class="form-select form-select-sm d-inline-block w-auto" [(ngModel)]="semesterChoice[mod.id]">
+                    <option [ngValue]="1">Semester 1</option>
+                    <option [ngValue]="2">Semester 2</option>
+                </select>
+                <button class="btn btn-sm btn-primary ms-1" (click)="applySemester(mod)">Apply</button>
+                <button class="btn btn-sm btn-outline-secondary ms-1" (click)="cancelSemesterPick()">Cancel</button>
+            </span>
+        </span>
     </div>
 </div>
 

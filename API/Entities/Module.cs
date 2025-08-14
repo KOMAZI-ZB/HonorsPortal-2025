@@ -8,7 +8,12 @@ namespace API.Entities
         public int Id { get; set; }
         public string ModuleCode { get; set; } = string.Empty;
         public string ModuleName { get; set; } = string.Empty;
+
+        // Semester indicator (1 or 2 for ordinary modules)
         public int Semester { get; set; }
+
+        // ✅ NEW: Year module flag (appears in both semester filters)
+        public bool IsYearModule { get; set; } = false;
 
         // ❌ Legacy single-venue/parallel arrays (kept temporarily for compatibility; no longer used for schedule)
         public string? ClassVenue { get; set; }
