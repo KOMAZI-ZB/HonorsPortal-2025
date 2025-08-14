@@ -6,8 +6,11 @@ namespace API.DTOs
     {
         public int Id { get; set; }
         public string Title { get; set; } = string.Empty;
-        public string Date { get; set; } = string.Empty;
 
+        // ✅ New: optional description
+        public string? Description { get; set; }
+
+        public string Date { get; set; } = string.Empty;
 
         public string? StartTime { get; set; }
         public string? EndTime { get; set; }

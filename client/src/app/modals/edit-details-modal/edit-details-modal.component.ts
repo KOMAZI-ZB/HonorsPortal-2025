@@ -10,6 +10,7 @@ import { CommonModule } from '@angular/common';
 
 interface Assessment {
   title: string;
+  description?: string;         // ✅ New: description in modal editing
   date: string;
   isTimed: boolean;
   startTime?: string;
@@ -91,6 +92,7 @@ export class EditDetailsModalComponent implements OnInit {
         // Assessments
         this.assessments = (updated.assessments || []).map(a => ({
           title: a.title,
+          description: (a as any).description || '', // ✅ pull through if present
           date: a.date,
           isTimed: a.isTimed,
           startTime: a.startTime || '',
@@ -137,6 +139,7 @@ export class EditDetailsModalComponent implements OnInit {
   addAssessment() {
     this.assessments.push({
       title: '',
+      description: '',       // ✅ default empty
       date: '',
       isTimed: true,
       startTime: '',
@@ -177,6 +180,7 @@ export class EditDetailsModalComponent implements OnInit {
     const cleanedAssessments = this.assessments.filter(a => (a.date || '').trim() !== '');
     const processedAssessments = cleanedAssessments.map(a => ({
       title: a.title,
+      description: (a.description || '').trim() || null, // ✅ include description in payload
       date: a.date,
       isTimed: a.isTimed,
       startTime: a.isTimed ? this.formatTimeString(a.startTime!) : null,

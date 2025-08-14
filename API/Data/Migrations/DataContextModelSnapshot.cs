@@ -189,6 +189,9 @@ namespace API.Data.Migrations
                     b.Property<DateOnly>("Date")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Description")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("DueTime")
                         .HasColumnType("TEXT");
 

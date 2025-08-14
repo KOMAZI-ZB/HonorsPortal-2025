@@ -9,6 +9,9 @@ namespace API.Entities
 
         public string Title { get; set; } = string.Empty;
 
+        // ✅ New: optional description column
+        public string? Description { get; set; }
+
         public DateOnly Date { get; set; }
 
         public string? StartTime { get; set; }

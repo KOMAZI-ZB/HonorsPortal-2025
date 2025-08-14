@@ -260,6 +260,7 @@ namespace API.Data.Migrations
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Title = table.Column<string>(type: "TEXT", nullable: false),
+                    Description = table.Column<string>(type: "TEXT", nullable: true),
                     Date = table.Column<DateOnly>(type: "TEXT", nullable: false),
                     StartTime = table.Column<string>(type: "TEXT", nullable: true),
                     EndTime = table.Column<string>(type: "TEXT", nullable: true),

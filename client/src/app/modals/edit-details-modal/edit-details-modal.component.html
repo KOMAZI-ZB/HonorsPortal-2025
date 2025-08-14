@@ -62,7 +62,7 @@
                 </div>
             </div>
 
-            <!-- ========== Assessments (unchanged UI) ========== -->
+            <!-- ========== Assessments (with Description) ========== -->
             <div [hidden]="activeTab !== 'assessments'">
                 <hr />
                 <h6>Assessments</h6>
@@ -79,6 +79,14 @@
                             <label>Title</label>
                             <input type="text" class="form-control" [(ngModel)]="assessment.title"
                                 [name]="'title' + i" />
+                        </div>
+
+                        <!-- ✅ New: Description -->
+                        <div class="mb-2">
+                            <label>Description</label>
+                            <textarea class="form-control" rows="2" [(ngModel)]="assessment.description"
+                                [name]="'description' + i"
+                                placeholder="Short description (e.g., scope, chapters, instructions)"></textarea>
                         </div>
 
                         <div class="mb-2">

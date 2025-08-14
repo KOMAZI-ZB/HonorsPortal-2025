@@ -11,15 +11,52 @@
         </select>
     </div>
 
-    <!-- Module Cards -->
-    <div class="row">
-        <div class="col-md-4 mb-3" *ngFor="let module of modules">
-            <div class="card h-100" (click)="openModule(module)" style="cursor: pointer;">
-                <div class="card-body">
-                    <h5 class="card-title">{{ module.moduleCode }}</h5>
-                    <p class="card-text">{{ module.moduleName }}</p>
+    <!-- ✅ Coordinator grouped view -->
+    <ng-container *ngIf="isCoordinator; else defaultList">
+        <div class="mb-2 d-flex align-items-center">
+            <h5 class="mb-0">Assigned Modules</h5>
+        </div>
+        <div class="row">
+            <div class="col-md-4 mb-3" *ngFor="let module of assignedModules">
+                <div class="card h-100" (click)="openModule(module)" style="cursor: pointer;">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ module.moduleCode }}</h5>
+                        <p class="card-text">{{ module.moduleName }}</p>
+                    </div>
                 </div>
             </div>
+            <div *ngIf="assignedModules.length === 0" class="text-muted">No modules assigned to you for this semester.
+            </div>
         </div>
-    </div>
+
+        <div class="mt-4 mb-2 d-flex align-items-center">
+            <h5 class="mb-0">Other Modules</h5>
+        </div>
+        <div class="row">
+            <div class="col-md-4 mb-3" *ngFor="let module of otherModules">
+                <div class="card h-100" (click)="openModule(module)" style="cursor: pointer;">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ module.moduleCode }}</h5>
+                        <p class="card-text">{{ module.moduleName }}</p>
+                    </div>
+                </div>
+            </div>
+            <div *ngIf="otherModules.length === 0" class="text-muted">No other modules found for this semester.</div>
+        </div>
+    </ng-container>
+
+    <!-- Original list for non-coordinators -->
+    <ng-template #defaultList>
+        <div class="row">
+            <div class="col-md-4 mb-3" *ngFor="let module of modules">
+                <div class="card h-100" (click)="openModule(module)" style="cursor: pointer;">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ module.moduleCode }}</h5>
+                        <p class="card-text">{{ module.moduleName }}</p>
+                    </div>
+                </div>
+            </div>
+            <div *ngIf="modules.length === 0" class="text-muted">No modules found for this semester.</div>
+        </div>
+    </ng-template>
 </div>

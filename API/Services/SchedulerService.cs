@@ -62,6 +62,7 @@ namespace API.Services
                 {
                     Id = a.Id,
                     Title = a.Title,
+                    Description = a.Description, // ✅ include description
                     Date = a.Date.ToString("yyyy-MM-dd"),
                     StartTime = a.StartTime,
                     EndTime = a.EndTime,

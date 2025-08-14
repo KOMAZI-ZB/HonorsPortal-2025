@@ -6,6 +6,9 @@ namespace API.DTOs
     {
         public string Title { get; set; } = string.Empty;
 
+        // ✅ New: optional description when creating
+        public string? Description { get; set; }
+
         public DateOnly Date { get; set; }
 
         public string? StartTime { get; set; }

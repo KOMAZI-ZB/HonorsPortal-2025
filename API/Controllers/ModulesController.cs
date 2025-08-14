@@ -1,4 +1,3 @@
-
 using API.DTOs;
 using API.Entities;
 using API.Data;
@@ -141,6 +140,76 @@ public class ModulesController(DataContext context) : BaseApiController
                 EndTime = s.EndTime
             }).ToList()
         }).ToList());
+    }
+
+    // ✅ NEW: Coordinator grouped view (assigned vs other)
+    [Authorize(Roles = "Coordinator")]
+    [HttpGet("semester/{semester}/grouped")]
+    public async Task<ActionResult> GetCoordinatorModulesGrouped(int semester)
+    {
+        var userId = int.Parse(User.GetUserId());
+
+        // All modules in this semester
+        var allModules = await context.Modules
+            .Where(m => m.Semester == semester)
+            .Include(m => m.ClassSessions)
+            .ToListAsync();
+
+        // Modules where this user is linked as Coordinator
+        var managedIds = await context.UserModules
+            .Where(um => um.AppUserId == userId
+                         && um.Module.Semester == semester
+                         && um.RoleContext == "Coordinator")
+            .Select(um => um.ModuleId)
+            .ToListAsync();
+
+        var assigned = allModules
+            .Where(m => managedIds.Contains(m.Id))
+            .Select(m => new ModuleDto
+            {
+                Id = m.Id,
+                ModuleCode = m.ModuleCode,
+                ModuleName = m.ModuleName,
+                Semester = m.Semester,
+                ClassVenue = m.ClassVenue,
+                WeekDays = m.WeekDays?.Split(',') ?? [],
+                StartTimes = m.StartTimes?.Split(',') ?? [],
+                EndTimes = m.EndTimes?.Split(',') ?? [],
+                ClassSessions = m.ClassSessions.Select(s => new ClassSessionDto
+                {
+                    Id = s.Id,
+                    Venue = s.Venue,
+                    WeekDay = s.WeekDay,
+                    StartTime = s.StartTime,
+                    EndTime = s.EndTime
+                }).ToList()
+            })
+            .ToList();
+
+        var other = allModules
+            .Where(m => !managedIds.Contains(m.Id))
+            .Select(m => new ModuleDto
+            {
+                Id = m.Id,
+                ModuleCode = m.ModuleCode,
+                ModuleName = m.ModuleName,
+                Semester = m.Semester,
+                ClassVenue = m.ClassVenue,
+                WeekDays = m.WeekDays?.Split(',') ?? [],
+                StartTimes = m.StartTimes?.Split(',') ?? [],
+                EndTimes = m.EndTimes?.Split(',') ?? [],
+                ClassSessions = m.ClassSessions.Select(s => new ClassSessionDto
+                {
+                    Id = s.Id,
+                    Venue = s.Venue,
+                    WeekDay = s.WeekDay,
+                    StartTime = s.StartTime,
+                    EndTime = s.EndTime
+                }).ToList()
+            })
+            .ToList();
+
+        return Ok(new { assigned, other });
     }
 
     [Authorize(Policy = "RequireAdminRole")]
