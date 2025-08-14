@@ -1,6 +1,6 @@
 <div class="modal-header">
     <h5 class="modal-title">Edit Modules for {{ user.name }} {{ user.surname }}</h5>
-    <button type="button" class="btn-close" aria-label="Close" (click)="cancel()"></button>
+    <button type="button" class="btn-close" aria-label="Close" (click)="attemptClose()"></button>
 </div>
 
 <div class="modal-body">
@@ -26,6 +26,6 @@
 </div>
 
 <div class="modal-footer">
-    <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
+    <button class="btn btn-secondary" (click)="attemptClose()">Cancel</button>
     <button class="btn btn-primary" (click)="submit()">Save Changes</button>
 </div>

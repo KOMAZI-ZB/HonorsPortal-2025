@@ -5,8 +5,6 @@
 
 <div class="modal-body">
     <form [formGroup]="form" (ngSubmit)="submit()" enctype="multipart/form-data" novalidate>
-
-        <!-- ✅ FIXED: No disabled binding, keep it active for value selection -->
         <div class="mb-3">
             <label class="form-label">Type</label>
             <select class="form-select" formControlName="type">
@@ -15,7 +13,6 @@
             </select>
         </div>
 
-        <!-- Title -->
         <div class="mb-3">
             <label class="form-label">Title</label>
             <input type="text" class="form-control" formControlName="title" placeholder="Enter title" />
@@ -24,7 +21,6 @@
             </div>
         </div>
 
-        <!-- Message -->
         <div class="mb-3">
             <label class="form-label">Message</label>
             <textarea class="form-control" formControlName="message" rows="4" placeholder="Enter message..."></textarea>
@@ -33,13 +29,11 @@
             </div>
         </div>
 
-        <!-- Image Upload -->
         <div class="mb-3">
             <label class="form-label">Attach Image (Optional)</label>
             <input type="file" class="form-control" (change)="onFileSelected($event)" />
         </div>
 
-        <!-- Hidden Module ID -->
         <div class="mb-3 d-none">
             <label class="form-label">Module ID</label>
             <input type="number" class="form-control" formControlName="moduleId" />

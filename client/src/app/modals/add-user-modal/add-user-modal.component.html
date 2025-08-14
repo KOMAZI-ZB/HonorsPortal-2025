@@ -7,30 +7,33 @@
     <form>
         <div class="mb-3">
             <label>User Name</label>
-            <input #usernameInput type="text" class="form-control" [(ngModel)]="userNumber" name="userNumber"
-                required />
+            <input #usernameInput type="text" class="form-control" [(ngModel)]="userNumber" name="userNumber" required
+                (ngModelChange)="markDirty()" />
         </div>
 
         <div class="mb-3">
             <label>First Name</label>
-            <input type="text" class="form-control" [(ngModel)]="firstName" name="firstName" required />
+            <input type="text" class="form-control" [(ngModel)]="firstName" name="firstName" required
+                (ngModelChange)="markDirty()" />
         </div>
 
         <div class="mb-3">
             <label>Last Name</label>
-            <input type="text" class="form-control" [(ngModel)]="lastName" name="lastName" required />
+            <input type="text" class="form-control" [(ngModel)]="lastName" name="lastName" required
+                (ngModelChange)="markDirty()" />
         </div>
 
         <div class="mb-3">
             <label>Email</label>
-            <input type="email" class="form-control" [(ngModel)]="email" name="email" required />
+            <input type="email" class="form-control" [(ngModel)]="email" name="email" required
+                (ngModelChange)="markDirty()" />
         </div>
 
         <div class="mb-3">
             <label>Password</label>
             <div class="input-group">
                 <input [type]="showPassword ? 'text' : 'password'" class="form-control" [(ngModel)]="password"
-                    name="password" />
+                    name="password" (ngModelChange)="markDirty()" />
                 <span class="input-group-text" (click)="togglePasswordVisibility()" style="cursor: pointer;">
                     <i class="fas" [ngClass]="showPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
                 </span>
@@ -39,7 +42,7 @@
 
         <div class="mb-3">
             <label>Role</label>
-            <select class="form-select" [(ngModel)]="role" name="role">
+            <select class="form-select" [(ngModel)]="role" name="role" (ngModelChange)="markDirty()">
                 <option *ngFor="let r of roles" [value]="r">{{ r }}</option>
             </select>
         </div>

@@ -1,10 +1,10 @@
 <div class="modal-header">
     <h5 class="modal-title">Edit Scheduling & Venue Details</h5>
-    <button type="button" class="btn-close" aria-label="Close" (click)="cancel()"></button>
+    <button type="button" class="btn-close" aria-label="Close" (click)="attemptClose()"></button>
 </div>
 
 <div class="modal-body">
-    <form>
+    <form #detailsForm="ngForm">
         <!-- Tabs -->
         <ul class="nav nav-tabs mb-3">
             <li class="nav-item">
@@ -31,7 +31,7 @@
                         <div class="flex-grow-1 me-2">
                             <label class="form-label">Venue</label>
                             <input class="form-control" [(ngModel)]="v.venue" [name]="'venue-'+vi"
-                                placeholder="e.g., B108" />
+                                placeholder="e.g., B108" (ngModelChange)="markDirty()" />
                         </div>
                         <button type="button" class="btn btn-outline-danger btn-sm mt-4"
                             (click)="removeVenue(vi)">Remove</button>
@@ -50,12 +50,13 @@
                             <div class="col">
                                 <label>Start Time</label>
                                 <input type="time" class="form-control" [(ngModel)]="v.days[day].startTime"
-                                    [name]="'start-'+vi+'-'+day" min="06:00" max="21:00" />
+                                    [name]="'start-'+vi+'-'+day" min="06:00" max="21:00"
+                                    (ngModelChange)="markDirty()" />
                             </div>
                             <div class="col">
                                 <label>End Time</label>
                                 <input type="time" class="form-control" [(ngModel)]="v.days[day].endTime"
-                                    [name]="'end-'+vi+'-'+day" min="06:00" max="22:00" />
+                                    [name]="'end-'+vi+'-'+day" min="06:00" max="22:00" (ngModelChange)="markDirty()" />
                             </div>
                         </div>
                     </div>
@@ -77,8 +78,8 @@
                     <div class="collapse show p-3" [id]="'collapse' + i">
                         <div class="mb-2">
                             <label>Title</label>
-                            <input type="text" class="form-control" [(ngModel)]="assessment.title"
-                                [name]="'title' + i" />
+                            <input type="text" class="form-control" [(ngModel)]="assessment.title" [name]="'title' + i"
+                                (ngModelChange)="markDirty()" />
                         </div>
 
                         <!-- ✅ New: Description -->
@@ -86,17 +87,20 @@
                             <label>Description</label>
                             <textarea class="form-control" rows="2" [(ngModel)]="assessment.description"
                                 [name]="'description' + i"
-                                placeholder="Short description (e.g., scope, chapters, instructions)"></textarea>
+                                placeholder="Short description (e.g., scope, chapters, instructions)"
+                                (ngModelChange)="markDirty()"></textarea>
                         </div>
 
                         <div class="mb-2">
                             <label>Date</label>
-                            <input type="date" class="form-control" [(ngModel)]="assessment.date" [name]="'date' + i" />
+                            <input type="date" class="form-control" [(ngModel)]="assessment.date" [name]="'date' + i"
+                                (ngModelChange)="markDirty()" />
                         </div>
 
                         <div class="mb-2">
                             <label>
-                                <input type="checkbox" [(ngModel)]="assessment.isTimed" [name]="'isTimed' + i" />
+                                <input type="checkbox" [(ngModel)]="assessment.isTimed" [name]="'isTimed' + i"
+                                    (ngModelChange)="markDirty()" />
                                 Timed Assessment (e.g., Venue & Time)
                             </label>
                         </div>
@@ -105,18 +109,18 @@
                             <div class="mb-2">
                                 <label>Venue</label>
                                 <input type="text" class="form-control" [(ngModel)]="assessment.venue"
-                                    [name]="'venue' + i" />
+                                    [name]="'venue' + i" (ngModelChange)="markDirty()" />
                             </div>
                             <div class="row">
                                 <div class="col">
                                     <label>Start Time</label>
                                     <input type="time" class="form-control" [(ngModel)]="assessment.startTime"
-                                        [name]="'startTime' + i" />
+                                        [name]="'startTime' + i" (ngModelChange)="markDirty()" />
                                 </div>
                                 <div class="col">
                                     <label>End Time</label>
                                     <input type="time" class="form-control" [(ngModel)]="assessment.endTime"
-                                        [name]="'endTime' + i" />
+                                        [name]="'endTime' + i" (ngModelChange)="markDirty()" />
                                 </div>
                             </div>
                         </div>
@@ -124,7 +128,7 @@
                         <div *ngIf="!assessment.isTimed" class="mb-2">
                             <label>Submission Deadline</label>
                             <input type="time" class="form-control" [(ngModel)]="assessment.dueTime"
-                                [name]="'dueTime' + i" />
+                                [name]="'dueTime' + i" (ngModelChange)="markDirty()" />
                         </div>
 
                         <div class="text-end mt-3">
@@ -145,6 +149,6 @@
 </div>
 
 <div class="modal-footer">
-    <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
+    <button class="btn btn-secondary" (click)="attemptClose()">Cancel</button>
     <button class="btn btn-primary" (click)="submit()">Save Changes</button>
 </div>

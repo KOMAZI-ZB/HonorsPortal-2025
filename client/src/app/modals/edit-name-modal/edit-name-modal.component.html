@@ -1,8 +1,7 @@
-<!-- src/app/modals/edit-name-modal/edit-name-modal.component.html -->
-<div class="modal-content">
+<form #nameForm="ngForm" class="modal-content">
     <div class="modal-header">
         <h5 class="modal-title">Edit Module Name</h5>
-        <button type="button" class="btn-close" aria-label="Close" (click)="cancel()"></button>
+        <button type="button" class="btn-close" aria-label="Close" (click)="attemptClose()"></button>
     </div>
 
     <div class="modal-body">
@@ -16,7 +15,7 @@
     </div>
 
     <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="cancel()">Cancel</button>
+        <button type="button" class="btn btn-secondary" (click)="attemptClose()">Cancel</button>
         <button type="button" class="btn btn-primary" (click)="submit()">Save</button>
     </div>
-</div>
+</form>
