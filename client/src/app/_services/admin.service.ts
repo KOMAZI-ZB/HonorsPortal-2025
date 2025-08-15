@@ -31,16 +31,16 @@ export class AdminService {
   }
 
   // ✅ Update modules assigned to user
-  updateUserModules(userNumber: string, semester1ModuleIds: number[], semester2ModuleIds: number[]) {
-    return this.http.put(`${this.baseUrl}admin/update-modules/${userNumber}`, {
+  updateUserModules(userName: string, semester1ModuleIds: number[], semester2ModuleIds: number[]) {
+    return this.http.put(`${this.baseUrl}admin/update-modules/${userName}`, {
       semester1ModuleIds,
       semester2ModuleIds
     });
   }
 
-  // ✅ Delete a user by userNumber
-  deleteUser(userNumber: string) {
-    return this.http.delete(`${this.baseUrl}admin/delete-user/${userNumber}`);
+  // ✅ Delete a user by userName
+  deleteUser(userName: string) {
+    return this.http.delete(`${this.baseUrl}admin/delete-user/${userName}`);
   }
 
   // ✅ Get users and their role claims (for role editing modal)
@@ -49,18 +49,18 @@ export class AdminService {
   }
 
   // ✅ Update user roles
-  updateUserRoles(userNumber: string, roles: string[]) {
-    return this.http.put(`${this.baseUrl}admin/update-roles/${userNumber}`, roles);
+  updateUserRoles(userName: string, roles: string[]) {
+    return this.http.put(`${this.baseUrl}admin/update-roles/${userName}`, roles);
   }
 
   // ✅ NEW: Update full user (name, email, password, roles)
-  updateUser(userNumber: string, model: {
+  updateUser(userName: string, model: {
     firstName: string;
     lastName: string;
     email: string;
     updatePassword?: string;
     roles: string[];
   }) {
-    return this.http.put(`${this.baseUrl}admin/update-user/${userNumber}`, model);
+    return this.http.put(`${this.baseUrl}admin/update-user/${userName}`, model);
   }
 }

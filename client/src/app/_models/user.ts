@@ -1,7 +1,7 @@
 import { Module } from './module';
 
 export interface User {
-    userNumber: string;
+    userName: string;
     name: string;
     surname: string;
     email: string;

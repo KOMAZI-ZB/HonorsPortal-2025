@@ -34,9 +34,8 @@ namespace API.Data.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     FirstName = table.Column<string>(type: "TEXT", nullable: false),
                     LastName = table.Column<string>(type: "TEXT", nullable: false),
-                    UserNumber = table.Column<string>(type: "TEXT", nullable: false),
                     JoinDate = table.Column<DateOnly>(type: "TEXT", nullable: true),
-                    UserName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
+                    UserName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: false),
                     NormalizedUserName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
                     NormalizedEmail = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
@@ -77,7 +76,7 @@ namespace API.Data.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    UserNumber = table.Column<string>(type: "TEXT", maxLength: 20, nullable: false),
+                    UserName = table.Column<string>(type: "TEXT", maxLength: 20, nullable: false),
                     WeekDays = table.Column<string>(type: "TEXT", maxLength: 20, nullable: false),
                     StartTime = table.Column<TimeOnly>(type: "TEXT", nullable: false),
                     EndTime = table.Column<TimeOnly>(type: "TEXT", nullable: false),
@@ -290,7 +289,7 @@ namespace API.Data.Migrations
                     FilePath = table.Column<string>(type: "TEXT", nullable: false),
                     UploadedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
                     UploadedBy = table.Column<string>(type: "TEXT", nullable: false),
-                    UploadedByUserNumber = table.Column<string>(type: "TEXT", nullable: false),
+                    UploadedByUserName = table.Column<string>(type: "TEXT", nullable: false),
                     ModuleId = table.Column<int>(type: "INTEGER", nullable: true),
                     Source = table.Column<string>(type: "TEXT", nullable: false)
                 },
@@ -413,9 +412,9 @@ namespace API.Data.Migrations
                 column: "NormalizedEmail");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AspNetUsers_UserNumber",
+                name: "IX_AspNetUsers_UserName",
                 table: "AspNetUsers",
-                column: "UserNumber",
+                column: "UserName",
                 unique: true);
 
             migrationBuilder.CreateIndex(

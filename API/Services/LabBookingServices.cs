@@ -18,13 +18,13 @@ public class LabBookingService(DataContext context, IMapper mapper) : ILabBookin
         // Join LabBookings to Users so we can include FirstName/LastName in the DTO
         return await (
             from b in _context.LabBookings
-            join u in _context.Users on b.UserNumber equals u.UserNumber into gj
+            join u in _context.Users on b.UserName equals u.UserName into gj
             from u in gj.DefaultIfEmpty()
             orderby b.BookingDate, b.StartTime
             select new LabBookingDto
             {
                 Id = b.Id,
-                UserNumber = b.UserNumber,
+                UserName = b.UserName,
                 WeekDays = b.WeekDays,
                 StartTime = b.StartTime,
                 EndTime = b.EndTime,
@@ -36,18 +36,18 @@ public class LabBookingService(DataContext context, IMapper mapper) : ILabBookin
         ).ToListAsync();
     }
 
-    public async Task<IEnumerable<LabBookingDto>> GetBookingsByUserAsync(string userNumber)
+    public async Task<IEnumerable<LabBookingDto>> GetBookingsByUserAsync(string userName)
     {
         return await (
             from b in _context.LabBookings
-            join u in _context.Users on b.UserNumber equals u.UserNumber into gj
+            join u in _context.Users on b.UserName equals u.UserName into gj
             from u in gj.DefaultIfEmpty()
-            where b.UserNumber == userNumber
+            where b.UserName == userName
             orderby b.BookingDate descending
             select new LabBookingDto
             {
                 Id = b.Id,
-                UserNumber = b.UserNumber,
+                UserName = b.UserName,
                 WeekDays = b.WeekDays,
                 StartTime = b.StartTime,
                 EndTime = b.EndTime,
@@ -59,7 +59,7 @@ public class LabBookingService(DataContext context, IMapper mapper) : ILabBookin
         ).ToListAsync();
     }
 
-    public async Task<bool> CreateBookingAsync(string userNumber, CreateLabBookingDto dto)
+    public async Task<bool> CreateBookingAsync(string userName, CreateLabBookingDto dto)
     {
         var conflict = await _context.LabBookings.AnyAsync(b =>
             b.BookingDate == dto.BookingDate &&
@@ -71,7 +71,7 @@ public class LabBookingService(DataContext context, IMapper mapper) : ILabBookin
 
         var booking = new LabBooking
         {
-            UserNumber = userNumber,
+            UserName = userName,
             WeekDays = dto.WeekDays,
             StartTime = dto.StartTime,
             EndTime = dto.EndTime,
@@ -83,12 +83,12 @@ public class LabBookingService(DataContext context, IMapper mapper) : ILabBookin
         return await _context.SaveChangesAsync() > 0;
     }
 
-    public async Task<bool> DeleteBookingAsync(int id, string userNumber, bool isPrivileged)
+    public async Task<bool> DeleteBookingAsync(int id, string userName, bool isPrivileged)
     {
         var booking = await _context.LabBookings.FindAsync(id);
         if (booking == null) return false;
 
-        if (!isPrivileged && booking.UserNumber != userNumber) return false;
+        if (!isPrivileged && booking.UserName != userName) return false;
 
         _context.LabBookings.Remove(booking);
         return await _context.SaveChangesAsync() > 0;

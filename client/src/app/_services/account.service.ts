@@ -81,15 +81,15 @@ export class AccountService {
     return this.http.get<User[]>(`${this.baseUrl}account/users-with-no-modules`);
   }
 
-  updateRoles(userNumber: string, roles: string[]) {
-    return this.http.put(`${this.baseUrl}account/update-roles/${userNumber}`, roles);
+  updateRoles(userName: string, roles: string[]) {
+    return this.http.put(`${this.baseUrl}account/update-roles/${userName}`, roles);
   }
 
-  updateUserModules(userNumber: string, semester1Ids: number[], semester2Ids: number[]) {
-    return this.http.put(`${this.baseUrl}account/users/${userNumber}/modules`, { semester1Ids, semester2Ids });
+  updateUserModules(userName: string, semester1Ids: number[], semester2Ids: number[]) {
+    return this.http.put(`${this.baseUrl}account/users/${userName}/modules`, { semester1Ids, semester2Ids });
   }
 
-  deleteUser(userNumber: string) {
-    return this.http.delete(`${this.baseUrl}account/users/${userNumber}`);
+  deleteUser(userName: string) {
+    return this.http.delete(`${this.baseUrl}account/users/${userName}`);
   }
 }

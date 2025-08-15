@@ -10,9 +10,9 @@
 
         <!-- User Number Field -->
         <div class="mb-3">
-            <input name="userNumber" [(ngModel)]="model.userNumber" class="form-control" type="text"
-                placeholder="Username" autocomplete="username" required />
-            <div class="text-danger mt-1" *ngIf="userNumberError">{{ userNumberError }}</div>
+            <input name="userName" [(ngModel)]="model.userName" class="form-control" type="text" placeholder="Username"
+                autocomplete="username" required />
+            <div class="text-danger mt-1" *ngIf="userNameError">{{ userNameError }}</div>
         </div>
 
         <!-- Password Field -->

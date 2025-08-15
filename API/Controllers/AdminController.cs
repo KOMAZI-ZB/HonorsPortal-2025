@@ -20,22 +20,29 @@ public class AdminController(
     [HttpPost("register-user")]
     public async Task<ActionResult> RegisterUser(RegisterUserDto dto)
     {
-        if (await userManager.Users.AnyAsync(x =>
-            x.UserNumber == dto.UserNumber || x.Email == dto.Email.Trim().ToLower()))
-        {
-            return BadRequest(new { message = "User with this UserNumber or Email already exists." });
-        }
+        var userNameTrimmed = dto.UserName?.Trim();
+        var emailLower = dto.Email?.Trim().ToLowerInvariant();
+
+        if (string.IsNullOrWhiteSpace(userNameTrimmed) || string.IsNullOrWhiteSpace(emailLower))
+            return BadRequest(new { message = "UserName and Email are required." });
+
+        // Check using normalized values to avoid case/culture issues
+        var exists = await userManager.Users.AnyAsync(x =>
+            x.NormalizedUserName == userNameTrimmed.ToUpperInvariant() ||
+            x.NormalizedEmail == emailLower.ToUpperInvariant());
+
+        if (exists)
+            return BadRequest(new { message = "User with this UserName or Email already exists." });
 
         var user = new AppUser
         {
             FirstName = dto.FirstName,
             LastName = dto.LastName,
-            UserNumber = dto.UserNumber,
-            Email = dto.Email.Trim().ToLower(),
-            UserName = dto.UserNumber,
-            NormalizedEmail = dto.Email.Trim().ToUpper(),
-            NormalizedUserName = dto.UserNumber.ToUpper(),
-            JoinDate = DateOnly.FromDateTime(DateTime.UtcNow) // ✅ Set JoinDate on registration
+            UserName = userNameTrimmed,                               // ✅ never null
+            Email = emailLower,                                        // normalized lower
+            NormalizedEmail = emailLower.ToUpperInvariant(),
+            NormalizedUserName = userNameTrimmed.ToUpperInvariant(),
+            JoinDate = DateOnly.FromDateTime(DateTime.UtcNow)          // ✅ set on registration
         };
 
         var result = await userManager.CreateAsync(user, dto.Password);
@@ -84,13 +91,13 @@ public class AdminController(
 
             result.Add(new UserDto
             {
-                UserNumber = user.UserNumber,
+                UserName = user.UserName ?? string.Empty,
                 Name = user.FirstName,
                 Surname = user.LastName,
                 Email = user.Email ?? string.Empty,
                 Roles = roles.ToArray(),
                 Token = "",
-                JoinDate = user.JoinDate, // ✅ Include JoinDate
+                JoinDate = user.JoinDate,
                 Modules = new List<ModuleDto>()
             });
         }
@@ -115,13 +122,13 @@ public class AdminController(
 
             result.Add(new UserDto
             {
-                UserNumber = user.UserNumber,
+                UserName = user.UserName ?? string.Empty,
                 Name = user.FirstName,
                 Surname = user.LastName,
                 Email = user.Email ?? string.Empty,
                 Roles = roles.ToArray(),
                 Token = "",
-                JoinDate = user.JoinDate, // ✅ Include JoinDate
+                JoinDate = user.JoinDate,
                 Modules = user.UserModules.Select(um => new ModuleDto
                 {
                     Id = um.Module.Id,
@@ -152,13 +159,13 @@ public class AdminController(
 
             result.Add(new UserDto
             {
-                UserNumber = user.UserNumber,
+                UserName = user.UserName ?? string.Empty,
                 Name = user.FirstName,
                 Surname = user.LastName,
                 Email = user.Email ?? string.Empty,
                 Roles = new[] { role },
                 Token = "",
-                JoinDate = user.JoinDate, // ✅ Include JoinDate
+                JoinDate = user.JoinDate,
                 Modules = user.UserModules.Select(um => new ModuleDto
                 {
                     Id = um.Module.Id,
@@ -189,13 +196,13 @@ public class AdminController(
 
             result.Add(new UserDto
             {
-                UserNumber = user.UserNumber,
+                UserName = user.UserName ?? string.Empty,
                 Name = user.FirstName,
                 Surname = user.LastName,
                 Email = user.Email ?? string.Empty,
                 Roles = roles.ToArray(),
                 Token = "",
-                JoinDate = user.JoinDate, // ✅ Include JoinDate
+                JoinDate = user.JoinDate,
                 Modules = new List<ModuleDto>()
             });
         }
@@ -204,10 +211,17 @@ public class AdminController(
     }
 
     [Authorize(Policy = "RequireAdminRole")]
-    [HttpPut("update-modules/{userNumber}")]
-    public async Task<ActionResult> UpdateModules(string userNumber, UpdateUserModulesDto dto)
+    [HttpPut("update-modules/{userName}")]
+    public async Task<ActionResult> UpdateModules(string userName, UpdateUserModulesDto dto)
     {
-        var user = await context.Users.Include(u => u.UserModules).FirstOrDefaultAsync(u => u.UserNumber == userNumber);
+        var routeUserName = userName?.Trim();
+        if (string.IsNullOrWhiteSpace(routeUserName))
+            return BadRequest("UserName is required.");
+
+        var user = await context.Users
+            .Include(u => u.UserModules)
+            .FirstOrDefaultAsync(u => u.UserName == routeUserName);
+
         if (user == null) return NotFound("User not found");
 
         context.UserModules.RemoveRange(user.UserModules);
@@ -231,10 +245,14 @@ public class AdminController(
     }
 
     [Authorize(Policy = "RequireAdminRole")]
-    [HttpPut("update-roles/{userNumber}")]
-    public async Task<ActionResult> UpdateRoles(string userNumber, List<string> roles)
+    [HttpPut("update-roles/{userName}")]
+    public async Task<ActionResult> UpdateRoles(string userName, List<string> roles)
     {
-        var user = await userManager.FindByNameAsync(userNumber);
+        var routeUserName = userName?.Trim();
+        if (string.IsNullOrWhiteSpace(routeUserName))
+            return BadRequest("UserName is required.");
+
+        var user = await userManager.FindByNameAsync(routeUserName);
         if (user == null) return NotFound("User not found");
 
         var currentRoles = await userManager.GetRolesAsync(user);
@@ -246,18 +264,26 @@ public class AdminController(
     }
 
     [Authorize(Policy = "RequireAdminRole")]
-    [HttpPut("update-user/{userNumber}")]
-    public async Task<ActionResult> UpdateUser(string userNumber, UpdateUserDto dto)
+    [HttpPut("update-user/{userName}")]
+    public async Task<ActionResult> UpdateUser(string userName, UpdateUserDto dto)
     {
-        var user = await userManager.Users.FirstOrDefaultAsync(u => u.UserNumber == userNumber);
+        var routeUserName = userName?.Trim();
+        if (string.IsNullOrWhiteSpace(routeUserName))
+            return BadRequest("UserName is required.");
+
+        var user = await userManager.Users.FirstOrDefaultAsync(u => u.UserName == routeUserName);
         if (user == null) return NotFound("User not found");
 
         user.FirstName = dto.FirstName;
         user.LastName = dto.LastName;
-        user.Email = dto.Email.ToLower();
-        user.NormalizedEmail = dto.Email.ToUpper();
-        user.UserName = userNumber;
-        user.NormalizedUserName = userNumber.ToUpper();
+
+        if (string.IsNullOrWhiteSpace(dto.Email))
+            return BadRequest("Email is required.");
+
+        user.Email = dto.Email.ToLower();                  // keep behavior
+        user.NormalizedEmail = dto.Email.ToUpper();        // keep behavior
+        user.UserName = routeUserName;                     // ✅ cannot become null
+        user.NormalizedUserName = routeUserName.ToUpperInvariant();
 
         var updateResult = await userManager.UpdateAsync(user);
         if (!updateResult.Succeeded)
@@ -279,15 +305,19 @@ public class AdminController(
     }
 
     [Authorize(Policy = "RequireAdminRole")]
-    [HttpDelete("delete-user/{userNumber}")]
-    public async Task<ActionResult> DeleteUser(string userNumber)
+    [HttpDelete("delete-user/{userName}")]
+    public async Task<ActionResult> DeleteUser(string userName)
     {
-        var user = await userManager.FindByNameAsync(userNumber);
+        var routeUserName = userName?.Trim();
+        if (string.IsNullOrWhiteSpace(routeUserName))
+            return BadRequest(new { message = "UserName is required." });
+
+        var user = await userManager.FindByNameAsync(routeUserName);
         if (user == null) return NotFound(new { message = "User not found" });
 
         context.Users.Remove(user);
         await context.SaveChangesAsync();
 
-        return Ok(new { message = $"User {userNumber} deleted." });
+        return Ok(new { message = $"User {routeUserName} deleted." });
     }
 }

@@ -27,8 +27,8 @@ public class SchedulerController(
     [HttpGet("lab/user")]
     public async Task<ActionResult<IEnumerable<LabBookingDto>>> GetMyBookings()
     {
-        var userNumber = User.GetUsername();
-        var bookings = await _bookingService.GetBookingsByUserAsync(userNumber);
+        var userName = User.GetUsername();
+        var bookings = await _bookingService.GetBookingsByUserAsync(userName);
         return Ok(bookings);
     }
 
@@ -37,30 +37,30 @@ public class SchedulerController(
     [HttpPost("lab")]
     public async Task<ActionResult> CreateBooking([FromBody] CreateLabBookingDto dto)
     {
-        var userNumber = User.GetUsername();
-        var success = await _bookingService.CreateBookingAsync(userNumber, dto);
+        var userName = User.GetUsername();
+        var success = await _bookingService.CreateBookingAsync(userName, dto);
         if (!success) return BadRequest("Booking overlaps with an existing entry.");
         return Ok(new { message = "Booking created successfully." });
     }
 
     // ✅ Create a lab booking on behalf of another user
     [Authorize(Roles = "Admin")]
-    [HttpPost("lab/assign/{userNumber}")]
-    public async Task<ActionResult> CreateBookingForUser(string userNumber, [FromBody] CreateLabBookingDto dto)
+    [HttpPost("lab/assign/{userName}")]
+    public async Task<ActionResult> CreateBookingForUser(string userName, [FromBody] CreateLabBookingDto dto)
     {
-        var success = await _bookingService.CreateBookingAsync(userNumber, dto);
+        var success = await _bookingService.CreateBookingAsync(userName, dto);
         if (!success) return BadRequest("Booking overlaps with an existing entry.");
-        return Ok(new { message = $"Booking created for user {userNumber}." });
+        return Ok(new { message = $"Booking created for user {userName}." });
     }
 
     // ✅ Delete a lab booking (self or admin/coordinator)
     [HttpDelete("lab/{id}")]
     public async Task<ActionResult> DeleteBooking(int id)
     {
-        var userNumber = User.GetUsername();
+        var userName = User.GetUsername();
         var isPrivileged = User.IsInRole("Coordinator") || User.IsInRole("Admin");
 
-        var success = await _bookingService.DeleteBookingAsync(id, userNumber, isPrivileged);
+        var success = await _bookingService.DeleteBookingAsync(id, userName, isPrivileged);
         if (!success) return Forbid("You do not have permission to delete this booking.");
         return Ok(new { message = "Booking deleted successfully." });
     }

@@ -201,7 +201,7 @@ export class EditModulesModalComponent implements OnInit, AfterViewInit, OnDestr
   }
 
   submit() {
-    this.adminService.updateUserModules(this.user.userNumber, this.selectedSemester1, this.selectedSemester2)
+    this.adminService.updateUserModules(this.user.userName, this.selectedSemester1, this.selectedSemester2)
       .subscribe({
         next: () => { this.toastr.success('Modules updated successfully'); this.justSaved = true; this.originalHide(); },
         error: err => { const message = err.error?.message || 'Failed to update modules'; this.toastr.error(message); }

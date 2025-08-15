@@ -31,33 +31,63 @@ namespace API.Services
             _cloudinary = new Cloudinary(acc);
         }
 
-        public async Task<DocumentDto> UploadDocumentAsync(UploadDocumentDto dto, string uploaderUserNumber)
+        public async Task<DocumentDto> UploadDocumentAsync(UploadDocumentDto dto, string uploaderUserName)
         {
             var user = await _context.Users
                 .Include(u => u.UserModules)
-                .SingleOrDefaultAsync(u => u.UserNumber == uploaderUserNumber);
+                .SingleOrDefaultAsync(u => u.UserName == uploaderUserName);
 
             if (user == null)
                 throw new Exception("User not found.");
 
-            if (dto.Source == "Module" && dto.ModuleId.HasValue)
+            // ---------------------------
+            // PERMISSION LOGIC (Adjusted)
+            // ---------------------------
+            if (dto.Source == "Module")
             {
-                var isAssigned = user.UserModules.Any(um =>
-                    um.ModuleId == dto.ModuleId &&
-                    (um.RoleContext == "Lecturer" || um.RoleContext == "Coordinator" || um.RoleContext == "Student"));
+                if (!dto.ModuleId.HasValue)
+                    throw new Exception("ModuleId is required for module uploads.");
 
-                if (!isAssigned)
-                    throw new Exception("This document must be assigned to a valid module you are registered for.");
+                var moduleId = dto.ModuleId.Value;
+
+                var moduleExists = await _context.Modules.AnyAsync(m => m.Id == moduleId);
+                if (!moduleExists)
+                    throw new Exception("Module not found.");
+
+                // Get roles to decide the rule
+                var roles = await _context.UserRoles
+                    .Include(ur => ur.Role)
+                    .Where(ur => ur.UserId == user.Id)
+                    .Select(ur => ur.Role.Name)
+                    .ToListAsync();
+
+                bool isAdmin = roles.Contains("Admin");
+                bool isCoordinator = roles.Contains("Coordinator");
+                bool isLecturer = roles.Contains("Lecturer");
+
+                // Lecturers must be assigned; Coordinators/Admins may upload to ANY module
+                if (isLecturer && !isCoordinator && !isAdmin)
+                {
+                    var lecturerAssigned = user.UserModules.Any(um =>
+                        um.ModuleId == moduleId &&
+                        (um.RoleContext == "Lecturer" || um.RoleContext == "Coordinator"));
+
+                    if (!lecturerAssigned)
+                        throw new Exception("Lecturers can only upload to modules they are assigned to.");
+                }
             }
 
-            var uploadResult = new RawUploadResult();
+            if (dto.File == null || dto.File.Length == 0)
+                throw new Exception("No file provided.");
+
+            RawUploadResult uploadResult;
             using var stream = dto.File.OpenReadStream();
 
             var uploadParams = new RawUploadParams
             {
                 File = new FileDescription(dto.File.FileName, stream),
                 Folder = "academic-portal-docs",
-                Type = "upload" // ✅ This makes the file publicly accessible
+                Type = "upload" // publicly accessible
             };
 
             uploadResult = await _cloudinary.UploadAsync(uploadParams, "raw");
@@ -65,6 +95,12 @@ namespace API.Services
             if (uploadResult.Error != null)
                 throw new Exception(uploadResult.Error.Message);
 
+            var fileUrl =
+                uploadResult.SecureUrl?.AbsoluteUri ??
+                uploadResult.Url?.AbsoluteUri ??
+                throw new Exception("Upload succeeded, but no URL was returned by Cloudinary.");
+
+            // Store the first role label for display
             var userRole = await _context.UserRoles
                 .Include(ur => ur.Role)
                 .Where(ur => ur.UserId == user.Id)
@@ -74,9 +110,10 @@ namespace API.Services
             var document = new Document
             {
                 Title = dto.Title,
-                FilePath = uploadResult.SecureUrl.AbsoluteUri,
-                UploadedBy = userRole ?? "Unknown",         // ⬅️ Updated: display user role instead of last name
-                UploadedByUserNumber = user.UserNumber,    // For access control
+                FilePath = fileUrl,
+                UploadedBy = userRole ?? "Unknown",
+                UploadedByUserName = user.UserName
+                    ?? throw new InvalidOperationException("User has no username."),
                 UploadedAt = DateTime.UtcNow,
                 ModuleId = dto.ModuleId,
                 Source = dto.Source
@@ -103,7 +140,8 @@ namespace API.Services
                 .ToListAsync();
         }
 
-        public async Task<PagedList<DocumentDto>> GetDocumentsByModulePaginatedAsync(int moduleId, PaginationParams paginationParams)
+        public async Task<PagedList<DocumentDto>> GetDocumentsByModulePaginatedAsync(
+            int moduleId, PaginationParams paginationParams)
         {
             var query = _context.Documents.AsQueryable();
 
@@ -130,12 +168,12 @@ namespace API.Services
                 .ToListAsync();
         }
 
-        public async Task<bool> DeleteDocumentAsync(int documentId, string requesterUserNumber, bool isAdminOrCoordinator)
+        public async Task<bool> DeleteDocumentAsync(int documentId, string requesterUserName, bool isAdminOrCoordinator)
         {
             var document = await _context.Documents.FindAsync(documentId);
             if (document == null) return false;
 
-            if (document.UploadedByUserNumber != requesterUserNumber && !isAdminOrCoordinator)
+            if (document.UploadedByUserName != requesterUserName && !isAdminOrCoordinator)
                 return false;
 
             _context.Documents.Remove(document);

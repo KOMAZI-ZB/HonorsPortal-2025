@@ -24,7 +24,7 @@ export class NotificationsComponent implements OnInit {
   pageSize = 10;
   bsModalRef?: BsModalRef;
   currentUserRole: string = '';
-  currentUserNumber: string = '';
+  currentUserName: string = '';
 
   // 🆕 For filtering
   typeFilter: string = '';
@@ -41,7 +41,7 @@ export class NotificationsComponent implements OnInit {
 
   ngOnInit(): void {
     const user = this.accountService.currentUser();
-    this.currentUserNumber = user?.userNumber || '';
+    this.currentUserName = user?.userName || '';
     this.currentUserRole = this.accountService.getUserRole();
     this.loadNotifications();
   }
@@ -79,7 +79,7 @@ export class NotificationsComponent implements OnInit {
 
   canDelete(notification: Notification): boolean {
     return (
-      notification.createdBy === this.currentUserNumber &&
+      notification.createdBy === this.currentUserName &&
       (this.currentUserRole === 'Admin' ||
         this.currentUserRole === 'Lecturer' ||
         this.currentUserRole === 'Coordinator')

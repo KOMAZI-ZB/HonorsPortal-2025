@@ -12,7 +12,7 @@ namespace API.Entities
 
         public string? ImagePath { get; set; }
 
-        public string CreatedBy { get; set; } = string.Empty; // UserNumber
+        public string CreatedBy { get; set; } = string.Empty; // UserName
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

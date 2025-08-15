@@ -131,7 +131,7 @@ export class EditUserModalComponent implements OnInit, AfterViewInit, OnDestroy 
       roles: this.selectedRoles
     };
 
-    this.http.put(`${this.baseUrl}admin/update-user/${this.user.userNumber}`, payload).subscribe({
+    this.http.put(`${this.baseUrl}admin/update-user/${this.user.userName}`, payload).subscribe({
       next: () => { this.toastr.success('User updated successfully'); this.justSaved = true; this.originalHide(); },
       error: err => {
         console.error('Update failed:', err);

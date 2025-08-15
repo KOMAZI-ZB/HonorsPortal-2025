@@ -45,7 +45,7 @@ export class AssessmentScheduleComponent implements OnInit {
     if (first) return first;
     if (last) return last;
 
-    return pick(u.displayName, u.username, u.userNumber);
+    return pick(u.displayName, u.username, u.userName);
   }
 
   onSemesterChange(): void {

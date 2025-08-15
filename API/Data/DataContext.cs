@@ -46,6 +46,9 @@ namespace API.Data
             // ✅ AppUser ↔ AppUserRole
             builder.Entity<AppUser>(b =>
             {
+                // ✅ Make Identity's built-in UserName required (no duplicate property on AppUser)
+                b.Property(u => u.UserName).IsRequired();
+
                 b.HasMany(u => u.UserRoles)
                  .WithOne(ur => ur.User)
                  .HasForeignKey(ur => ur.UserId)
@@ -133,7 +136,7 @@ namespace API.Data
             // ✅ Constraints for Lab Bookings
             builder.Entity<LabBooking>(b =>
             {
-                b.Property(lb => lb.UserNumber).IsRequired().HasMaxLength(20);
+                b.Property(lb => lb.UserName).IsRequired().HasMaxLength(20);
                 b.Property(lb => lb.WeekDays).IsRequired().HasMaxLength(20);
                 b.Property(lb => lb.BookingDate).IsRequired();
                 b.Property(lb => lb.StartTime).IsRequired();

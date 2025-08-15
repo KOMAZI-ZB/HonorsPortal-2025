@@ -40,7 +40,7 @@ export class ClassScheduleComponent implements OnInit {
     const first = pick(u.name);
     const last = pick(u.surname);
     if (first && last) return `${first} ${last}`;
-    return first || last || pick(u.displayName, u.username, u.userNumber);
+    return first || last || pick(u.displayName, u.username, u.userName);
   }
 
   loadSchedule(): void {

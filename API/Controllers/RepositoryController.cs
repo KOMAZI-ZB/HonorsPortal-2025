@@ -28,11 +28,11 @@ public class RepositoryController(
     [HttpPost("upload")]
     public async Task<ActionResult<DocumentDto>> UploadToRepository([FromForm] UploadDocumentDto dto)
     {
-        var userNumber = User.GetUsername();
+        var userName = User.GetUsername();
         dto.Source = "Repository";
         dto.ModuleId = null;
 
-        var result = await _documentService.UploadDocumentAsync(dto, userNumber);
+        var result = await _documentService.UploadDocumentAsync(dto, userName);
         if (result == null)
             return BadRequest("Upload failed.");
 
@@ -40,12 +40,12 @@ public class RepositoryController(
         {
             Type = "RepositoryUpdate",
             Title = "Internal Repository Updated",
-            Message = $"A new document was uploaded by {userNumber} to the internal repository.",
+            Message = $"A new document was uploaded by {userName} to the internal repository.",
             Image = null,
             ModuleId = null
         };
 
-        await _notificationService.CreateAsync(notification, userNumber);
+        await _notificationService.CreateAsync(notification, userName);
         return Ok(result);
     }
 
@@ -61,10 +61,10 @@ public class RepositoryController(
     [HttpDelete("{documentId}")]
     public async Task<ActionResult> Delete(int documentId)
     {
-        var userNumber = User.GetUsername();
+        var userName = User.GetUsername();
         var isPrivileged = User.IsInRole("Coordinator") || User.IsInRole("Admin");
 
-        var success = await _documentService.DeleteDocumentAsync(documentId, userNumber, isPrivileged);
+        var success = await _documentService.DeleteDocumentAsync(documentId, userName, isPrivileged);
         if (!success)
             return StatusCode(403, new { message = "You are not authorized to delete this document." });
 

@@ -20,8 +20,8 @@ public class DocumentsController(
     [HttpPost("upload")]
     public async Task<ActionResult<DocumentDto>> Upload([FromForm] UploadDocumentDto dto)
     {
-        var userNumber = User.GetUsername();
-        var result = await _documentService.UploadDocumentAsync(dto, userNumber);
+        var userName = User.GetUsername();
+        var result = await _documentService.UploadDocumentAsync(dto, userName);
 
         if (result == null)
             return BadRequest("Upload failed.");
@@ -35,7 +35,7 @@ public class DocumentsController(
             ModuleId = dto.ModuleId
         };
 
-        await _notificationService.CreateAsync(notification, userNumber);
+        await _notificationService.CreateAsync(notification, userName);
 
         return Ok(result);
     }
@@ -64,10 +64,10 @@ public class DocumentsController(
     [HttpDelete("{documentId}")]
     public async Task<ActionResult> Delete(int documentId)
     {
-        var userNumber = User.GetUsername();
+        var userName = User.GetUsername();
         var isPrivileged = User.IsInRole("Coordinator") || User.IsInRole("Admin");
 
-        var success = await _documentService.DeleteDocumentAsync(documentId, userNumber, isPrivileged);
+        var success = await _documentService.DeleteDocumentAsync(documentId, userName, isPrivileged);
 
         if (!success)
         {

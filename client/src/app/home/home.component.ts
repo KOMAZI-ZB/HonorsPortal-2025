@@ -19,11 +19,11 @@ export class HomeComponent {
 
   model: any = {};
   showPassword = false;
-  userNumberError = '';
+  userNameError = '';
   passwordError = '';
 
   login() {
-    this.userNumberError = '';
+    this.userNameError = '';
     this.passwordError = '';
 
     this.accountService.login(this.model).subscribe({
@@ -34,7 +34,7 @@ export class HomeComponent {
       error: error => {
         const errObj = error?.error;
         if (typeof errObj === 'object') {
-          this.userNumberError = errObj?.userNumber || '';
+          this.userNameError = errObj?.userName || '';
           this.passwordError = errObj?.password || '';
         }
       }

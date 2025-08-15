@@ -44,15 +44,15 @@ export class UserManagementComponent implements OnInit {
   filterUsers(): void {
     const term = this.searchTerm.toLowerCase();
     this.filteredUsers = this.users.filter(user =>
-      user.userNumber.toLowerCase().includes(term) ||
+      user.userName.toLowerCase().includes(term) ||
       user.name.toLowerCase().includes(term) ||
       user.surname.toLowerCase().includes(term) ||
       user.roles.some(role => role.toLowerCase().includes(term))
     );
   }
 
-  trackByUserNumber(index: number, user: User): string {
-    return user.userNumber;
+  trackByUserName(index: number, user: User): string {
+    return user.userName;
   }
 
   openAddUserModal() {
@@ -61,7 +61,7 @@ export class UserManagementComponent implements OnInit {
   }
 
   openEditModulesModal(user: User) {
-    const matchedUser = this.users.find(u => u.userNumber === user.userNumber);
+    const matchedUser = this.users.find(u => u.userName === user.userName);
     if (!matchedUser) return;
 
     this.modalRef = this.modalService.show(EditModulesModalComponent, {

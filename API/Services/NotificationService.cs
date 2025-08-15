@@ -35,7 +35,7 @@ public class NotificationService : INotificationService
         // ✅ Fetch current user with modules and roles
         var user = await _context.Users
             .Include(u => u.UserModules)
-            .FirstOrDefaultAsync(u => u.UserNumber == queryParams.CurrentUserNumber);
+            .FirstOrDefaultAsync(u => u.UserName == queryParams.CurrentUserName);
 
         if (user == null)
         {
@@ -118,7 +118,7 @@ public class NotificationService : INotificationService
         );
     }
 
-    public async Task<NotificationDto?> CreateAsync(CreateNotificationDto dto, string createdByUserNumber)
+    public async Task<NotificationDto?> CreateAsync(CreateNotificationDto dto, string createdByUserName)
     {
         // Upload image if present
         string? imagePath = null;
@@ -163,7 +163,7 @@ public class NotificationService : INotificationService
         // If created by a lecturer, verify module allocation (defence-in-depth)
         var creator = await _context.Users
             .Include(u => u.UserModules)
-            .FirstOrDefaultAsync(u => u.UserNumber == createdByUserNumber);
+            .FirstOrDefaultAsync(u => u.UserName == createdByUserName);
 
         if (creator == null) throw new Exception("Creator not found.");
 
@@ -193,7 +193,7 @@ public class NotificationService : INotificationService
             Title = dto.Title.Trim(),
             Message = dto.Message,
             ImagePath = imagePath,
-            CreatedBy = createdByUserNumber,
+            CreatedBy = createdByUserName,
             CreatedAt = DateTime.UtcNow,
             ModuleId = dto.ModuleId,
             Audience = audience
@@ -205,12 +205,12 @@ public class NotificationService : INotificationService
         return _mapper.Map<NotificationDto>(notification);
     }
 
-    public async Task<bool> DeleteAsync(int id, string requesterUserNumber, bool isAdmin)
+    public async Task<bool> DeleteAsync(int id, string requesterUserName, bool isAdmin)
     {
         var notification = await _context.Notifications.FindAsync(id);
         if (notification == null) return false;
 
-        if (!isAdmin && notification.CreatedBy != requesterUserNumber)
+        if (!isAdmin && notification.CreatedBy != requesterUserName)
             return false;
 
         _context.Notifications.Remove(notification);

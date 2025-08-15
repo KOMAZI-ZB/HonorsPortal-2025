@@ -105,11 +105,8 @@ namespace API.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("UserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("UserNumber")
                         .IsRequired()
+                        .HasMaxLength(256)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -121,7 +118,7 @@ namespace API.Data.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
 
-                    b.HasIndex("UserNumber")
+                    b.HasIndex("UserName")
                         .IsUnique();
 
                     b.ToTable("AspNetUsers", (string)null);
@@ -244,7 +241,7 @@ namespace API.Data.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("UploadedByUserNumber")
+                    b.Property<string>("UploadedByUserName")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
@@ -295,7 +292,7 @@ namespace API.Data.Migrations
                     b.Property<TimeOnly>("StartTime")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("UserNumber")
+                    b.Property<string>("UserName")
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("TEXT");

@@ -1,6 +1,6 @@
 export interface LabBooking {
     id?: number;            // Optional during creation
-    userNumber?: string;    // Optional when posting a new booking (filled on the server)
+    userName?: string;    // Optional when posting a new booking (filled on the server)
     firstName?: string;     // ✅ Added to match backend DTO
     lastName?: string;      // ✅ Added to match backend DTO
     weekDays: string;

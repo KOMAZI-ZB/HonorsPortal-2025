@@ -14,6 +14,6 @@ namespace API.DTOs
 
         public int? ModuleId { get; set; } // null for Repository files
                                            // ✅ Optional: expose user number for UI logic
-        public string? UploadedByUserNumber { get; set; }
+        public string? UploadedByUserName { get; set; }
     }
 }

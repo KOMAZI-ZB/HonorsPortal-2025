@@ -28,8 +28,8 @@ export class LabbookingService {
   }
 
   // ✅ Create a booking for a specific user (Admin only)
-  createBookingForUser(userNumber: string, booking: LabBooking): Observable<any> {
-    return this.http.post(`${this.baseUrl}scheduler/lab/assign/${userNumber}`, booking);
+  createBookingForUser(userName: string, booking: LabBooking): Observable<any> {
+    return this.http.post(`${this.baseUrl}scheduler/lab/assign/${userName}`, booking);
   }
 
   // ✅ Delete an existing lab booking (only if authorized)

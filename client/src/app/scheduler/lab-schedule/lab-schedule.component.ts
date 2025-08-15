@@ -49,7 +49,7 @@ export class LabScheduleComponent implements OnInit {
   // ✅ Full name for PDF header:
   // Prefer account fields (name + surname). If either is missing,
   // fall back to the current user's booking (firstName + lastName).
-  // Then safe fallbacks (displayName/username/userNumber).
+  // Then safe fallbacks (displayName/username/userName).
   get userFullName(): string {
     const u: any = this.user || {};
     const pick = (...cands: any[]) =>
@@ -61,8 +61,8 @@ export class LabScheduleComponent implements OnInit {
 
     // 2) If missing, fall back to a booking for this user
     if (!first || !last) {
-      const meNumber = pick(u.userNumber);
-      const mine = this.bookings.find(b => (b.userNumber ?? '') === meNumber);
+      const meNumber = pick(u.userName);
+      const mine = this.bookings.find(b => (b.userName ?? '') === meNumber);
       if (mine) {
         if (!first) first = pick(mine.firstName);
         if (!last) last = pick(mine.lastName);
@@ -74,7 +74,7 @@ export class LabScheduleComponent implements OnInit {
     if (last) return last;
 
     // 3) Final safety fallbacks
-    return pick(u.displayName, u.username, u.userNumber);
+    return pick(u.displayName, u.username, u.userName);
   }
 
   // ⏰ Updated: make one-hour slots that start at :10 (e.g., 06:10–07:10, 07:10–08:10, ...)
@@ -160,7 +160,7 @@ export class LabScheduleComponent implements OnInit {
   }
 
   canUnbook(booking: LabBooking): boolean {
-    return this.roles.includes('Admin') || booking.userNumber === this.user?.userNumber;
+    return this.roles.includes('Admin') || booking.userName === this.user?.userName;
   }
 
   openBookingModal() {

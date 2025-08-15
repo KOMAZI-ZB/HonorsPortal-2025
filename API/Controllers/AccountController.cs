@@ -20,14 +20,23 @@ public class AccountController(
     {
         var errors = new Dictionary<string, string>();
 
+        var inputUserName = loginDto.UserName?.Trim();
+        if (string.IsNullOrWhiteSpace(inputUserName))
+        {
+            errors["userName"] = "User name is required.";
+            return Unauthorized(errors);
+        }
+
+        var normalized = inputUserName.ToUpperInvariant();
+
         var user = await userManager.Users
             .Include(u => u.UserModules)
                 .ThenInclude(um => um.Module)
-            .FirstOrDefaultAsync(x => x.UserNumber == loginDto.UserNumber);
+            .FirstOrDefaultAsync(u => u.NormalizedUserName == normalized);
 
         if (user == null)
         {
-            errors["userNumber"] = "User number not found.";
+            errors["userName"] = "User number not found.";
             return Unauthorized(errors);
         }
 
@@ -42,12 +51,13 @@ public class AccountController(
 
         return new UserDto
         {
-            UserNumber = user.UserNumber,
+            UserName = user.UserName ?? string.Empty, // ✅ guard
             Name = user.FirstName,
             Surname = user.LastName,
             Email = user.Email ?? string.Empty,
             Roles = roles.ToArray(),
             Token = await tokenService.CreateToken(user),
+            JoinDate = user.JoinDate, // ✅ include JoinDate for consistency
             Modules = user.UserModules.Select(um => new ModuleDto
             {
                 Id = um.Module.Id,

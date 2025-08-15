@@ -27,7 +27,7 @@ export class AddUserModalComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @ViewChild('usernameInput') usernameInput!: ElementRef<HTMLInputElement>;
 
-  userNumber = '';
+  userName = '';
   firstName = '';
   lastName = '';
   email = '';
@@ -53,7 +53,7 @@ export class AddUserModalComponent implements OnInit, AfterViewInit, OnDestroy {
   // (only ngOnInit filtering changed)
 
   ngOnInit(): void {
-    this.userNumber = '';
+    this.userName = '';
     this.firstName = '';
     this.lastName = '';
     this.email = '';
@@ -140,7 +140,7 @@ export class AddUserModalComponent implements OnInit, AfterViewInit, OnDestroy {
 
   submit() {
     const payload = {
-      userNumber: this.userNumber,
+      userName: this.userName,
       firstName: this.firstName,
       lastName: this.lastName,
       email: this.email,

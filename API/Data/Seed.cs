@@ -47,15 +47,21 @@ public class Seed
 
             foreach (var dto in users)
             {
+                var userNameTrimmed = dto.UserName?.Trim();
+                var emailLower = dto.Email?.Trim().ToLowerInvariant();
+
+                // ✅ Ensure UserName and Email are not null/empty; skip invalid seed rows
+                if (string.IsNullOrWhiteSpace(userNameTrimmed) || string.IsNullOrWhiteSpace(emailLower))
+                    continue;
+
                 var user = new AppUser
                 {
                     FirstName = dto.FirstName,
                     LastName = dto.LastName,
-                    UserNumber = dto.UserNumber,
-                    Email = dto.Email.ToLower(),
-                    UserName = dto.UserNumber,
-                    NormalizedEmail = dto.Email.ToUpper(),
-                    NormalizedUserName = dto.UserNumber.ToUpper(),
+                    UserName = userNameTrimmed,                              // ✅ never null
+                    Email = emailLower,
+                    NormalizedEmail = emailLower.ToUpperInvariant(),
+                    NormalizedUserName = userNameTrimmed.ToUpperInvariant(),
                     JoinDate = dto.JoinDate ?? DateOnly.FromDateTime(DateTime.UtcNow)
                 };
 

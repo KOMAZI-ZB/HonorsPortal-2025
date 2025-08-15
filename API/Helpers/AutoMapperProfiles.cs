@@ -37,7 +37,7 @@ namespace API.Helpers
 
             // Documents, FAQ (unchanged)
             CreateMap<Document, DocumentDto>()
-                .ForMember(dest => dest.UploadedByUserNumber, opt => opt.MapFrom(src => src.UploadedByUserNumber));
+                .ForMember(dest => dest.UploadedByUserName, opt => opt.MapFrom(src => src.UploadedByUserName));
             CreateMap<UploadDocumentDto, Document>();
             CreateMap<FaqEntry, FaqEntryDto>();
 

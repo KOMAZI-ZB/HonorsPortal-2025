@@ -28,8 +28,8 @@ public class NotificationsController(INotificationService notificationService) :
     [HttpGet]
     public async Task<ActionResult<IEnumerable<NotificationDto>>> GetAll([FromQuery] QueryParams queryParams)
     {
-        // ✅ Ensure current user's UserNumber is set for filtering by JoinDate
-        queryParams.CurrentUserNumber = User.GetUsername();
+        // ✅ Ensure current user's UserName is set for filtering by JoinDate
+        queryParams.CurrentUserName = User.GetUsername();
 
         var result = await _notificationService.GetAllPaginatedAsync(queryParams);
         Response.AddPaginationHeader(result);
@@ -40,7 +40,7 @@ public class NotificationsController(INotificationService notificationService) :
     [Authorize(Roles = "Lecturer,Coordinator,Admin")]
     public async Task<ActionResult<NotificationDto>> Create([FromForm] CreateNotificationDto dto)
     {
-        var userNumber = User.GetUsername();
+        var userName = User.GetUsername();
 
         // Type guard
         if (!AllowedTypes.Any(t => string.Equals(t, dto.Type, StringComparison.OrdinalIgnoreCase)))
@@ -66,17 +66,17 @@ public class NotificationsController(INotificationService notificationService) :
             dto.Audience = "ModuleStudents";
         }
 
-        var result = await _notificationService.CreateAsync(dto, userNumber);
+        var result = await _notificationService.CreateAsync(dto, userName);
         return Ok(result);
     }
 
     [HttpDelete("{id}")]
     public async Task<ActionResult> Delete(int id)
     {
-        var userNumber = User.GetUsername();
+        var userName = User.GetUsername();
         var isAdmin = User.IsInRole("Admin");
 
-        var success = await _notificationService.DeleteAsync(id, userNumber, isAdmin);
+        var success = await _notificationService.DeleteAsync(id, userName, isAdmin);
 
         if (!success)
             return Forbid("You are not authorized to delete this notification.");

@@ -5,7 +5,7 @@ namespace API.Interfaces
 {
     public interface IDocumentService
     {
-        Task<DocumentDto> UploadDocumentAsync(UploadDocumentDto dto, string uploaderUserNumber);
+        Task<DocumentDto> UploadDocumentAsync(UploadDocumentDto dto, string uploaderUserName);
 
         Task<IEnumerable<DocumentDto>> GetDocumentsByModuleAsync(int moduleId);
 
@@ -13,6 +13,6 @@ namespace API.Interfaces
 
         Task<IEnumerable<DocumentDto>> GetInternalRepositoryDocumentsAsync();
 
-        Task<bool> DeleteDocumentAsync(int documentId, string requesterUserNumber, bool isAdminOrCoordinator);
+        Task<bool> DeleteDocumentAsync(int documentId, string requesterUserName, bool isAdminOrCoordinator);
     }
 }

@@ -17,7 +17,7 @@ namespace API.Entities
         // Uploader (LastName for traceability)
         public string UploadedBy { get; set; } = string.Empty;
         // ✅ NEW FIELD to correctly track uploader by identity
-        public string UploadedByUserNumber { get; set; } = string.Empty;
+        public string UploadedByUserName { get; set; } = string.Empty;
 
         // Nullable → If null, this is a Repository document
         public int? ModuleId { get; set; }
