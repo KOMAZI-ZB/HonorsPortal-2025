@@ -28,7 +28,6 @@ export class CreateNotificationModalComponent implements OnInit, AfterViewInit, 
   private backdropCapture?: (ev: MouseEvent) => void;
   private escCapture?: (ev: KeyboardEvent) => void;
 
-  // 🆕 Target audience options + modules for selection
   audiences = ['All', 'Students', 'Staff', 'ModuleStudents'] as const;
   modules: Module[] = [];
 
@@ -51,9 +50,6 @@ export class CreateNotificationModalComponent implements OnInit, AfterViewInit, 
     this.currentUserRole = this.accountService.getUserRole();
     this.initForm();
 
-    // Load selectable modules:
-    // - Lecturers/Coordinators: only modules assigned to them
-    // - Admin: all modules
     if (this.isLecturer || this.isCoordinator) {
       this.moduleService.getAssignedModules().subscribe({
         next: (mods) => (this.modules = mods || []),
@@ -71,12 +67,12 @@ export class CreateNotificationModalComponent implements OnInit, AfterViewInit, 
     this.bsModalRef.hide = () => this.attemptClose();
     this.justSaved = false;
 
-    // Dynamic validators: when audience = ModuleStudents, moduleId is required
-    this.form.get('audience')?.valueChanges.subscribe(aud => {
+    // Dynamic validator for moduleId
+    this.form.get('audience')?.valueChanges.subscribe(() => {
       this.applyModuleRequirement();
     });
 
-    // Lecturers are constrained: force audience to ModuleStudents and require moduleId
+    // Lecturers: force ModuleStudents
     if (this.isLecturer) {
       this.form.get('audience')?.setValue('ModuleStudents', { emitEvent: true });
       this.applyModuleRequirement();
@@ -116,21 +112,18 @@ export class CreateNotificationModalComponent implements OnInit, AfterViewInit, 
   }
 
   private initForm() {
-    // Default audience:
-    // - Lecturer: ModuleStudents (enforced)
-    // - Others: All
     const defaultAudience = this.isLecturer ? 'ModuleStudents' : 'All';
 
     this.form = this.fb.group({
+      // 🔹 Manual = Announcement: only 'General' or 'System'
       type: ['General', Validators.required],
       title: ['', [Validators.required, Validators.minLength(3)]],
       message: ['', [Validators.required, Validators.minLength(5)]],
-      audience: [defaultAudience, Validators.required],          // 🆕
-      moduleId: [null],                                          // required dynamically in some cases
+      audience: [defaultAudience, Validators.required],
+      moduleId: [null],
       image: [null]
     });
 
-    // For Lecturers, prevent changing the audience away from ModuleStudents in the UI.
     if (this.isLecturer) {
       this.form.get('audience')?.disable({ emitEvent: false });
     }
@@ -155,7 +148,6 @@ export class CreateNotificationModalComponent implements OnInit, AfterViewInit, 
     const file = event.target.files[0];
     if (file) {
       this.imageFile = file;
-      // Mark dirty to trigger confirm-close when needed
       this.form.markAsDirty();
     }
   }
@@ -189,15 +181,15 @@ export class CreateNotificationModalComponent implements OnInit, AfterViewInit, 
     }
 
     const formData = new FormData();
-    // If audience control is disabled (Lecturer), we still want to send its value
+
     const audienceValue = this.isLecturer
       ? 'ModuleStudents'
       : (this.form.get('audience')?.value || 'All');
 
-    formData.append('type', this.form.get('type')?.value);
+    formData.append('type', this.form.get('type')?.value);   // 'General' or 'System'
     formData.append('title', this.form.get('title')?.value);
     formData.append('message', this.form.get('message')?.value);
-    formData.append('audience', audienceValue); // 🆕
+    formData.append('audience', audienceValue);
 
     const moduleId = this.form.get('moduleId')?.value;
     if (moduleId !== null && moduleId !== undefined && moduleId !== '') {
@@ -208,16 +200,16 @@ export class CreateNotificationModalComponent implements OnInit, AfterViewInit, 
 
     this.notificationService.create(formData).subscribe({
       next: () => {
-        this.toastr.success('Notification posted');
-        localStorage.setItem('newNotification', 'true');
+        this.toastr.success('Announcement posted');
+        // 🔹 Align with your app-wide bell flag
+        localStorage.setItem('newAnnouncement', 'true');
 
-        // mark pristine and allow silent close
         this.justSaved = true;
         this.form.markAsPristine();
         this.originalHide();
       },
       error: err => {
-        this.toastr.error('Failed to post notification');
+        this.toastr.error('Failed to post announcement');
         console.error(err);
       }
     });

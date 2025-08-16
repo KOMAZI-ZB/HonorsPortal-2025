@@ -32,7 +32,7 @@ public class NotificationService : INotificationService
 
     public async Task<PagedList<NotificationDto>> GetAllPaginatedAsync(QueryParams queryParams)
     {
-        // ✅ Fetch current user with modules and roles
+        // ✅ Current user for JoinDate & module scoping
         var user = await _context.Users
             .Include(u => u.UserModules)
             .FirstOrDefaultAsync(u => u.UserName == queryParams.CurrentUserName);
@@ -57,33 +57,35 @@ public class NotificationService : INotificationService
 
         var query = _context.Notifications.AsQueryable();
 
-        // ✅ Filter by join date
+        // ✅ Join date filter
         if (joinDate is not null)
         {
             var joinDateTime = joinDate.Value.ToDateTime(TimeOnly.MinValue);
             query = query.Where(a => a.CreatedAt >= joinDateTime);
         }
 
-        // ✅ Base module scoping (global = null, else must be a registered module)
+        // ✅ Module scoping (null = global; else must be one of user's modules)
         query = query.Where(a => a.ModuleId == null || registeredModuleIds.Contains(a.ModuleId.Value));
 
-        // ✅ Filter by type (notification vs notification)
-        if (!string.IsNullOrEmpty(queryParams.TypeFilter))
+        // ✅ Filter by category: announcements vs notifications
+        if (!string.IsNullOrWhiteSpace(queryParams.TypeFilter))
         {
-            var filter = queryParams.TypeFilter.ToLower();
-            if (filter == "notification")
+            var filter = queryParams.TypeFilter.Trim().ToLowerInvariant();
+            if (filter == "announcements")
             {
+                // Only General/System
                 query = query.Where(a =>
                     a.Type.ToLower() == "general" || a.Type.ToLower() == "system");
             }
-            else if (filter == "notification")
+            else if (filter == "notifications")
             {
+                // Everything except General/System
                 query = query.Where(a =>
                     a.Type.ToLower() != "general" && a.Type.ToLower() != "system");
             }
         }
 
-        // ✅ Audience filtering
+        // ✅ Audience targeting
         query = query.Where(a =>
             a.Audience == "All" ||
             (a.Audience == "Students" && isStudent) ||
@@ -91,25 +93,26 @@ public class NotificationService : INotificationService
             (a.Audience == "ModuleStudents" && isStudent && a.ModuleId != null && registeredModuleIds.Contains(a.ModuleId.Value))
         );
 
-        // ✅ Left-join read receipts to compute IsRead
+        // ✅ Compute IsRead via left-join
         var readsForUser = _context.NotificationReads.Where(r => r.UserId == userId);
 
-        var dtoQuery = from a in query.OrderByDescending(a => a.CreatedAt)
-                       join r in readsForUser on a.Id equals r.NotificationId into gj
-                       from read in gj.DefaultIfEmpty()
-                       select new NotificationDto
-                       {
-                           Id = a.Id,
-                           Type = a.Type,
-                           Title = a.Title,
-                           Message = a.Message,
-                           ImagePath = a.ImagePath,
-                           CreatedBy = a.CreatedBy,
-                           CreatedAt = a.CreatedAt,
-                           ModuleId = a.ModuleId,
-                           Audience = a.Audience,
-                           IsRead = read != null
-                       };
+        var dtoQuery =
+            from a in query.OrderByDescending(a => a.CreatedAt)
+            join r in readsForUser on a.Id equals r.NotificationId into gj
+            from read in gj.DefaultIfEmpty()
+            select new NotificationDto
+            {
+                Id = a.Id,
+                Type = a.Type,
+                Title = a.Title,
+                Message = a.Message,
+                ImagePath = a.ImagePath,
+                CreatedBy = a.CreatedBy,
+                CreatedAt = a.CreatedAt,
+                ModuleId = a.ModuleId,
+                Audience = a.Audience,
+                IsRead = read != null
+            };
 
         return await PagedList<NotificationDto>.CreateAsync(
             dtoQuery,
@@ -141,26 +144,24 @@ public class NotificationService : INotificationService
         // Normalize audience
         var audience = string.IsNullOrWhiteSpace(dto.Audience) ? "All" : dto.Audience;
 
-        // If this is a document upload, ensure it's module-scoped to students and includes module code.
+        // If document upload, force ModuleStudents and include module code context
         if (dto.Type.Equals("DocumentUpload", StringComparison.OrdinalIgnoreCase) && dto.ModuleId is not null)
         {
-            audience = "ModuleStudents"; // only students registered for the module
+            audience = "ModuleStudents";
 
             var module = await _context.Modules.FindAsync(dto.ModuleId.Value);
             if (module != null)
             {
-                // Prefix module code to title if not already present
                 var codeTag = $"[{module.ModuleCode}] ";
                 if (!dto.Title.StartsWith(codeTag, StringComparison.OrdinalIgnoreCase))
                     dto.Title = codeTag + dto.Title;
 
-                // Ensure module code is in message
                 if (!dto.Message.Contains(module.ModuleCode, StringComparison.OrdinalIgnoreCase))
                     dto.Message = $"{dto.Message} (Module: {module.ModuleCode})";
             }
         }
 
-        // If created by a lecturer, verify module allocation (defence-in-depth)
+        // Defence-in-depth for Lecturer
         var creator = await _context.Users
             .Include(u => u.UserModules)
             .FirstOrDefaultAsync(u => u.UserName == createdByUserName);
@@ -224,7 +225,7 @@ public class NotificationService : INotificationService
 
         var already = await _context.NotificationReads
             .AnyAsync(r => r.NotificationId == notificationId && r.UserId == userId);
-        if (already) return true; // idempotent
+        if (already) return true;
 
         _context.NotificationReads.Add(new NotificationRead
         {

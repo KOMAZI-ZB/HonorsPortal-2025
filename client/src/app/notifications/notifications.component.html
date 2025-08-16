@@ -1,4 +1,4 @@
-<!-- Notifications Header -->
+<!-- Header -->
 <div class="row align-items-start mb-3">
     <div class="col-md-6">
         <h2 class="mb-0">Notification Board</h2>
@@ -11,23 +11,22 @@
                 <select id="filterSelect" class="form-select d-inline-block w-auto" [(ngModel)]="typeFilter"
                     (change)="loadNotifications()">
                     <option value="">All</option>
-                    <option value="notification">Notifications</option>
-                    <option value="notification">Notifications</option>
+                    <option value="announcements">Announcements</option>
+                    <option value="notifications">Notifications</option>
                 </select>
             </div>
 
-            <!-- Post Notification Button -->
+            <!-- Compose button (manual) -->
             <button *ngIf="currentUserRole !== 'Student'" class="btn btn-primary" (click)="openPostModal()">
-                Post Notification
+                Post Announcement
             </button>
         </div>
     </div>
 </div>
 
-<!-- Notification Feed -->
+<!-- Feed -->
 <div *ngFor="let ann of notifications" class="card mb-3 shadow-sm">
     <div class="card-body">
-        <!-- Header Row -->
         <div class="d-flex justify-content-between align-items-center mb-2">
             <div class="d-flex align-items-center gap-2">
                 <span class="text-uppercase fw-bold text-primary small">{{ formatBadgeLabel(ann.type) }}</span>
@@ -48,19 +47,15 @@
             </div>
         </div>
 
-        <!-- Title -->
         <h5 class="card-title mb-1">{{ ann.title }}</h5>
-
-        <!-- Message -->
         <p class="card-text">{{ ann.message }}</p>
 
-        <!-- Image (clickable) -->
         <img *ngIf="ann.imagePath" [src]="ann.imagePath" class="img-fluid rounded mt-2"
             style="max-height: 200px; cursor: pointer;" (click)="openImageModal(ann.imagePath!)" />
     </div>
 </div>
 
-<!-- Pagination Controls -->
+<!-- Pagination -->
 <nav *ngIf="pagination" class="mt-4 d-flex justify-content-center">
     <ul class="pagination">
         <li class="page-item" [class.disabled]="pagination.currentPage === 1">

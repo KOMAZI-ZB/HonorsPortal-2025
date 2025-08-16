@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router'; // not used here but fine if present elsewhere
 import { CommonModule } from '@angular/common';
 import { Notification } from '../_models/notification';
 import { NotificationService } from '../_services/notification.service';
@@ -26,10 +25,10 @@ export class NotificationsComponent implements OnInit {
   currentUserRole: string = '';
   currentUserName: string = '';
 
-  // 🆕 For filtering
+  // 🔹 announcements | notifications | ''(all)
   typeFilter: string = '';
 
-  // 🆕 For modal image preview
+  // image modal
   selectedImageUrl: string | null = null;
   showImageModal: boolean = false;
 
@@ -48,11 +47,7 @@ export class NotificationsComponent implements OnInit {
 
   loadNotifications() {
     this.notificationService
-      .getPaginatedNotifications(
-        this.pageNumber,
-        this.pageSize,
-        this.typeFilter
-      )
+      .getPaginatedNotifications(this.pageNumber, this.pageSize, this.typeFilter)
       .subscribe({
         next: response => {
           this.notifications = response.body ?? [];
@@ -68,13 +63,11 @@ export class NotificationsComponent implements OnInit {
   }
 
   openPostModal() {
+    // Still uses the same component; it now says "Announcement"
     this.bsModalRef = this.modalService.show(CreateNotificationModalComponent, {
       class: 'modal-lg'
     });
-
-    this.bsModalRef.onHidden?.subscribe(() => {
-      this.loadNotifications();
-    });
+    this.bsModalRef.onHidden?.subscribe(() => this.loadNotifications());
   }
 
   canDelete(notification: Notification): boolean {
@@ -104,20 +97,19 @@ export class NotificationsComponent implements OnInit {
     this.selectedImageUrl = imageUrl;
     this.showImageModal = true;
   }
-
   closeImageModal() {
     this.selectedImageUrl = null;
     this.showImageModal = false;
   }
 
-  // ✅ Badge label formatter (used in template only)
+  // 🔹 Badge label: General/System → ANNOUNCEMENT; others → NOTIFICATION
   formatBadgeLabel(type: string): string {
-    const readable = type.replace(/([a-z])([A-Z])/g, '$1 $2').toUpperCase();
-    const isNotification = type.toLowerCase() === 'general' || type.toLowerCase() === 'system';
-    return isNotification ? `${readable} NOTIFICATION` : `${readable} NOTIFICATION`;
+    const t = (type || '').toLowerCase();
+    const readable = (type || '').replace(/([a-z])([A-Z])/g, '$1 $2').toUpperCase();
+    const isAnnouncement = t === 'general' || t === 'system';
+    return isAnnouncement ? `${readable} ANNOUNCEMENT` : `${readable} NOTIFICATION`;
   }
 
-  // 🆕 Mark a single item as read (optional feature)
   markAsRead(a: Notification) {
     if (a.isRead) return;
     this.notificationService.markAsRead(a.id).subscribe({
