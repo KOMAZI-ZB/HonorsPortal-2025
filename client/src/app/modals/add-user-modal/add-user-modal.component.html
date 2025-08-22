@@ -3,12 +3,13 @@
     <button type="button" class="btn-close" (click)="cancel()" aria-label="Close"></button>
 </div>
 
+<!-- Prevent admin credential autofill -->
 <div class="modal-body">
-    <form>
+    <form autocomplete="off">
         <div class="mb-3">
-            <label>User Name</label>
+            <label>Username</label>
             <input #usernameInput type="text" class="form-control" [(ngModel)]="userName" name="userName" required
-                (ngModelChange)="markDirty()" />
+                (ngModelChange)="markDirty()" autocomplete="off" autocapitalize="none" spellcheck="false" />
         </div>
 
         <div class="mb-3">
@@ -26,14 +27,16 @@
         <div class="mb-3">
             <label>Email</label>
             <input type="email" class="form-control" [(ngModel)]="email" name="email" required
-                (ngModelChange)="markDirty()" />
+                (ngModelChange)="markDirty()" autocomplete="off" />
         </div>
 
         <div class="mb-3">
             <label>Password</label>
             <div class="input-group">
+                <!-- Stop saved-password injection -->
                 <input [type]="showPassword ? 'text' : 'password'" class="form-control" [(ngModel)]="password"
-                    name="password" (ngModelChange)="markDirty()" />
+                    name="newPassword" (ngModelChange)="markDirty()" autocomplete="new-password" autocapitalize="none"
+                    spellcheck="false" />
                 <span class="input-group-text" (click)="togglePasswordVisibility()" style="cursor: pointer;">
                     <i class="fas" [ngClass]="showPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
                 </span>

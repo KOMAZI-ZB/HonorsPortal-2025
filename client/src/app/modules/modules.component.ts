@@ -66,6 +66,11 @@ export class ModulesComponent implements OnInit {
   }
 
   openModule(module: Module) {
-    this.router.navigate(['/modules', module.id]);
+    // ✅ Send both state and query params so the next page can render the header
+    // and also survive a refresh (query params).
+    this.router.navigate(['/modules', module.id], {
+      state: { moduleCode: module.moduleCode, moduleName: module.moduleName },
+      queryParams: { code: module.moduleCode, name: module.moduleName }
+    });
   }
 }

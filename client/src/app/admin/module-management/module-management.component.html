@@ -15,8 +15,7 @@
                 <th>Module Code</th>
                 <th>Module Name</th>
                 <th>Semester</th>
-                <th>Edit Name</th>
-                <th>Edit Code</th>
+                <th>Edit Module</th> <!-- ✅ Unified (Name + Code + Semester) -->
                 <th>Edit Details</th>
                 <th>Delete Module</th>
             </tr>
@@ -27,10 +26,8 @@
                 <td>{{ mod.moduleName }}</td>
                 <td>{{ mod.semester }}</td>
                 <td>
-                    <button class="btn btn-outline-secondary btn-sm" (click)="openEditNameModal(mod)">Edit Name</button>
-                </td>
-                <td>
-                    <button class="btn btn-outline-secondary btn-sm" (click)="openEditCodeModal(mod)">Edit Code</button>
+                    <button class="btn btn-outline-secondary btn-sm" (click)="openEditModuleModal(mod)">Edit
+                        Module</button>
                 </td>
                 <td>
                     <button class="btn btn-outline-secondary btn-sm" (click)="openEditDetailsModal(mod)">Edit

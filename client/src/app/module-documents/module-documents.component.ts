@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router'; // ✅ Added Router
 import { CommonModule } from '@angular/common';
 import { DocumentService } from '../_services/document.service';
 import { Document } from '../_models/document';
@@ -7,6 +6,9 @@ import { UploadDocumentModalComponent } from '../modals/upload-document-modal/up
 import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 import { AccountService } from '../_services/account.service';
 import { Pagination } from '../_models/pagination';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ModuleService } from '../_services/module.service';
+import { Module } from '../_models/module';
 
 @Component({
   selector: 'app-module-documents',
@@ -17,6 +19,8 @@ import { Pagination } from '../_models/pagination';
 })
 export class ModuleDocumentsComponent implements OnInit {
   moduleId!: number;
+  moduleCode: string = '';
+  moduleName: string = '';
   documents: Document[] = [];
   bsModalRef?: BsModalRef;
   roles: string[] = [];
@@ -33,13 +37,48 @@ export class ModuleDocumentsComponent implements OnInit {
     private documentService: DocumentService,
     private modalService: BsModalService,
     private accountService: AccountService,
-    private router: Router // ✅ Inject Router
+    private router: Router,
+    private moduleService: ModuleService
   ) { }
 
   ngOnInit(): void {
     this.roles = this.accountService.roles();
     this.moduleId = +this.route.snapshot.paramMap.get('id')!;
+
+    // ✅ 1) Read from router state if present
+    const s = (history && history.state) ? (history.state as any) : {};
+    if (s?.moduleCode) this.moduleCode = s.moduleCode;
+    if (s?.moduleName) this.moduleName = s.moduleName;
+
+    // ✅ 2) Read from query params (persists across refresh)
+    const qp = this.route.snapshot.queryParamMap;
+    this.moduleCode = qp.get('code') ?? this.moduleCode;
+    this.moduleName = qp.get('name') ?? this.moduleName;
+
+    // Also handle client-side param changes (rare but safe)
+    this.route.queryParamMap.subscribe(p => {
+      const code = p.get('code');
+      const name = p.get('name');
+      if (code) this.moduleCode = code;
+      if (name) this.moduleName = name;
+    });
+
+    // ✅ 3) Staff fetch confirmed details (students already have header via params)
+    if (this.hasUploadRights()) {
+      this.loadHeaderContext();
+    }
+
     this.loadDocuments();
+  }
+
+  private loadHeaderContext() {
+    this.moduleService.getModuleById(this.moduleId).subscribe({
+      next: (m: Module) => {
+        this.moduleCode = m?.moduleCode ?? this.moduleCode;
+        this.moduleName = m?.moduleName ?? this.moduleName;
+      },
+      error: () => { /* ignore; keep whatever we have */ }
+    });
   }
 
   loadDocuments() {
@@ -47,7 +86,11 @@ export class ModuleDocumentsComponent implements OnInit {
       .getDocumentsByModulePaged(this.moduleId, this.pagination.currentPage, this.pagination.itemsPerPage)
       .subscribe({
         next: (response) => {
-          this.documents = response.body || [];
+          const body = response.body || [];
+          this.documents = [...body].sort((a, b) =>
+            new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
+          );
+
           const paginationHeader = response.headers.get('Pagination');
           if (paginationHeader) {
             this.pagination = JSON.parse(paginationHeader);
@@ -97,6 +140,6 @@ export class ModuleDocumentsComponent implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/modules']); // ✅ Navigation logic
+    this.router.navigate(['/modules']);
   }
 }

@@ -3,22 +3,20 @@
     <h2>Scheduler</h2>
 
     <div class="card-container">
-        <a routerLink="lab" class="card">
+        <a routerLink="lab" routerLinkActive="active" class="card">
             <h3>View Lab Schedule</h3>
             <p>View Lab Bookings</p>
         </a>
 
-        <a routerLink="class" class="card">
+        <a routerLink="class" routerLinkActive="active" class="card">
             <h3>View Class Schedule</h3>
             <p>Timetable and Class Slots</p>
         </a>
 
-        <!-- scheduler.component.html -->
-        <a routerLink="assessment" class="card assessment-card">
+        <a routerLink="assessment" routerLinkActive="active" class="card assessment-card">
             <h3>View Assessment Schedule</h3>
             <p>All Upcoming Assessments</p>
         </a>
-
     </div>
 
     <router-outlet></router-outlet>

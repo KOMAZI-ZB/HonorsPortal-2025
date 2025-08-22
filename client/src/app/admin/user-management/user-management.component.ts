@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms'; // ✅ Needed for [(ngModel)]
-import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
+import { FormsModule } from '@angular/forms'; // ✅ FormsModule for ngModel
 import { User } from '../../_models/user';
 
 import { AddUserModalComponent } from '../../modals/add-user-modal/add-user-modal.component';
@@ -9,6 +8,7 @@ import { EditModulesModalComponent } from '../../modals/edit-modules-modal/edit-
 import { EditUserModalComponent } from '../../modals/edit-user-modal/edit-user-modal.component';
 import { DeleteUserModalComponent } from '../../modals/delete-user-modal/delete-user-modal.component';
 import { AdminService } from '../../_services/admin.service';
+import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 
 @Component({
   selector: 'app-user-management',
@@ -32,23 +32,34 @@ export class UserManagementComponent implements OnInit {
     this.loadUsers();
   }
 
+  private applyDefaultUserSort(list: User[]): User[] {
+    return list.sort((a, b) => {
+      const sA = (a.surname || '').localeCompare(b.surname || '', undefined, { sensitivity: 'base' });
+      if (sA !== 0) return sA;
+      const nA = (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' });
+      if (nA !== 0) return nA;
+      return (a.userName || '').localeCompare(b.userName || '', undefined, { sensitivity: 'base' });
+    });
+  }
+
   loadUsers() {
     this.adminService.getAllUsers().subscribe({
       next: users => {
-        this.users = users;
-        this.filteredUsers = users;
+        this.users = this.applyDefaultUserSort(users);                 // ✅ Default: Surname A→Z
+        this.filteredUsers = [...this.users];
       }
     });
   }
 
   filterUsers(): void {
     const term = this.searchTerm.toLowerCase();
-    this.filteredUsers = this.users.filter(user =>
+    const list = this.users.filter(user =>
       user.userName.toLowerCase().includes(term) ||
       user.name.toLowerCase().includes(term) ||
       user.surname.toLowerCase().includes(term) ||
       user.roles.some(role => role.toLowerCase().includes(term))
     );
+    this.filteredUsers = this.applyDefaultUserSort(list);              // ✅ Keep Surname A→Z after filtering
   }
 
   trackByUserName(index: number, user: User): string {

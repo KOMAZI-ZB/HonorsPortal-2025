@@ -13,16 +13,20 @@ export class NotificationService {
 
   constructor(private http: HttpClient) { }
 
-  // ✅ Get paginated notifications (with optional filters)
+  // ✅ Get paginated notifications (type + read filters)
   getPaginatedNotifications(
     pageNumber: number,
     pageSize: number,
-    typeFilter: string = ''
+    typeFilter: string = '',
+    readFilter: '' | 'read' | 'unread' = ''
   ): Observable<HttpResponse<Notification[]>> {
     let params = setPaginationHeaders(pageNumber, pageSize);
 
     if (typeFilter) {
       params = params.append('TypeFilter', typeFilter);
+    }
+    if (readFilter) {
+      params = params.append('ReadFilter', readFilter); // backend may ignore if unsupported
     }
 
     return this.http.get<Notification[]>(`${this.baseUrl}notifications`, {
@@ -36,36 +40,13 @@ export class NotificationService {
     return this.http.post<Notification>(`${this.baseUrl}notifications`, formData);
   }
 
-  // ✅ Delete an notification by ID
+  // 🗑️ (No longer used in UI) Delete an notification by ID
   delete(id: number): Observable<any> {
     return this.http.delete(`${this.baseUrl}notifications/${id}`);
-  }
-
-  // ✅ Used internally by other features to auto-create system notifications
-  //    Optional audience support (e.g., 'ModuleStudents' for DocumentUpload)
-  createFromSystem(data: {
-    type: string;
-    title: string;
-    message: string;
-    moduleId?: number | null;
-    audience?: string; // optional
-  }): Observable<Notification> {
-    const formData = new FormData();
-    formData.append('type', data.type);
-    formData.append('title', data.title);
-    formData.append('message', data.message);
-    if (data.moduleId !== undefined && data.moduleId !== null) {
-      formData.append('moduleId', data.moduleId.toString());
-    }
-    if (data.audience) {
-      formData.append('audience', data.audience);
-    }
-    return this.create(formData);
   }
 
   // 🆕 Mark as read
   markAsRead(id: number): Observable<any> {
     return this.http.post(`${this.baseUrl}notifications/${id}/read`, {});
-    // server is idempotent; safe to call multiple times
   }
 }

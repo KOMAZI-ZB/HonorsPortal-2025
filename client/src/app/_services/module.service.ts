@@ -22,6 +22,11 @@ export class ModuleService {
     return this.http.get<Module[]>(`${this.baseUrl}semester/${semester}`);
   }
 
+  // ✅ NEW: Get single module by id (used for header context)
+  getModuleById(id: number): Observable<Module> {
+    return this.http.get<Module>(`${this.baseUrl}${id}`);
+  }
+
   // ✅ Admin: Add a new module
   addModule(moduleData: Partial<Module>): Observable<Module> {
     return this.http.post<Module>(this.baseUrl, moduleData);

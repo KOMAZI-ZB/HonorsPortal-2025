@@ -20,18 +20,12 @@ export class EditModulesModalComponent implements OnInit, AfterViewInit, OnDestr
   @Input() user!: User;
   @Input() bsModalRef!: BsModalRef<EditModulesModalComponent>;
 
-  // keep full list to rebuild both semester lists as flags change
   private allModules: Module[] = [];
-
   semester1Modules: Module[] = [];
   semester2Modules: Module[] = [];
 
   selectedSemester1: number[] = [];
   selectedSemester2: number[] = [];
-
-  // inline semester picker state when turning Year -> normal
-  pickingSemesterFor: number | null = null;
-  semesterChoice: { [id: number]: 1 | 2 } = {};
 
   private originalHide!: () => void;
   private justSaved = false;
@@ -41,8 +35,12 @@ export class EditModulesModalComponent implements OnInit, AfterViewInit, OnDestr
   private backdropCapture?: (ev: MouseEvent) => void;
   private escCapture?: (ev: KeyboardEvent) => void;
 
-  // Known year modules (safety net) if backend hasn’t been updated everywhere
+  // Keep badge support, but remove any "convert to year module" logic
   private readonly yearModuleCodes = new Set<string>(['CSIS6809', 'BCIS6809']);
+  isYear(m: Module): boolean {
+    const code = (m.moduleCode || '').toUpperCase();
+    return (m as any).isYearModule === true || m.semester === 0 || this.yearModuleCodes.has(code);
+  }
 
   constructor(
     private moduleService: ModuleService,
@@ -53,6 +51,10 @@ export class EditModulesModalComponent implements OnInit, AfterViewInit, OnDestr
     private elRef: ElementRef<HTMLElement>
   ) { }
 
+  private sortByCode(a: Module, b: Module) {
+    return (a.moduleCode || '').localeCompare(b.moduleCode || '', undefined, { numeric: true, sensitivity: 'base' });
+  }
+
   ngOnInit(): void {
     const ref = this.bsModalRef ?? this.modalRef;
     this.originalHide = ref.hide.bind(ref);
@@ -61,11 +63,8 @@ export class EditModulesModalComponent implements OnInit, AfterViewInit, OnDestr
     this.moduleService.getAllModules().subscribe({
       next: modules => {
         this.allModules = modules;
-
-        // Build semester lists (include year modules in both)
         this.rebuildSemesterLists();
 
-        // Pre-select for this user
         const selectedIds = this.user.modules.map(m => m.id);
         this.selectedSemester1 = this.semester1Modules.filter(m => selectedIds.includes(m.id)).map(m => m.id);
         this.selectedSemester2 = this.semester2Modules.filter(m => selectedIds.includes(m.id)).map(m => m.id);
@@ -76,15 +75,14 @@ export class EditModulesModalComponent implements OnInit, AfterViewInit, OnDestr
     });
   }
 
-  // Year module = semester 0 OR known codes OR backend-provided flag (if exists)
-  isYear(m: Module): boolean {
-    const code = (m.moduleCode || '').toUpperCase();
-    return (m as any).isYearModule === true || m.semester === 0 || this.yearModuleCodes.has(code);
-  }
-
   private rebuildSemesterLists(): void {
-    this.semester1Modules = this.allModules.filter(m => m.semester === 1 || this.isYear(m));
-    this.semester2Modules = this.allModules.filter(m => m.semester === 2 || this.isYear(m));
+    this.semester1Modules = this.allModules
+      .filter(m => m.semester === 1 || this.isYear(m))
+      .sort(this.sortByCode.bind(this));
+
+    this.semester2Modules = this.allModules
+      .filter(m => m.semester === 2 || this.isYear(m))
+      .sort(this.sortByCode.bind(this));
   }
 
   ngAfterViewInit(): void {
@@ -149,55 +147,6 @@ export class EditModulesModalComponent implements OnInit, AfterViewInit, OnDestr
       if (index > -1) list.splice(index, 1);
     }
     this.locallyDirty = true;
-  }
-
-  // === Year toggle handlers ===
-  onYearToggle(mod: Module, ev: any) {
-    const checked = !!ev.target.checked;
-
-    if (checked) {
-      // Set Year (no semester needed)
-      this.moduleService.updateModule(mod.id, { isYearModule: true } as any).subscribe({
-        next: () => {
-          this.toastr.success(`Marked ${mod.moduleCode} as a Year module`);
-          this.updateLocalSemester(mod.id, 0);
-        },
-        error: (err) => {
-          this.toastr.error('Failed to mark as Year module');
-          console.error(err);
-        }
-      });
-    } else {
-      // Switching OFF Year → ask which semester
-      this.pickingSemesterFor = mod.id;
-      this.semesterChoice[mod.id] = 1; // default suggestion
-    }
-  }
-
-  applySemester(mod: Module) {
-    const sem = this.semesterChoice[mod.id] || 1;
-    this.moduleService.updateModule(mod.id, { isYearModule: false, semester: sem } as any).subscribe({
-      next: () => {
-        this.toastr.success(`${mod.moduleCode} set to Semester ${sem}`);
-        this.updateLocalSemester(mod.id, sem);
-        this.pickingSemesterFor = null;
-        delete this.semesterChoice[mod.id];
-      },
-      error: (err) => {
-        this.toastr.error('Failed to set semester');
-        console.error(err);
-      }
-    });
-  }
-
-  cancelSemesterPick() {
-    this.pickingSemesterFor = null;
-  }
-
-  private updateLocalSemester(id: number, newSemester: number) {
-    const m = this.allModules.find(x => x.id === id);
-    if (m) m.semester = newSemester;
-    this.rebuildSemesterLists();
   }
 
   submit() {

@@ -14,24 +14,6 @@
             {{ mod.moduleCode }} - {{ mod.moduleName }}
             <span *ngIf="isYear(mod)" class="badge bg-info ms-2">Year</span>
         </label>
-
-        <!-- Year toggle and (when needed) semester picker -->
-        <span class="ms-3 align-middle">
-            <div class="form-check form-switch d-inline-flex align-items-center">
-                <input class="form-check-input" type="checkbox" [checked]="isYear(mod)"
-                    (change)="onYearToggle(mod, $event)" [id]="'year-' + mod.id" />
-                <label class="form-check-label small ms-1" [for]="'year-' + mod.id">Year</label>
-            </div>
-
-            <span *ngIf="pickingSemesterFor === mod.id" class="ms-2">
-                <select class="form-select form-select-sm d-inline-block w-auto" [(ngModel)]="semesterChoice[mod.id]">
-                    <option [ngValue]="1">Semester 1</option>
-                    <option [ngValue]="2">Semester 2</option>
-                </select>
-                <button class="btn btn-sm btn-primary ms-1" (click)="applySemester(mod)">Apply</button>
-                <button class="btn btn-sm btn-outline-secondary ms-1" (click)="cancelSemesterPick()">Cancel</button>
-            </span>
-        </span>
     </div>
 
     <hr />
@@ -46,24 +28,6 @@
             {{ mod.moduleCode }} - {{ mod.moduleName }}
             <span *ngIf="isYear(mod)" class="badge bg-info ms-2">Year</span>
         </label>
-
-        <!-- Year toggle and (when needed) semester picker -->
-        <span class="ms-3 align-middle">
-            <div class="form-check form-switch d-inline-flex align-items-center">
-                <input class="form-check-input" type="checkbox" [checked]="isYear(mod)"
-                    (change)="onYearToggle(mod, $event)" [id]="'year2-' + mod.id" />
-                <label class="form-check-label small ms-1" [for]="'year2-' + mod.id">Year</label>
-            </div>
-
-            <span *ngIf="pickingSemesterFor === mod.id" class="ms-2">
-                <select class="form-select form-select-sm d-inline-block w-auto" [(ngModel)]="semesterChoice[mod.id]">
-                    <option [ngValue]="1">Semester 1</option>
-                    <option [ngValue]="2">Semester 2</option>
-                </select>
-                <button class="btn btn-sm btn-primary ms-1" (click)="applySemester(mod)">Apply</button>
-                <button class="btn btn-sm btn-outline-secondary ms-1" (click)="cancelSemesterPick()">Cancel</button>
-            </span>
-        </span>
     </div>
 </div>
 

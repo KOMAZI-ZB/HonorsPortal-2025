@@ -17,16 +17,14 @@
     <!-- ✅ PDF Content -->
     <div id="pdfContent" class="mt-4 p-4 bg-white">
 
-        <!-- ✅ Header: title left | logo center | user right (mirrors Lab/Class) -->
+        <!-- ✅ Header: title left | logo center | user right -->
         <div class="pdf-header mb-3">
             <div class="pdf-left">
                 <h2 class="pdf-title-left">Assessment Schedule</h2>
             </div>
-
             <div class="pdf-center">
                 <img src="assets/ufslogo.jpg" alt="UFS Logo" class="pdf-logo" />
             </div>
-
             <div class="pdf-right">
                 <div class="pdf-user">{{ userFullName }}</div>
             </div>
@@ -38,7 +36,6 @@
                 <table class="table table-bordered text-center align-middle mb-5">
                     <thead class="table-dark">
                         <tr>
-                            <!-- ⬇️ Increased from 7 to 8 to include Description -->
                             <th colspan="8" class="text-center fs-5">{{ month }}</th>
                         </tr>
                         <tr class="table-light">
@@ -68,8 +65,9 @@
             </div>
         </div>
 
+        <!-- ✅ Consistent empty state for Assessment -->
         <ng-template #noData>
-            <div class="text-muted text-center">No assessments scheduled.</div>
+            <div class="alert alert-info text-center py-4">Nothing scheduled.</div>
         </ng-template>
     </div>
 </div>

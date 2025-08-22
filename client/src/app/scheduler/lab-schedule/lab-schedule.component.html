@@ -7,7 +7,6 @@
             </button>
         </div>
         <ng-template #readonlyMsg></ng-template>
-        <!-- 👇 Added ms-auto so this stays on the far right even when the left button is absent (students) -->
         <div class="ms-auto">
             <button class="btn btn-success" (click)="downloadScheduleAsPdf()">
                 Download PDF
@@ -15,19 +14,22 @@
         </div>
     </div>
 
-    <!-- Weekly Grid Table with Logo + Title + User (PDF only header) -->
-    <div id="labScheduleTable" class="table-responsive mt-3 p-4 bg-white">
+    <!-- ✅ Consistent empty state for Lab -->
+    <div *ngIf="!hasBookingsThisWeek()" class="alert alert-info text-center py-4">
+        Nothing scheduled.
+    </div>
+
+    <!-- Weekly Grid Table + PDF header (only when we have bookings this week) -->
+    <div *ngIf="hasBookingsThisWeek()" id="labScheduleTable" class="table-responsive mt-3 p-4 bg-white">
 
         <!-- ✅ PDF header: title left, logo centered, user right -->
         <div class="pdf-only pdf-header mb-3">
             <div class="pdf-left">
                 <div class="pdf-title-left">Lab Schedule</div>
             </div>
-
             <div class="pdf-center">
                 <img src="assets/ufslogo.jpg" alt="UFS Logo" class="pdf-logo" />
             </div>
-
             <div class="pdf-right">
                 <div class="pdf-user">{{ userFullName }}</div>
             </div>

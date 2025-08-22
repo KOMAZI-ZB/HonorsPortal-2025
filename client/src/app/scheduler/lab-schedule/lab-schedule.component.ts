@@ -46,20 +46,13 @@ export class LabScheduleComponent implements OnInit {
     return this.roles.includes('Student');
   }
 
-  // ✅ Full name for PDF header:
-  // Prefer account fields (name + surname). If either is missing,
-  // fall back to the current user's booking (firstName + lastName).
-  // Then safe fallbacks (displayName/username/userName).
+  // ✅ Full name for PDF header
   get userFullName(): string {
     const u: any = this.user || {};
     const pick = (...cands: any[]) =>
       cands.map(v => (v ?? '').toString().trim()).find(v => v.length > 0) || '';
-
-    // 1) Primary: account payload (matches your User interface)
-    let first = pick(u.name);       // <-- first name is "name" on User
-    let last = pick(u.surname);    // <-- last name is "surname" on User
-
-    // 2) If missing, fall back to a booking for this user
+    let first = pick(u.name);
+    let last = pick(u.surname);
     if (!first || !last) {
       const meNumber = pick(u.userName);
       const mine = this.bookings.find(b => (b.userName ?? '') === meNumber);
@@ -68,34 +61,26 @@ export class LabScheduleComponent implements OnInit {
         if (!last) last = pick(mine.lastName);
       }
     }
-
     if (first && last) return `${first} ${last}`;
     if (first) return first;
     if (last) return last;
-
-    // 3) Final safety fallbacks
     return pick(u.displayName, u.username, u.userName);
   }
 
-  // ⏰ Updated: make one-hour slots that start at :10 (e.g., 06:10–07:10, 07:10–08:10, ...)
+  // ⏰ make one-hour slots that start at :10
   generateTimeSlots() {
     const slots: string[] = [];
-    const startHour = 6;     // 06:xx
-    const startMinute = 10;  // :10 offset
-    const totalSlots = 15;   // keep same count as before
-
+    const startHour = 6;
+    const startMinute = 10;
+    const totalSlots = 15;
     const pad = (n: number) => n.toString().padStart(2, '0');
-
     for (let i = 0; i < totalSlots; i++) {
       const fromDate = new Date(0, 0, 0, startHour + i, startMinute, 0, 0);
-      const toDate = new Date(fromDate.getTime() + 60 * 60 * 1000); // +1 hour
-
+      const toDate = new Date(fromDate.getTime() + 60 * 60 * 1000);
       const from = `${pad(fromDate.getHours())}:${pad(fromDate.getMinutes())}`;
       const to = `${pad(toDate.getHours())}:${pad(toDate.getMinutes())}`;
-
       slots.push(`${from} - ${to}`);
     }
-
     this.timeSlots = slots;
   }
 
@@ -108,7 +93,21 @@ export class LabScheduleComponent implements OnInit {
     return sunday;
   }
 
-  // ✅ Fix: use a daysMap to align correctly with bookingDate
+  // ✅ Are there any bookings within the current week window?
+  hasBookingsThisWeek(): boolean {
+    if (!this.bookings?.length) return false;
+    const start = new Date(this.currentWeekStart);
+    const end = new Date(start);
+    end.setDate(start.getDate() + 7);
+    return this.bookings.some(b => {
+      if (!b.bookingDate) return false;
+      const d = new Date(b.bookingDate);
+      // include dates from Mon (start+1) to Sat (start+6); using < end covers Sat 23:59
+      return d >= start && d < end;
+    });
+  }
+
+  // ✅ Fix: align with bookingDate
   getBookingDateForDay(day: string): Date {
     const daysMap: Record<string, number> = {
       'Monday': 1,
@@ -118,7 +117,6 @@ export class LabScheduleComponent implements OnInit {
       'Friday': 5,
       'Saturday': 6
     };
-
     const date = new Date(this.currentWeekStart);
     const offset = daysMap[day] ?? 0;
     date.setDate(this.currentWeekStart.getDate() + offset);
@@ -163,13 +161,8 @@ export class LabScheduleComponent implements OnInit {
     return this.roles.includes('Admin') || booking.userName === this.user?.userName;
   }
 
-  openBookingModal() {
-    this.showBookingModal = true;
-  }
-
-  closeBookingModal() {
-    this.showBookingModal = false;
-  }
+  openBookingModal() { this.showBookingModal = true; }
+  closeBookingModal() { this.showBookingModal = false; }
 
   triggerUnbookModal(booking: LabBooking) {
     if (!this.canUnbook(booking)) return;
@@ -185,13 +178,11 @@ export class LabScheduleComponent implements OnInit {
   handleBookingConfirmed(data: { day: string; time: string; description?: string }) {
     const start = data.time.split(' - ')[0];
     const end = data.time.split(' - ')[1];
-
     const bookingDateObj = this.getBookingDateForDay(data.day);
     const yyyy = bookingDateObj.getFullYear();
     const mm = (bookingDateObj.getMonth() + 1).toString().padStart(2, '0');
     const dd = bookingDateObj.getDate().toString().padStart(2, '0');
     const formattedDate = `${yyyy}-${mm}-${dd}`;
-
     const formattedStartTime = `${start}:00`;
     const formattedEndTime = `${end}:00`;
 
@@ -204,10 +195,7 @@ export class LabScheduleComponent implements OnInit {
     };
 
     this.labbookingService.createBooking(dto).subscribe({
-      next: () => {
-        this.loadBookings();
-        this.showBookingModal = false;
-      },
+      next: () => { this.loadBookings(); this.showBookingModal = false; },
       error: err => {
         console.error('Booking failed:', err);
         alert('Booking failed: ' + (err.error?.message || 'Please try again.'));
@@ -218,12 +206,8 @@ export class LabScheduleComponent implements OnInit {
 
   handleBookingUnconfirmed() {
     if (!this.selectedBookingToDelete?.id) return;
-
     this.labbookingService.deleteBooking(this.selectedBookingToDelete.id).subscribe({
-      next: () => {
-        this.loadBookings();
-        this.closeUnbookModal();
-      },
+      next: () => { this.loadBookings(); this.closeUnbookModal(); },
       error: err => {
         console.error('Unbooking failed:', err);
         alert('Unbooking failed: ' + (err.error?.message || 'Please try again.'));
@@ -235,7 +219,6 @@ export class LabScheduleComponent implements OnInit {
   downloadScheduleAsPdf() {
     const tableElement = document.getElementById('labScheduleTable');
     if (!tableElement) return;
-
     const options = {
       margin: 0.5,
       filename: 'Lab_Schedule.pdf',
@@ -243,7 +226,6 @@ export class LabScheduleComponent implements OnInit {
       html2canvas: { scale: 2 },
       jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
     };
-
     html2pdf().set(options).from(tableElement).save();
   }
 }

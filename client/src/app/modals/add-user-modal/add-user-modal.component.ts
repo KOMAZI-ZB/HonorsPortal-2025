@@ -41,7 +41,6 @@ export class AddUserModalComponent implements OnInit, AfterViewInit, OnDestroy {
   selectedSemester2: number[] = [];
   roles = ['Student', 'Lecturer', 'Coordinator', 'Admin'];
 
-  // confirm-close state
   private originalHide!: () => void;
   private formDirty = false;
 
@@ -49,10 +48,12 @@ export class AddUserModalComponent implements OnInit, AfterViewInit, OnDestroy {
   private backdropCapture?: (ev: MouseEvent) => void;
   private escCapture?: (ev: KeyboardEvent) => void;
 
-  // ...imports stay the same...
-  // (only ngOnInit filtering changed)
+  private sortByCode(a: Module, b: Module) {
+    return (a.moduleCode || '').localeCompare(b.moduleCode || '', undefined, { numeric: true, sensitivity: 'base' });
+  }
 
   ngOnInit(): void {
+    // ✅ Ensure no autofill values are set by us
     this.userName = '';
     this.firstName = '';
     this.lastName = '';
@@ -61,16 +62,20 @@ export class AddUserModalComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.moduleService.getAllModules().subscribe({
       next: modules => {
-        // ✅ Include year modules in BOTH semester lists
-        this.semester1Modules = modules.filter(m => m.semester === 1 || m.isYearModule);
-        this.semester2Modules = modules.filter(m => m.semester === 2 || m.isYearModule);
+        // ✅ Include year modules in BOTH, then sort by module code
+        this.semester1Modules = modules
+          .filter(m => m.semester === 1 || m.isYearModule)
+          .sort(this.sortByCode.bind(this));
+
+        this.semester2Modules = modules
+          .filter(m => m.semester === 2 || m.isYearModule)
+          .sort(this.sortByCode.bind(this));
       }
     });
 
     this.originalHide = this.modalRef.hide.bind(this.modalRef);
     this.modalRef.hide = () => this.attemptClose();
   }
-
 
   ngAfterViewInit(): void {
     setTimeout(() => this.usernameInput?.nativeElement.focus(), 0);
@@ -106,7 +111,6 @@ export class AddUserModalComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.escCapture) document.removeEventListener('keydown', this.escCapture, true);
   }
 
-  // mark dirty on any edit
   markDirty() { this.formDirty = true; }
 
   toggleModule(id: number, list: number[], event: any) {
