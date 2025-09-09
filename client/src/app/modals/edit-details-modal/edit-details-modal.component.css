@@ -1,5 +1,18 @@
-/* src/app/modals/edit-details-modal.component.css */
+/* keep */
 .modal-body {
     max-height: 75vh;
     overflow-y: auto;
+}
+
+/* ✅ thicker divider between assessment items */
+.assessment-divider {
+    border: 0;
+    border-top: 2px solid #6c757d;
+    /* thicker, neutral */
+    margin: 0.75rem 0 1rem 0;
+}
+
+/* ✅ visually thicker assessment card border */
+.assessment-card {
+    border: 2px solid #dee2e6 !important;
 }

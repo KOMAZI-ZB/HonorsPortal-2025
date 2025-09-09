@@ -13,7 +13,6 @@ export class NotificationService {
 
   constructor(private http: HttpClient) { }
 
-  // ✅ Get paginated notifications (type + read filters)
   getPaginatedNotifications(
     pageNumber: number,
     pageSize: number,
@@ -22,12 +21,8 @@ export class NotificationService {
   ): Observable<HttpResponse<Notification[]>> {
     let params = setPaginationHeaders(pageNumber, pageSize);
 
-    if (typeFilter) {
-      params = params.append('TypeFilter', typeFilter);
-    }
-    if (readFilter) {
-      params = params.append('ReadFilter', readFilter); // backend may ignore if unsupported
-    }
+    if (typeFilter) params = params.append('TypeFilter', typeFilter);
+    if (readFilter) params = params.append('ReadFilter', readFilter);
 
     return this.http.get<Notification[]>(`${this.baseUrl}notifications`, {
       observe: 'response',
@@ -35,18 +30,20 @@ export class NotificationService {
     });
   }
 
-  // ✅ Create a new notification (manual or system-triggered)
   create(formData: FormData): Observable<Notification> {
     return this.http.post<Notification>(`${this.baseUrl}notifications`, formData);
   }
 
-  // 🗑️ (No longer used in UI) Delete an notification by ID
   delete(id: number): Observable<any> {
     return this.http.delete(`${this.baseUrl}notifications/${id}`);
   }
 
-  // 🆕 Mark as read
   markAsRead(id: number): Observable<any> {
     return this.http.post(`${this.baseUrl}notifications/${id}/read`, {});
+  }
+
+  // 🆕 persist "unread"
+  markAsUnread(id: number): Observable<any> {
+    return this.http.delete(`${this.baseUrl}notifications/${id}/read`);
   }
 }

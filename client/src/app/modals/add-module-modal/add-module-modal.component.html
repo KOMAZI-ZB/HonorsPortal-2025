@@ -1,4 +1,7 @@
-<div class="p-3">
+<div class="p-3 position-relative">
+    <button type="button" class="btn-close position-absolute top-0 end-0 m-2" (click)="cancel()" aria-label="Close">
+    </button>
+
     <hr />
     <h4>Add New Module</h4>
 
@@ -6,33 +9,28 @@
     <div class="mb-3">
         <label>Module Code</label>
         <input #moduleCodeInput type="text" class="form-control" [(ngModel)]="moduleCode" (ngModelChange)="markDirty()"
-            name="moduleCode" />
+            name="moduleCode" required [class.is-invalid]="(moduleCode || '').trim().length === 0" />
+        <div class="invalid-feedback">Module Code is required.</div>
     </div>
 
     <div class="mb-3">
         <label>Module Name</label>
-        <input type="text" class="form-control" [(ngModel)]="moduleName" (ngModelChange)="markDirty()"
-            name="moduleName" />
+        <input type="text" class="form-control" [(ngModel)]="moduleName" (ngModelChange)="markDirty()" name="moduleName"
+            required [class.is-invalid]="(moduleName || '').trim().length === 0" />
+        <div class="invalid-feedback">Module Name is required.</div>
     </div>
 
-    <!-- Semester + Year Module -->
+    <!-- Semester -->
     <div class="row mb-3">
         <div class="col-auto">
             <label>Semester</label>
-            <select class="form-control" [(ngModel)]="semester" (ngModelChange)="markDirty()" name="semester"
-                [disabled]="isYearModule">
-                <option [value]="1">Semester 1</option>
-                <option [value]="2">Semester 2</option>
+            <select class="form-control" [(ngModel)]="semesterChoice" (ngModelChange)="markDirty()"
+                name="semesterChoice" required [class.is-invalid]="!['1','2','year'].includes(semesterChoice)">
+                <option value="1">Semester 1</option>
+                <option value="2">Semester 2</option>
+                <option value="year">Year Module</option>
             </select>
-        </div>
-        <div class="col d-flex align-items-end">
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="isYearModule" [(ngModel)]="isYearModule"
-                    (ngModelChange)="markDirty()" name="isYearModule" />
-                <label class="form-check-label" for="isYearModule">
-                    Is Year module?
-                </label>
-            </div>
+            <div class="invalid-feedback">Please select a valid Semester.</div>
         </div>
     </div>
 
@@ -72,83 +70,87 @@
 
     <!-- Assessments -->
     <hr />
-    <h6>Assessments</h6>
+    <div class="d-flex justify-content-between align-items-center">
+        <h6 class="mb-0">Assessments</h6>
+        <button class="btn btn-outline-primary btn-sm" (click)="addAssessment()" type="button">+ Add Assessment</button>
+    </div>
 
-    <div *ngFor="let assessment of assessments; let i = index" class="border rounded mb-3">
-        <!-- Collapsible Header -->
-        <button class="btn btn-light w-100 text-start p-3" type="button" data-bs-toggle="collapse"
-            [attr.data-bs-target]="'#collapseAdd' + i" [attr.aria-expanded]="true"
-            [attr.aria-controls]="'collapseAdd' + i">
-            <strong>📘 Assessment {{ i + 1 }}: {{ assessment.title || 'Untitled' }}</strong>
-        </button>
+    <ng-container *ngFor="let assessment of assessments; let i = index">
+        <hr class="assessment-divider" *ngIf="i > 0" />
+        <div class="border rounded mb-3 assessment-card">
+            <button class="btn btn-light w-100 text-start p-3" type="button" data-bs-toggle="collapse"
+                [attr.data-bs-target]="'#collapseAdd' + i" [attr.aria-expanded]="true"
+                [attr.aria-controls]="'collapseAdd' + i">
+                <strong>📘 Assessment {{ i + 1 }}: {{ assessment.title || 'Untitled' }}</strong>
+            </button>
 
-        <!-- Collapsible Body -->
-        <div class="collapse show p-3" [id]="'collapseAdd' + i">
-            <div class="mb-2">
-                <label>Title</label>
-                <input type="text" class="form-control" [(ngModel)]="assessment.title" (ngModelChange)="markDirty()"
-                    [name]="'title' + i" />
-            </div>
-
-            <div class="mb-2">
-                <label>Date</label>
-                <input type="date" class="form-control" [(ngModel)]="assessment.date" (ngModelChange)="markDirty()"
-                    [name]="'date' + i" />
-            </div>
-
-            <div class="mb-2">
-                <label>
-                    <input type="checkbox" [(ngModel)]="assessment.isTimed" (ngModelChange)="markDirty()"
-                        [name]="'isTimed' + i" />
-                    Timed Assessment (e.g., Venue & Time)
-                </label>
-            </div>
-
-            <div *ngIf="assessment.isTimed">
+            <div class="collapse show p-3" [id]="'collapseAdd' + i">
                 <div class="mb-2">
-                    <label>Venue</label>
-                    <input type="text" class="form-control" [(ngModel)]="assessment.venue" (ngModelChange)="markDirty()"
-                        [name]="'venue' + i" />
+                    <label>Title</label>
+                    <input type="text" class="form-control" [(ngModel)]="assessment.title" (ngModelChange)="markDirty()"
+                        [name]="'title' + i" required />
                 </div>
-                <div class="row">
-                    <div class="col">
-                        <label>Start Time</label>
-                        <input type="time" class="form-control" [(ngModel)]="assessment.startTime"
-                            (ngModelChange)="markDirty()" [name]="'startTime' + i" />
+
+                <!-- ✅ Description (required) -->
+                <div class="mb-2">
+                    <label>Description</label>
+                    <textarea class="form-control" rows="2" [(ngModel)]="assessment.description"
+                        (ngModelChange)="markDirty()" [name]="'description' + i" required></textarea>
+                </div>
+
+                <div class="mb-2">
+                    <label>Date</label>
+                    <input type="date" class="form-control" [(ngModel)]="assessment.date" (ngModelChange)="markDirty()"
+                        [name]="'date' + i" required />
+                </div>
+
+                <div class="mb-2">
+                    <label>
+                        <input type="checkbox" [(ngModel)]="assessment.isTimed" (ngModelChange)="markDirty()"
+                            [name]="'isTimed' + i" />
+                        Timed Assessment (e.g., Venue & Time)
+                    </label>
+                </div>
+
+                <div *ngIf="assessment.isTimed">
+                    <div class="mb-2">
+                        <label>Venue</label>
+                        <input type="text" class="form-control" [(ngModel)]="assessment.venue"
+                            (ngModelChange)="markDirty()" [name]="'venue' + i" />
                     </div>
-                    <div class="col">
-                        <label>End Time</label>
-                        <input type="time" class="form-control" [(ngModel)]="assessment.endTime"
-                            (ngModelChange)="markDirty()" [name]="'endTime' + i" />
+                    <div class="row">
+                        <div class="col">
+                            <label>Start Time</label>
+                            <input type="time" class="form-control" [(ngModel)]="assessment.startTime"
+                                (ngModelChange)="markDirty()" [name]="'startTime' + i" />
+                        </div>
+                        <div class="col">
+                            <label>End Time</label>
+                            <input type="time" class="form-control" [(ngModel)]="assessment.endTime"
+                                (ngModelChange)="markDirty()" [name]="'endTime' + i" />
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div *ngIf="!assessment.isTimed" class="mb-2">
-                <label>Submission Deadline</label>
-                <input type="time" class="form-control" [(ngModel)]="assessment.dueTime" (ngModelChange)="markDirty()"
-                    [name]="'dueTime' + i" />
-            </div>
+                <div *ngIf="!assessment.isTimed" class="mb-2">
+                    <label>Submission Deadline</label>
+                    <input type="time" class="form-control" [(ngModel)]="assessment.dueTime"
+                        (ngModelChange)="markDirty()" [name]="'dueTime' + i" />
+                </div>
 
-            <div class="text-end mt-3">
-                <button class="btn btn-sm btn-outline-danger" (click)="removeAssessment(i)" type="button">
-                    Remove
-                </button>
+                <div class="text-end mt-3">
+                    <button class="btn btn-sm btn-outline-danger" (click)="removeAssessment(i)"
+                        type="button">Remove</button>
+                </div>
             </div>
         </div>
-    </div>
-
-    <!-- Add Assessment Button -->
-    <div class="mb-3 text-end">
-        <button class="btn btn-outline-primary" (click)="addAssessment()" type="button">
-            + Add Assessment
-        </button>
-    </div>
+    </ng-container>
 
     <!-- Actions -->
     <hr />
     <div class="text-end">
         <button class="btn btn-secondary me-2" (click)="cancel()">Cancel</button>
-        <button class="btn btn-primary" (click)="submit()">Add Module</button>
+        <!-- ✅ Disabled until Code, Name, Semester are valid -->
+        <button class="btn btn-primary" (click)="submit()" [disabled]="!isCoreValid">Add Module</button>
     </div>
 </div>

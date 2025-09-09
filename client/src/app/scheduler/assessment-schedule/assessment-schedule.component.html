@@ -9,15 +9,23 @@
                 <option [value]="2">Semester 2</option>
             </select>
         </div>
-        <button class="btn btn-success" (click)="downloadScheduleAsPdf()">
+
+        <!-- ✅ Center label inside button + disable when no data -->
+        <button class="btn btn-success d-inline-flex align-items-center justify-content-center"
+            (click)="downloadScheduleAsPdf()" [disabled]="groupedMonths.length === 0">
             Download (PDF)
         </button>
     </div>
 
-    <!-- ✅ PDF Content -->
-    <div id="pdfContent" class="mt-4 p-4 bg-white">
+    <!-- ✅ Consistent empty state (show ONLY this when there’s nothing) -->
+    <div *ngIf="groupedMonths.length === 0" class="alert alert-info text-center py-4">
+        Nothing scheduled.
+    </div>
 
-        <!-- ✅ Header: title left | logo center | user right -->
+    <!-- ✅ PDF Content: render ONLY when there is data -->
+    <div *ngIf="groupedMonths.length > 0" id="pdfContent" class="mt-4 p-4 bg-white">
+
+        <!-- Header: title left | logo center | user right -->
         <div class="pdf-header mb-3">
             <div class="pdf-left">
                 <h2 class="pdf-title-left">Assessment Schedule</h2>
@@ -30,8 +38,8 @@
             </div>
         </div>
 
-        <!-- ✅ Tables grouped by month -->
-        <div *ngIf="groupedMonths.length > 0; else noData">
+        <!-- Tables grouped by month -->
+        <div>
             <div *ngFor="let month of groupedMonths">
                 <table class="table table-bordered text-center align-middle mb-5">
                     <thead class="table-dark">
@@ -64,10 +72,5 @@
                 </table>
             </div>
         </div>
-
-        <!-- ✅ Consistent empty state for Assessment -->
-        <ng-template #noData>
-            <div class="alert alert-info text-center py-4">Nothing scheduled.</div>
-        </ng-template>
     </div>
 </div>

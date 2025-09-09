@@ -35,11 +35,18 @@ export class EditModulesModalComponent implements OnInit, AfterViewInit, OnDestr
   private backdropCapture?: (ev: MouseEvent) => void;
   private escCapture?: (ev: KeyboardEvent) => void;
 
-  // Keep badge support, but remove any "convert to year module" logic
+  // Year module support (no labels shown in UI)
   private readonly yearModuleCodes = new Set<string>(['CSIS6809', 'BCIS6809']);
   isYear(m: Module): boolean {
     const code = (m.moduleCode || '').toUpperCase();
     return (m as any).isYearModule === true || m.semester === 0 || this.yearModuleCodes.has(code);
+  }
+
+  // ✅ Treat Admins as having no module editing: modal stays blank
+  get isAdmin(): boolean {
+    const u: any = this.user || {};
+    const roles: string[] = Array.isArray(u.roles) ? u.roles : [];
+    return u.role === 'Admin' || roles.includes('Admin');
   }
 
   constructor(
@@ -59,6 +66,9 @@ export class EditModulesModalComponent implements OnInit, AfterViewInit, OnDestr
     const ref = this.bsModalRef ?? this.modalRef;
     this.originalHide = ref.hide.bind(ref);
     ref.hide = () => this.attemptClose();
+
+    // 🚫 Admins: do not load modules; keep modal blank
+    if (this.isAdmin) return;
 
     this.moduleService.getAllModules().subscribe({
       next: modules => {

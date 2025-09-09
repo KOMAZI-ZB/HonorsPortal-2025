@@ -32,17 +32,15 @@ public class NotificationService : INotificationService
 
     public async Task<PagedList<NotificationDto>> GetAllPaginatedAsync(QueryParams queryParams)
     {
-        // ✅ Current user for JoinDate & module scoping
         var user = await _context.Users
             .Include(u => u.UserModules)
             .FirstOrDefaultAsync(u => u.UserName == queryParams.CurrentUserName);
 
         if (user == null)
-        {
             return new PagedList<NotificationDto>(new List<NotificationDto>(), 0, queryParams.PageNumber, queryParams.PageSize);
-        }
 
         var userId = user.Id;
+        var userName = user.UserName;
         var joinDate = user.JoinDate;
         var registeredModuleIds = user.UserModules.Select(um => um.ModuleId).ToList();
 
@@ -57,43 +55,43 @@ public class NotificationService : INotificationService
 
         var query = _context.Notifications.AsQueryable();
 
-        // ✅ Join date filter
+        // Join date filter
         if (joinDate is not null)
         {
             var joinDateTime = joinDate.Value.ToDateTime(TimeOnly.MinValue);
             query = query.Where(a => a.CreatedAt >= joinDateTime);
         }
 
-        // ✅ Module scoping (null = global; else must be one of user's modules)
-        query = query.Where(a => a.ModuleId == null || registeredModuleIds.Contains(a.ModuleId.Value));
+        // Module scoping — include author’s own posts regardless of module linkage
+        query = query.Where(a =>
+            a.CreatedBy == userName || // author can always see
+            a.ModuleId == null ||
+            registeredModuleIds.Contains(a.ModuleId.Value)
+        );
 
-        // ✅ Filter by category: announcements vs notifications
+        // Announcements vs notifications filter
         if (!string.IsNullOrWhiteSpace(queryParams.TypeFilter))
         {
             var filter = queryParams.TypeFilter.Trim().ToLowerInvariant();
             if (filter == "announcements")
             {
-                // Only General/System
-                query = query.Where(a =>
-                    a.Type.ToLower() == "general" || a.Type.ToLower() == "system");
+                query = query.Where(a => a.Type.ToLower() == "general" || a.Type.ToLower() == "system");
             }
             else if (filter == "notifications")
             {
-                // Everything except General/System
-                query = query.Where(a =>
-                    a.Type.ToLower() != "general" && a.Type.ToLower() != "system");
+                query = query.Where(a => a.Type.ToLower() != "general" && a.Type.ToLower() != "system");
             }
         }
 
-        // ✅ Audience targeting
+        // Audience targeting — include author’s own posts regardless of audience
         query = query.Where(a =>
+            a.CreatedBy == userName ||
             a.Audience == "All" ||
             (a.Audience == "Students" && isStudent) ||
             (a.Audience == "Staff" && isStaff) ||
             (a.Audience == "ModuleStudents" && isStudent && a.ModuleId != null && registeredModuleIds.Contains(a.ModuleId.Value))
         );
 
-        // ✅ Compute IsRead via left-join
         var readsForUser = _context.NotificationReads.Where(r => r.UserId == userId);
 
         var dtoQuery =
@@ -123,28 +121,30 @@ public class NotificationService : INotificationService
 
     public async Task<NotificationDto?> CreateAsync(CreateNotificationDto dto, string createdByUserName)
     {
-        // Upload image if present
+        // Upload image if present — now strictly images
         string? imagePath = null;
         if (dto.Image != null)
         {
             using var stream = dto.Image.OpenReadStream();
-            var uploadParams = new RawUploadParams
+            var uploadParams = new ImageUploadParams
             {
                 File = new FileDescription(dto.Image.FileName, stream),
-                Folder = "academic-portal-notifications"
+                Folder = "academic-portal-notifications",
+                UseFilename = true,
+                UniqueFilename = false,
+                Overwrite = false
             };
 
             var uploadResult = await _cloudinary.UploadAsync(uploadParams);
             if (uploadResult.Error != null)
                 throw new Exception(uploadResult.Error.Message);
 
-            imagePath = uploadResult.SecureUrl.AbsoluteUri;
+            imagePath = uploadResult.SecureUrl?.AbsoluteUri;
         }
 
-        // Normalize audience
         var audience = string.IsNullOrWhiteSpace(dto.Audience) ? "All" : dto.Audience;
 
-        // If document upload, force ModuleStudents and include module code context
+        // If document upload (system side), scope to module students and tag module
         if (dto.Type.Equals("DocumentUpload", StringComparison.OrdinalIgnoreCase) && dto.ModuleId is not null)
         {
             audience = "ModuleStudents";
@@ -178,10 +178,12 @@ public class NotificationService : INotificationService
         {
             if (dto.ModuleId is null)
                 throw new Exception("Lecturers must target a specific module.");
+
             var lecturerModuleIds = creator.UserModules
                 .Where(um => um.RoleContext == "Lecturer")
                 .Select(um => um.ModuleId)
                 .ToHashSet();
+
             if (!lecturerModuleIds.Contains(dto.ModuleId.Value))
                 throw new Exception("You are not assigned as Lecturer for the selected module.");
 
@@ -234,6 +236,23 @@ public class NotificationService : INotificationService
             ReadAt = DateTime.UtcNow
         });
 
+        return await _context.SaveChangesAsync() > 0;
+    }
+
+    // 🆕 Persist "unread" by removing the read receipt
+    public async Task<bool> UnmarkAsReadAsync(int notificationId, int userId)
+    {
+        var rec = await _context.NotificationReads
+            .FirstOrDefaultAsync(r => r.NotificationId == notificationId && r.UserId == userId);
+
+        if (rec == null)
+        {
+            // not found is effectively "already unread" — report false only if the notification itself doesn't exist
+            var exists = await _context.Notifications.AnyAsync(a => a.Id == notificationId);
+            return exists;
+        }
+
+        _context.NotificationReads.Remove(rec);
         return await _context.SaveChangesAsync() > 0;
     }
 }

@@ -2,6 +2,7 @@
     padding: 20px;
 }
 
+/* Desktop cards */
 .card-container {
     display: flex;
     gap: 20px;
@@ -17,6 +18,7 @@
     flex: 1 1 200px;
     transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
     border: 1px solid #ccc;
+    min-width: 220px;
 }
 
 .card:hover {
@@ -30,13 +32,64 @@
     border: 1px dashed #aaa;
 }
 
+/* ✅ Fix overflow: allow wrapping for long titles */
 .assessment-card h3 {
-    white-space: nowrap;
+    white-space: normal;
+    /* was nowrap causing overflow */
+    word-break: break-word;
 }
 
-/* ✅ Selected tab highlight (light blue, theme-friendly) */
+/* Selected state */
 .card.active {
     background-color: #e7f1ff;
     border-color: #b3d4ff;
     box-shadow: 0 0 0 2px rgba(19, 102, 241, 0.15);
+}
+
+/* -----------------------------
+   Mobile hamburger menu
+   ----------------------------- */
+.mobile-menu {
+    display: none;
+    margin-bottom: 12px;
+}
+
+.menu-toggle {
+    width: 120px;
+}
+
+.menu-panel {
+    display: none;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 8px;
+    background: #fff;
+    margin-top: 8px;
+}
+
+.menu-panel.open {
+    display: block;
+}
+
+.menu-panel a {
+    display: block;
+    padding: 10px 12px;
+    text-decoration: none;
+    border-radius: 6px;
+    color: #0d6efd;
+}
+
+.menu-panel a:hover {
+    background: #f2f6ff;
+}
+
+/* Show hamburger / hide cards on small screens */
+@media (max-width: 576px) {
+    .mobile-menu {
+        display: block;
+    }
+
+    .card-container {
+        display: none;
+    }
 }

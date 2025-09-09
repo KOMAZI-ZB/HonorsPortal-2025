@@ -25,7 +25,6 @@ public class TokenService(IConfiguration config, UserManager<AppUser> userManage
         };
 
         var roles = await userManager.GetRolesAsync(user);
-
         claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
@@ -33,7 +32,8 @@ public class TokenService(IConfiguration config, UserManager<AppUser> userManage
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddDays(7),
+            // Reduced lifetime from 7 days to 8 hours to prevent long-lived sessions.
+            Expires = DateTime.UtcNow.AddHours(8),
             SigningCredentials = creds
         };
 

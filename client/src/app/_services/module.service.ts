@@ -12,7 +12,7 @@ export class ModuleService {
 
   constructor(private http: HttpClient) { }
 
-  // ✅ Admin: Get all modules in the system
+  // ✅ Admin/Coordinator: Get all modules in the system
   getAllModules(): Observable<Module[]> {
     return this.http.get<Module[]>(this.baseUrl);
   }

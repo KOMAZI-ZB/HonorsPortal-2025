@@ -25,13 +25,9 @@ export class NotificationsComponent implements OnInit {
   currentUserRole: string = '';
   currentUserName: string = '';
 
-  // 🔹 announcements | notifications | ''(all)
   typeFilter: string = '';
-
-  // 🔹 cross-type read filter: '' | 'read' | 'unread'
   readFilter: '' | 'read' | 'unread' = '';
 
-  // image modal
   selectedImageUrl: string | null = null;
   showImageModal: boolean = false;
 
@@ -56,12 +52,11 @@ export class NotificationsComponent implements OnInit {
           const items = response.body ?? [];
           this.pagination = JSON.parse(response.headers.get('Pagination')!);
 
-          // ✅ newest at top everywhere
           this.notifications = [...items].sort((a, b) =>
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
           );
 
-          this.applyFilters(); // also applies read filter client-side if backend ignores ReadFilter
+          this.applyFilters();
         },
         error: err => console.error(err)
       });
@@ -70,12 +65,8 @@ export class NotificationsComponent implements OnInit {
   applyFilters() {
     let list = [...this.notifications];
 
-    // ✅ Cross-type Unread | Read filter (works even if backend ignores ReadFilter)
-    if (this.readFilter === 'read') {
-      list = list.filter(x => !!x.isRead);
-    } else if (this.readFilter === 'unread') {
-      list = list.filter(x => !x.isRead);
-    }
+    if (this.readFilter === 'read') list = list.filter(x => !!x.isRead);
+    else if (this.readFilter === 'unread') list = list.filter(x => !x.isRead);
 
     this.filtered = list;
   }
@@ -96,14 +87,12 @@ export class NotificationsComponent implements OnInit {
   }
 
   openPostModal() {
-    // Still uses the same component; the button now says "Post Announcement"
     this.bsModalRef = this.modalService.show(CreateNotificationModalComponent, {
       class: 'modal-lg'
     });
     this.bsModalRef.onHidden?.subscribe(() => this.loadNotifications());
   }
 
-  // 🔹 Badge label: General/System → ANNOUNCEMENT; others → NOTIFICATION
   formatBadgeLabel(type: string): string {
     const t = (type || '').toLowerCase();
     const readable = (type || '').replace(/([a-z])([A-Z])/g, '$1 $2').toUpperCase();
@@ -111,7 +100,6 @@ export class NotificationsComponent implements OnInit {
     return isAnnouncement ? `${readable} ANNOUNCEMENT` : `${readable} NOTIFICATION`;
   }
 
-  // 🔹 Audience wording cleanup (e.g., "ModuleStudents" → "Module students")
   formatAudience(audience?: string | null): string {
     const key = (audience || '').toLowerCase();
     switch (key) {
@@ -119,7 +107,7 @@ export class NotificationsComponent implements OnInit {
       case 'students': return 'Students';
       case 'staff': return 'Staff';
       case 'modulestudents': return 'Module students';
-      case 'yearmodulestudents': return 'Year-module students'; // covers your “year module students” wording
+      case 'yearmodulestudents': return 'Year-module students';
       default: return audience || 'All users';
     }
   }
@@ -127,19 +115,18 @@ export class NotificationsComponent implements OnInit {
   markAsRead(a: Notification) {
     if (a.isRead) return;
     this.notificationService.markAsRead(a.id).subscribe({
-      next: () => {
-        a.isRead = true;
-        this.applyFilters();
-      },
+      next: () => { a.isRead = true; this.applyFilters(); },
       error: err => console.error(err)
     });
   }
 
-  // 🆕 Client-side mark as unread (non-destructive fallback if backend lacks /unread)
+  // 🔁 now persisted via backend
   markAsUnread(a: Notification) {
     if (!a.isRead) return;
-    a.isRead = false;
-    this.applyFilters();
+    this.notificationService.markAsUnread(a.id).subscribe({
+      next: () => { a.isRead = false; this.applyFilters(); },
+      error: err => console.error(err)
+    });
   }
 
   openImageModal(imageUrl: string) {

@@ -9,7 +9,7 @@ namespace API.Interfaces
         Task<NotificationDto?> CreateAsync(CreateNotificationDto dto, string createdByUserName);
         Task<bool> DeleteAsync(int id, string requesterUserName, bool isAdmin);
 
-        // 🆕 Read receipts
         Task<bool> MarkAsReadAsync(int notificationId, int userId);
+        Task<bool> UnmarkAsReadAsync(int notificationId, int userId); // 🆕
     }
 }

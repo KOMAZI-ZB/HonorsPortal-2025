@@ -8,7 +8,7 @@
         </div>
         <ng-template #readonlyMsg></ng-template>
         <div class="ms-auto">
-            <button class="btn btn-success" (click)="downloadScheduleAsPdf()">
+            <button class="btn btn-success" (click)="downloadScheduleAsPdf()" [disabled]="!hasBookingsThisWeek()">
                 Download PDF
             </button>
         </div>

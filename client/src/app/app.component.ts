@@ -16,13 +16,16 @@ export class AppComponent implements OnInit {
   private accountService = inject(AccountService);
 
   ngOnInit(): void {
-    this.setCurrentUser();
+    this.setCurrentUserFromStorage();
   }
 
-  setCurrentUser() {
-    const userString = localStorage.getItem('user');
+  private setCurrentUserFromStorage() {
+    // Switched to sessionStorage so sessions don’t persist for weeks.
+    const userString = sessionStorage.getItem('user');
     if (!userString) return;
+
     const user = JSON.parse(userString);
+    // AccountService will validate exp and auto-logout if needed.
     this.accountService.setCurrentUser(user);
   }
 }

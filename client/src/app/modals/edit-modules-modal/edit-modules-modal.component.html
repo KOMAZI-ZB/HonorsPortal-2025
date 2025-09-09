@@ -3,7 +3,8 @@
     <button type="button" class="btn-close" aria-label="Close" (click)="attemptClose()"></button>
 </div>
 
-<div class="modal-body">
+<!-- Admins: show nothing -->
+<div class="modal-body" *ngIf="!isAdmin; else blankBody">
     <h6>Semester 1 Modules</h6>
     <small class="text-muted d-block mb-2">Year modules appear in both semester lists.</small>
 
@@ -12,7 +13,6 @@
             (change)="toggleModule(mod.id, selectedSemester1, $event)" [id]="'sem1-' + mod.id" />
         <label class="form-check-label" [for]="'sem1-' + mod.id">
             {{ mod.moduleCode }} - {{ mod.moduleName }}
-            <span *ngIf="isYear(mod)" class="badge bg-info ms-2">Year</span>
         </label>
     </div>
 
@@ -26,12 +26,16 @@
             (change)="toggleModule(mod.id, selectedSemester2, $event)" [id]="'sem2-' + mod.id" />
         <label class="form-check-label" [for]="'sem2-' + mod.id">
             {{ mod.moduleCode }} - {{ mod.moduleName }}
-            <span *ngIf="isYear(mod)" class="badge bg-info ms-2">Year</span>
         </label>
     </div>
 </div>
 
-<div class="modal-footer">
+<ng-template #blankBody>
+    <!-- Intentionally empty for Admins -->
+    <div class="modal-body"></div>
+</ng-template>
+
+<div class="modal-footer" *ngIf="!isAdmin">
     <button class="btn btn-secondary" (click)="attemptClose()">Cancel</button>
     <button class="btn btn-primary" (click)="submit()">Save Changes</button>
 </div>

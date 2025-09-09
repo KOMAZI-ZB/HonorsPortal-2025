@@ -9,7 +9,7 @@
                 <option [value]="2">Semester 2</option>
             </select>
         </div>
-        <button class="btn btn-success" (click)="downloadScheduleAsPdf()">
+        <button class="btn btn-success" (click)="downloadScheduleAsPdf()" [disabled]="timeBlocks.length === 0">
             Download (PDF)
         </button>
     </div>

@@ -30,15 +30,21 @@
                 <td>{{ user.email }}</td>
                 <td>{{ user.roles.join(', ') }}</td>
                 <td>
-                    <button class="btn btn-outline-secondary btn-sm" (click)="openEditUserModal(user)">Edit
-                        User</button>
+                    <button class="btn btn-outline-secondary btn-sm" (click)="openEditUserModal(user)">
+                        Edit User
+                    </button>
                 </td>
                 <td>
-                    <button class="btn btn-outline-secondary btn-sm" (click)="openEditModulesModal(user)">Edit
-                        Modules</button>
+                    <!-- ❌ Hide Edit Modules button for Admins -->
+                    <button *ngIf="!user.roles?.includes('Admin')" class="btn btn-outline-secondary btn-sm"
+                        (click)="openEditModulesModal(user)">
+                        Edit Modules
+                    </button>
                 </td>
                 <td>
-                    <button class="btn btn-outline-danger btn-sm" (click)="openDeleteUserModal(user)">Delete</button>
+                    <button class="btn btn-outline-danger btn-sm" (click)="openDeleteUserModal(user)">
+                        Delete
+                    </button>
                 </td>
             </tr>
         </tbody>

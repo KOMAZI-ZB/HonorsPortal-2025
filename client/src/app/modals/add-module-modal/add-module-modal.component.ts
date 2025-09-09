@@ -6,13 +6,12 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { ToastrService } from 'ngx-toastr';
 import { ConfirmCloseModalComponent } from '../confirm-close-modal/confirm-close-modal.component';
-import { AssessmentSchedule } from '../../_models/assessment-schedule'; // ✅ reuse existing model
+import { AssessmentSchedule } from '../../_models/assessment-schedule';
 
-// ✅ use a narrowed subset of the shared model (no id/moduleCode/semester)
 type Assessment = Pick<
   AssessmentSchedule,
   'title' | 'date' | 'isTimed' | 'startTime' | 'endTime' | 'dueTime' | 'venue'
->;
+> & { description?: string }; // ✅ include description
 
 @Component({
   selector: 'app-add-module-modal',
@@ -39,9 +38,7 @@ export class AddModuleModalComponent implements AfterViewInit, OnDestroy {
 
   moduleCode = '';
   moduleName = '';
-  semester = 1;
-  // ✅ year module toggle (kept as previously added)
-  isYearModule = false;
+  semesterChoice: '1' | '2' | 'year' = '1';
 
   classVenue = '';
   weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -57,6 +54,14 @@ export class AddModuleModalComponent implements AfterViewInit, OnDestroy {
   private modalEl: HTMLElement | null = null;
   private backdropCapture?: (ev: MouseEvent) => void;
   private escCapture?: (ev: KeyboardEvent) => void;
+
+  /** Convenience getter: core validity for required fields only (code, name, semester) */
+  get isCoreValid(): boolean {
+    const code = (this.moduleCode || '').trim();
+    const name = (this.moduleName || '').trim();
+    const semValid = ['1', '2', 'year'].includes(this.semesterChoice);
+    return code.length > 0 && name.length > 0 && semValid;
+  }
 
   ngAfterViewInit(): void {
     setTimeout(() => this.moduleCodeInput?.nativeElement.focus(), 0);
@@ -102,6 +107,7 @@ export class AddModuleModalComponent implements AfterViewInit, OnDestroy {
   addAssessment(): void {
     this.assessments.push({
       title: '',
+      description: '', // ✅ default
       date: '',
       isTimed: true,
       startTime: '',
@@ -116,7 +122,58 @@ export class AddModuleModalComponent implements AfterViewInit, OnDestroy {
     this.markDirty();
   }
 
+  private isAssessmentValid(a: Assessment): boolean {
+    if (!a) return false;
+    const hasTitle = (a.title || '').trim().length > 0;
+    const hasDesc = (a.description || '').trim().length > 0; // ✅ required (unchanged rule you already had)
+    const hasDate = (a.date || '').trim().length > 0;
+
+    if (!hasTitle || !hasDesc || !hasDate) return false;
+
+    if (a.isTimed) {
+      const v = (a.venue || '').trim();
+      const st = (a.startTime || '').trim();
+      const et = (a.endTime || '').trim();
+      return v.length > 0 && st.length > 0 && et.length > 0;
+    } else {
+      const due = (a.dueTime || '').trim();
+      return due.length > 0;
+    }
+  }
+
+  /** Validate only the must-have inputs and show actionable errors */
+  private validateCoreFields(): boolean {
+    const errors: string[] = [];
+    const code = (this.moduleCode || '').trim();
+    const name = (this.moduleName || '').trim();
+    const semValid = ['1', '2', 'year'].includes(this.semesterChoice);
+
+    if (code.length === 0) errors.push('Module Code is required.');
+    if (name.length === 0) errors.push('Module Name is required.');
+    if (!semValid) errors.push('Please select a valid Semester.');
+
+    if (errors.length) {
+      this.toastr.error(errors.join(' '));
+      // Focus first missing field for a nicer UX
+      if (code.length === 0 && this.moduleCodeInput) {
+        setTimeout(() => this.moduleCodeInput.nativeElement.focus(), 0);
+      }
+      return false;
+    }
+    return true;
+  }
+
   submit(): void {
+    // ✅ Enforce only the three required fields
+    if (!this.validateCoreFields()) return;
+
+    // Existing assessment validation remains unchanged
+    const anyInvalid = this.assessments.some(a => !this.isAssessmentValid(a));
+    if (anyInvalid) {
+      this.toastr.error('Please complete Title, Description, Date and the required time fields for each assessment.');
+      return;
+    }
+
     const chosenDays: string[] = [];
     const starts: string[] = [];
     const ends: string[] = [];
@@ -129,9 +186,10 @@ export class AddModuleModalComponent implements AfterViewInit, OnDestroy {
       }
     }
 
-    const cleanedAssessments = this.assessments.filter(a => a.date && a.date.trim() !== '');
+    const cleanedAssessments = this.assessments.filter(a => (a.date || '').trim() !== '');
     const processedAssessments = cleanedAssessments.map(a => ({
-      title: a.title,
+      title: (a.title || '').trim(),
+      description: ((a.description || '').trim() || null),
       date: a.date,
       isTimed: a.isTimed,
       startTime: a.isTimed ? this.formatTimeString(a.startTime || '') : null,
@@ -140,12 +198,15 @@ export class AddModuleModalComponent implements AfterViewInit, OnDestroy {
       venue: a.isTimed ? (a.venue || '') : null
     }));
 
+    const isYear = this.semesterChoice === 'year';
+    const semesterNumber = isYear ? 1 : Number(this.semesterChoice);
+
     const payload = {
-      moduleCode: this.moduleCode,
-      moduleName: this.moduleName,
-      semester: this.semester,
-      isYearModule: this.isYearModule, // ✅ included
-      classVenue: this.classVenue || null,
+      moduleCode: (this.moduleCode || '').trim(),
+      moduleName: (this.moduleName || '').trim(),
+      semester: semesterNumber,
+      isYearModule: isYear,
+      classVenue: (this.classVenue || '').trim() || null,
       weekDays: chosenDays,
       startTimes: starts,
       endTimes: ends,

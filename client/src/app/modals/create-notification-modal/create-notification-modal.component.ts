@@ -50,29 +50,25 @@ export class CreateNotificationModalComponent implements OnInit, AfterViewInit, 
     this.currentUserRole = this.accountService.getUserRole();
     this.initForm();
 
-    if (this.isLecturer || this.isCoordinator) {
+    // 🔁 Coordinators now see ALL modules (not only assigned). Lecturers still see assigned.
+    if (this.isLecturer) {
       this.moduleService.getAssignedModules().subscribe({
         next: (mods) => (this.modules = mods || []),
         error: (e) => console.error('Failed to load assigned modules', e)
       });
-    } else if (this.isAdmin) {
+    } else if (this.isCoordinator || this.isAdmin) {
       this.moduleService.getAllModules().subscribe({
         next: (mods) => (this.modules = mods || []),
         error: (e) => console.error('Failed to load modules', e)
       });
     }
 
-    // Intercept close
     this.originalHide = this.bsModalRef.hide.bind(this.bsModalRef);
     this.bsModalRef.hide = () => this.attemptClose();
     this.justSaved = false;
 
-    // Dynamic validator for moduleId
-    this.form.get('audience')?.valueChanges.subscribe(() => {
-      this.applyModuleRequirement();
-    });
+    this.form.get('audience')?.valueChanges.subscribe(() => this.applyModuleRequirement());
 
-    // Lecturers: force ModuleStudents
     if (this.isLecturer) {
       this.form.get('audience')?.setValue('ModuleStudents', { emitEvent: true });
       this.applyModuleRequirement();
@@ -115,7 +111,6 @@ export class CreateNotificationModalComponent implements OnInit, AfterViewInit, 
     const defaultAudience = this.isLecturer ? 'ModuleStudents' : 'All';
 
     this.form = this.fb.group({
-      // 🔹 Manual = Announcement: only 'General' or 'System'
       type: ['General', Validators.required],
       title: ['', [Validators.required, Validators.minLength(3)]],
       message: ['', [Validators.required, Validators.minLength(5)]],
@@ -136,11 +131,9 @@ export class CreateNotificationModalComponent implements OnInit, AfterViewInit, 
     const moduleCtrl = this.form.get('moduleId');
     const mustSelectModule = this.isLecturer || audience === 'ModuleStudents';
 
-    if (mustSelectModule) {
-      moduleCtrl?.setValidators([Validators.required]);
-    } else {
-      moduleCtrl?.clearValidators();
-    }
+    if (mustSelectModule) moduleCtrl?.setValidators([Validators.required]);
+    else moduleCtrl?.clearValidators();
+
     moduleCtrl?.updateValueAndValidity({ emitEvent: false });
   }
 
@@ -186,7 +179,7 @@ export class CreateNotificationModalComponent implements OnInit, AfterViewInit, 
       ? 'ModuleStudents'
       : (this.form.get('audience')?.value || 'All');
 
-    formData.append('type', this.form.get('type')?.value);   // 'General' or 'System'
+    formData.append('type', this.form.get('type')?.value);
     formData.append('title', this.form.get('title')?.value);
     formData.append('message', this.form.get('message')?.value);
     formData.append('audience', audienceValue);
@@ -201,9 +194,7 @@ export class CreateNotificationModalComponent implements OnInit, AfterViewInit, 
     this.notificationService.create(formData).subscribe({
       next: () => {
         this.toastr.success('Announcement posted');
-        // 🔹 Align with your app-wide bell flag
         localStorage.setItem('newAnnouncement', 'true');
-
         this.justSaved = true;
         this.form.markAsPristine();
         this.originalHide();

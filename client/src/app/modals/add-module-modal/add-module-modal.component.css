@@ -1,5 +1,3 @@
-/* src/app/modals/add-module-modal.component.css */
-
 /* Keep modal body scrollable */
 .modal-body {
     max-height: 75vh;
@@ -18,7 +16,7 @@ h6 {
 hr {
     margin-top: 1.5rem;
     margin-bottom: 1rem;
-    border-color: #dee2e6;
+    border-color: #000000;
 }
 
 /* Collapsible header for assessments */
@@ -36,8 +34,19 @@ button.btn-light {
 
 /* Assessment card container */
 .border.rounded.mb-3 {
-    border: 1px solid #dee2e6 !important;
     background-color: #ffffff;
+}
+
+/* ✅ Thicker borders/dividers for assessments */
+.assessment-card {
+    border: 5px solid #dee2e6 !important;
+    border-color: #000000;
+}
+
+.assessment-divider {
+    border: 2px;
+    border-top: 2px solid #6c757d;
+    margin: 0.75rem 0 1rem 0;
 }
 
 /* Add some spacing for Add Assessment button */
@@ -48,4 +57,21 @@ button.btn-light {
 /* Improve checkbox alignment with labels */
 .form-check-label {
     font-weight: 500;
+}
+
+/* Close button styling */
+.close-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: transparent;
+    border: none;
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.close-btn:focus {
+    outline: 2px solid #adb5bd;
+    outline-offset: 2px;
 }

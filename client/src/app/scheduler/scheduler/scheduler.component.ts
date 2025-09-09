@@ -9,4 +9,8 @@ import { RouterModule } from '@angular/router';
   templateUrl: './scheduler.component.html',
   styleUrls: ['./scheduler.component.css']
 })
-export class SchedulerComponent { }
+export class SchedulerComponent {
+  menuOpen = false;
+  toggleMenu() { this.menuOpen = !this.menuOpen; }
+  closeMenu() { this.menuOpen = false; }
+}

@@ -209,7 +209,35 @@ export class EditDetailsModalComponent implements OnInit, AfterViewInit, OnDestr
     this.originalHide();
   }
 
+  // ✅ Validation rule: require title, description, date; then timed vs non-timed fields
+  private isAssessmentValid(a: Assessment): boolean {
+    if (!a) return false;
+    const hasTitle = (a.title || '').trim().length > 0;
+    const hasDesc = (a.description || '').trim().length > 0; // <-- required
+    const hasDate = (a.date || '').trim().length > 0;
+
+    if (!hasTitle || !hasDesc || !hasDate) return false;
+
+    if (a.isTimed) {
+      const v = (a.venue || '').trim();
+      const st = (a.startTime || '').trim();
+      const et = (a.endTime || '').trim();
+      return v.length > 0 && st.length > 0 && et.length > 0;
+    } else {
+      const due = (a.dueTime || '').trim();
+      return due.length > 0;
+    }
+  }
+
   submit() {
+    // Block submit if any assessment is incomplete
+    const anyInvalid = this.assessments.some(a => !this.isAssessmentValid(a));
+    if (anyInvalid) {
+      this.activeTab = 'assessments';
+      this.toastr.error('Please complete Title, Description, Date and the required time fields for each assessment before saving.');
+      return;
+    }
+
     const classSessions: ClassSession[] = [];
 
     for (const v of this.venues) {
@@ -230,7 +258,7 @@ export class EditDetailsModalComponent implements OnInit, AfterViewInit, OnDestr
     const cleanedAssessments = this.assessments.filter(a => (a.date || '').trim() !== '');
     const processedAssessments = cleanedAssessments.map(a => ({
       title: a.title,
-      description: (a.description || '').trim() || null,
+      description: (a.description || '').trim() || null, // <-- sent to API
       date: a.date,
       isTimed: a.isTimed,
       startTime: a.isTimed ? this.formatTimeString(a.startTime!) : null,

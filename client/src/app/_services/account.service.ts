@@ -13,6 +13,9 @@ export class AccountService {
 
   currentUser = signal<User | null>(null);
 
+  // Holds the pending auto-logout timer so it can be cleared/reset.
+  private logoutTimer: any = null;
+
   roles = computed(() => {
     const user = this.currentUser();
     if (!user?.token) return [];
@@ -50,7 +53,6 @@ export class AccountService {
     );
   }
 
-
   register(model: any) {
     return this.http.post<{ message: string }>(this.baseUrl + 'account/register-user', model).pipe(
       map(response => {
@@ -59,14 +61,35 @@ export class AccountService {
     );
   }
 
+  /**
+   * Store user in sessionStorage (not localStorage), validate token expiry,
+   * and set a timer to auto-logout at exact expiry.
+   */
   setCurrentUser(user: User) {
-    localStorage.setItem('user', JSON.stringify(user));
+    // Validate token before storing
+    const expiryMs = this.getTokenExpiryMs(user?.token);
+    const now = Date.now();
+
+    if (!expiryMs || expiryMs <= now) {
+      // Token already expired or invalid -> ensure logout state.
+      this.clearStorage();
+      this.currentUser.set(null);
+      this.clearLogoutTimer();
+      return;
+    }
+
+    // Persist only for this session (ends when the app/browser closes).
+    sessionStorage.setItem('user', JSON.stringify(user));
     this.currentUser.set(user);
+
+    // (Re)start auto-logout timer
+    this.startAutoLogoutTimer(expiryMs - now);
   }
 
   logout() {
-    localStorage.removeItem('user');
+    this.clearStorage();
     this.currentUser.set(null);
+    this.clearLogoutTimer();
   }
 
   getAllUsers() {
@@ -91,5 +114,43 @@ export class AccountService {
 
   deleteUser(userName: string) {
     return this.http.delete(`${this.baseUrl}account/users/${userName}`);
+  }
+
+  // ===== Helpers for token expiry & timers =====
+
+  private getTokenExpiryMs(token?: string | null): number | null {
+    if (!token) return null;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      // exp is in seconds since epoch; convert to ms
+      return typeof payload.exp === 'number' ? payload.exp * 1000 : null;
+    } catch (e) {
+      console.error('Failed to decode JWT exp:', e);
+      return null;
+    }
+  }
+
+  private startAutoLogoutTimer(timeoutMs: number) {
+    this.clearLogoutTimer();
+    // Guard: if somehow negative/too small, log out immediately.
+    if (timeoutMs <= 0) {
+      this.logout();
+      return;
+    }
+    this.logoutTimer = setTimeout(() => {
+      this.logout();
+    }, timeoutMs);
+  }
+
+  private clearLogoutTimer() {
+    if (this.logoutTimer) {
+      clearTimeout(this.logoutTimer);
+      this.logoutTimer = null;
+    }
+  }
+
+  private clearStorage() {
+    // We intentionally use sessionStorage only now.
+    sessionStorage.removeItem('user');
   }
 }
