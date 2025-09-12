@@ -42,7 +42,7 @@ export class EditModulesModalComponent implements OnInit, AfterViewInit, OnDestr
     return (m as any).isYearModule === true || m.semester === 0 || this.yearModuleCodes.has(code);
   }
 
-  // ✅ Treat Admins as having no module editing: modal stays blank
+  // (Getter retained but no longer used to block UI)
   get isAdmin(): boolean {
     const u: any = this.user || {};
     const roles: string[] = Array.isArray(u.roles) ? u.roles : [];
@@ -67,9 +67,7 @@ export class EditModulesModalComponent implements OnInit, AfterViewInit, OnDestr
     this.originalHide = ref.hide.bind(ref);
     ref.hide = () => this.attemptClose();
 
-    // 🚫 Admins: do not load modules; keep modal blank
-    if (this.isAdmin) return;
-
+    // ✅ Admins are now allowed — don't block loading anymore
     this.moduleService.getAllModules().subscribe({
       next: modules => {
         this.allModules = modules;

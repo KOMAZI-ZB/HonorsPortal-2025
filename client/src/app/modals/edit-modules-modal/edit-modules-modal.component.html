@@ -3,8 +3,8 @@
     <button type="button" class="btn-close" aria-label="Close" (click)="attemptClose()"></button>
 </div>
 
-<!-- Admins: show nothing -->
-<div class="modal-body" *ngIf="!isAdmin; else blankBody">
+<!-- ✅ Everyone (including Admins) sees the full UI -->
+<div class="modal-body">
     <h6>Semester 1 Modules</h6>
     <small class="text-muted d-block mb-2">Year modules appear in both semester lists.</small>
 
@@ -30,12 +30,7 @@
     </div>
 </div>
 
-<ng-template #blankBody>
-    <!-- Intentionally empty for Admins -->
-    <div class="modal-body"></div>
-</ng-template>
-
-<div class="modal-footer" *ngIf="!isAdmin">
+<div class="modal-footer">
     <button class="btn btn-secondary" (click)="attemptClose()">Cancel</button>
     <button class="btn btn-primary" (click)="submit()">Save Changes</button>
 </div>

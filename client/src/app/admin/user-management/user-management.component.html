@@ -35,9 +35,8 @@
                     </button>
                 </td>
                 <td>
-                    <!-- ❌ Hide Edit Modules button for Admins -->
-                    <button *ngIf="!user.roles?.includes('Admin')" class="btn btn-outline-secondary btn-sm"
-                        (click)="openEditModulesModal(user)">
+                    <!-- ✅ Admins can also edit modules now -->
+                    <button class="btn btn-outline-secondary btn-sm" (click)="openEditModulesModal(user)">
                         Edit Modules
                     </button>
                 </td>
