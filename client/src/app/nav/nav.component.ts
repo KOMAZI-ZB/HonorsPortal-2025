@@ -1,8 +1,9 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
+import { CollapseModule } from 'ngx-bootstrap/collapse';
 import { HasRoleDirective } from '../_directives/has-role.directive';
-import { NgIf, NgClass } from '@angular/common'; // <-- add NgClass
+import { NgIf, NgClass } from '@angular/common';
 import { AccountService } from '../_services/account.service';
 
 @Component({
@@ -10,11 +11,12 @@ import { AccountService } from '../_services/account.service';
   standalone: true,
   imports: [
     BsDropdownModule,
+    CollapseModule,          // <-- use ngx-bootstrap Collapse
     RouterLink,
     RouterLinkActive,
     HasRoleDirective,
     NgIf,
-    NgClass // <-- add NgClass
+    NgClass
   ],
   templateUrl: './nav.component.html',
   styleUrls: ['./nav.component.css']
@@ -25,6 +27,9 @@ export class NavComponent implements OnInit {
 
   hasNewNotification = false;
 
+  // controls the collapsed state of the navbar on small screens
+  isCollapsed = true;
+
   ngOnInit() {
     const seen = localStorage.getItem('notificationsSeen');
     this.hasNewNotification = seen !== 'true';
@@ -33,12 +38,17 @@ export class NavComponent implements OnInit {
   logout() {
     this.accountService.logout();
     this.router.navigateByUrl('/');
+    this.isCollapsed = true; // close menu after action
   }
 
   markNotificationsAsSeen() {
     this.hasNewNotification = false;
     localStorage.setItem('notificationsSeen', 'true');
     localStorage.setItem('lastSeenNotification', new Date().toISOString());
+  }
+
+  closeNav() {
+    this.isCollapsed = true;
   }
 
   get showLecturerPanel(): boolean {

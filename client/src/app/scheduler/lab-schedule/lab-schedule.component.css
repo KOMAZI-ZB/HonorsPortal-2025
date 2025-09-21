@@ -5,67 +5,46 @@
     text-transform: none;
 }
 
-/* ✅ Non-interactive look for students */
+/* Non-interactive look for students (unchanged) */
 .non-interactive {
     pointer-events: none;
     cursor: default !important;
 }
 
-/* ===========================
-   PDF Header Layout (UPDATED)
-   =========================== */
-.pdf-header {
+/* ======= Header layout (NEW) ======= */
+/* Logo sits above everything */
+.logo-row {
     display: flex;
-    align-items: flex-end;
-    /* ✅ Align to bottom so they sit on top of table neatly */
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 10px;
-    /* Space just above table */
-}
-
-/* Left column: title */
-.pdf-left {
-    flex: 1 1 0%;
-    display: flex;
-    align-items: flex-end;
-}
-
-.pdf-title-left {
-    font-size: 24px;
-    /* ✅ Same as user name */
-    font-weight: 600;
-    text-align: left;
-}
-
-/* Center column: logo centered */
-.pdf-center {
-    flex: 0 0 auto;
-    display: flex;
-    align-items: center;
     justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+    /* small gap before the topbar */
 }
 
-.pdf-logo {
-    width: 400px;
+.pdf-logo-top {
+    max-width: clamp(220px, 28vw, 400px);
+    width: 100%;
     height: auto;
-    margin-bottom: 10px;
     display: block;
-    margin-left: auto;
-    margin-right: auto;
 }
 
-/* Right column: user name */
-.pdf-right {
-    flex: 1 1 0%;
+/* Top bar that sits right on top of the table */
+.table-topbar {
     display: flex;
+    justify-content: space-between;
     align-items: flex-end;
-    justify-content: flex-end;
+    margin-bottom: 6px;
+    /* tight to the table */
 }
 
-.pdf-user {
+.topbar-title {
     font-size: 24px;
-    /* ✅ Match title size */
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.topbar-user {
+    font-size: 24px;
     font-weight: 600;
     white-space: nowrap;
     text-align: right;
@@ -82,6 +61,23 @@
 #labScheduleTable table {
     table-layout: auto;
     width: 100%;
+}
+
+/* Time column: fixed width + single line */
+.col-time {
+    width: 140px;
+}
+
+.time-head,
+.time-cell,
+.no-wrap {
+    white-space: nowrap;
+}
+
+.time-head,
+.time-cell {
+    padding-left: 8px;
+    padding-right: 8px;
 }
 
 /* Table borders */
@@ -101,7 +97,7 @@
     font-weight: bold;
 }
 
-/* First column */
+/* First column background */
 .table tbody td:first-child {
     font-weight: bold;
     background-color: #f8f9fa;
@@ -113,14 +109,41 @@
     overflow: hidden;
     text-overflow: ellipsis;
     display: block;
-    font-size: 0.85rem;
+    font-size: .85rem;
     color: #6c757d;
     margin-top: 4px;
 }
 
-/* Print settings */
+/* --- Page-break hygiene for PDF/print --- */
+tr,
+td,
+th,
+.avoid-break {
+    break-inside: avoid;
+    page-break-inside: avoid;
+}
+
 @media print {
-    #labScheduleTable {
+    thead {
+        display: table-header-group;
+    }
+
+    /* repeat headers */
+    tfoot {
+        display: table-footer-group;
+    }
+
+    table,
+    .schedule-table {
+        break-inside: auto;
+        page-break-inside: auto;
+    }
+
+    tr,
+    td,
+    th,
+    .avoid-break {
+        break-inside: avoid;
         page-break-inside: avoid;
     }
 

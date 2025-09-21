@@ -125,7 +125,7 @@ export class AddModuleModalComponent implements AfterViewInit, OnDestroy {
   private isAssessmentValid(a: Assessment): boolean {
     if (!a) return false;
     const hasTitle = (a.title || '').trim().length > 0;
-    const hasDesc = (a.description || '').trim().length > 0; // ✅ required (unchanged rule you already had)
+    const hasDesc = (a.description || '').trim().length > 0; // required
     const hasDate = (a.date || '').trim().length > 0;
 
     if (!hasTitle || !hasDesc || !hasDate) return false;
@@ -164,7 +164,7 @@ export class AddModuleModalComponent implements AfterViewInit, OnDestroy {
   }
 
   submit(): void {
-    // ✅ Enforce only the three required fields
+    // Enforce only the three required fields
     if (!this.validateCoreFields()) return;
 
     // Existing assessment validation remains unchanged
@@ -199,7 +199,7 @@ export class AddModuleModalComponent implements AfterViewInit, OnDestroy {
     }));
 
     const isYear = this.semesterChoice === 'year';
-    const semesterNumber = isYear ? 1 : Number(this.semesterChoice);
+    const semesterNumber = isYear ? 0 : Number(this.semesterChoice); // <-- year => 0
 
     const payload = {
       moduleCode: (this.moduleCode || '').trim(),

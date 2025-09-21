@@ -9,11 +9,13 @@ namespace API.Controllers;
 [Authorize]
 public class SchedulerController(
     ILabBookingService bookingService,
-    ISchedulerService schedulerService
+    ISchedulerService schedulerService,
+    INotificationService notificationService   // <-- add
 ) : BaseApiController
 {
     private readonly ILabBookingService _bookingService = bookingService;
     private readonly ISchedulerService _schedulerService = schedulerService;
+    private readonly INotificationService _notificationService = notificationService; // <-- add
 
     // ✅ Get all lab bookings (Admin view)
     [HttpGet("lab")]
@@ -40,6 +42,16 @@ public class SchedulerController(
         var userName = User.GetUsername();
         var success = await _bookingService.CreateBookingAsync(userName, dto);
         if (!success) return BadRequest("Booking overlaps with an existing entry.");
+
+        // 🔔 Broadcast lab schedule updates to everyone
+        await _notificationService.CreateAsync(new CreateNotificationDto
+        {
+            Type = "ScheduleUpdate",
+            Title = "Lab schedule updated",
+            Message = $"Lab schedule updated: {dto.WeekDays} {dto.StartTime}-{dto.EndTime} on {dto.BookingDate}.",
+            Audience = "All"
+        }, userName);
+
         return Ok(new { message = "Booking created successfully." });
     }
 
@@ -50,6 +62,17 @@ public class SchedulerController(
     {
         var success = await _bookingService.CreateBookingAsync(userName, dto);
         if (!success) return BadRequest("Booking overlaps with an existing entry.");
+
+        // 🔔 Broadcast lab schedule updates to everyone
+        var createdBy = User.GetUsername();
+        await _notificationService.CreateAsync(new CreateNotificationDto
+        {
+            Type = "ScheduleUpdate",
+            Title = "Lab schedule updated",
+            Message = $"Lab schedule updated (for {userName}): {dto.WeekDays} {dto.StartTime}-{dto.EndTime} on {dto.BookingDate}.",
+            Audience = "All"
+        }, createdBy);
+
         return Ok(new { message = $"Booking created for user {userName}." });
     }
 

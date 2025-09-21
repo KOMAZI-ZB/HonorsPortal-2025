@@ -1,64 +1,67 @@
 /* ===========================
-   Header (mirrors Lab)
+   Header (logo above + topbar)
    =========================== */
-.pdf-header {
+.logo-row {
     display: flex;
-    align-items: flex-end;
-    /* sit neatly on top of the table */
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 8px;
-}
-
-.pdf-left {
-    flex: 1 1 0%;
-    display: flex;
-    align-items: flex-end;
-}
-
-.pdf-title-left {
-    font-size: 24px;
-    /* ✅ Same as user name */
-    font-weight: 600;
-    text-align: left;
-}
-
-.pdf-center {
-    flex: 0 0 auto;
-    display: flex;
-    align-items: center;
     justify-content: center;
+    align-items: center;
+    margin-bottom: 16px;
 }
 
-.pdf-logo {
-    width: 400px;
+.pdf-logo-top {
+    max-width: clamp(220px, 28vw, 400px);
+    width: 100%;
     height: auto;
-    margin-bottom: 10px;
     display: block;
-    margin-left: auto;
-    margin-right: auto;
 }
 
-.pdf-right {
-    flex: 1 1 0%;
+/* Prevent a page break right AFTER these blocks */
+.keep-with-next {
+    page-break-after: avoid;
+    break-after: avoid;
+}
+
+.table-topbar {
     display: flex;
+    justify-content: space-between;
     align-items: flex-end;
-    justify-content: flex-end;
+    margin-bottom: 6px;
 }
 
-.pdf-user {
+.topbar-title {
     font-size: 24px;
-    /* ✅ Match title size */
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.topbar-user {
+    font-size: 24px;
     font-weight: 600;
     white-space: nowrap;
     text-align: right;
 }
 
-/* (kept) White background and spacing */
+/* ===== Fix PDF clipping on the right edge ===== */
+/* Make sure the export root doesn't clip overflow content */
 #pdfContent {
     background-color: white;
     padding: 20px;
     border-radius: 10px;
+    overflow: visible;
+    /* ⬅️ important: no clipping when rasterized */
+}
+
+/* Make the table occupy the container width and wrap long text */
+#pdfContent table {
+    width: 100%;
+    table-layout: fixed;
+    /* keeps 12 columns fitting within the page */
+}
+
+/* Avoids column expansion due to long content */
+#pdfContent th,
+#pdfContent td {
+    word-break: break-word;
 }
 
 /* (kept) Table styling */
@@ -77,8 +80,29 @@
     font-weight: bold;
 }
 
-/* (kept) Print mode: exclude interactive controls */
+/* --- Page-break hygiene --- */
+tr,
+td,
+th,
+.avoid-break {
+    break-inside: avoid;
+    page-break-inside: avoid;
+}
+
 @media print {
+    thead {
+        display: table-header-group;
+    }
+
+    tfoot {
+        display: table-footer-group;
+    }
+
+    /* Allow the TABLE to split across pages, but keep rows intact */
+    table {
+        break-inside: auto;
+        page-break-inside: auto;
+    }
 
     .btn,
     .form-select,

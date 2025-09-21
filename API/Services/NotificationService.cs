@@ -7,6 +7,7 @@ using AutoMapper;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using Microsoft.EntityFrameworkCore;
+using System.Text.RegularExpressions;
 
 namespace API.Services;
 
@@ -29,6 +30,25 @@ public class NotificationService : INotificationService
 
         _cloudinary = new Cloudinary(acc);
     }
+
+    // --- helpers ------------------------------------------------------------
+
+    private static string StripModuleSuffix(string? s)
+    {
+        if (string.IsNullOrWhiteSpace(s)) return s ?? string.Empty;
+        return Regex.Replace(s, @"\s*\(Module:\s*[^)]+\)\s*$", string.Empty, RegexOptions.IgnoreCase);
+    }
+
+    private static string EnsurePrefixed(string title, string moduleCode)
+    {
+        var prefix = $"[{moduleCode}]";
+        var trimmed = title.TrimStart();
+        return trimmed.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
+            ? title
+            : $"{prefix} {title}".Trim();
+    }
+
+    // -----------------------------------------------------------------------
 
     public async Task<PagedList<NotificationDto>> GetAllPaginatedAsync(QueryParams queryParams)
     {
@@ -55,21 +75,18 @@ public class NotificationService : INotificationService
 
         var query = _context.Notifications.AsQueryable();
 
-        // Join date filter
         if (joinDate is not null)
         {
             var joinDateTime = joinDate.Value.ToDateTime(TimeOnly.MinValue);
             query = query.Where(a => a.CreatedAt >= joinDateTime);
         }
 
-        // Module scoping — include author’s own posts regardless of module linkage
         query = query.Where(a =>
-            a.CreatedBy == userName || // author can always see
+            a.CreatedBy == userName ||
             a.ModuleId == null ||
             registeredModuleIds.Contains(a.ModuleId.Value)
         );
 
-        // Announcements vs notifications filter
         if (!string.IsNullOrWhiteSpace(queryParams.TypeFilter))
         {
             var filter = queryParams.TypeFilter.Trim().ToLowerInvariant();
@@ -83,7 +100,6 @@ public class NotificationService : INotificationService
             }
         }
 
-        // Audience targeting — include author’s own posts regardless of audience
         query = query.Where(a =>
             a.CreatedBy == userName ||
             a.Audience == "All" ||
@@ -121,7 +137,6 @@ public class NotificationService : INotificationService
 
     public async Task<NotificationDto?> CreateAsync(CreateNotificationDto dto, string createdByUserName)
     {
-        // Upload image if present — now strictly images
         string? imagePath = null;
         if (dto.Image != null)
         {
@@ -142,26 +157,31 @@ public class NotificationService : INotificationService
             imagePath = uploadResult.SecureUrl?.AbsoluteUri;
         }
 
+        // Normalize audience
         var audience = string.IsNullOrWhiteSpace(dto.Audience) ? "All" : dto.Audience;
 
-        // If document upload (system side), scope to module students and tag module
-        if (dto.Type.Equals("DocumentUpload", StringComparison.OrdinalIgnoreCase) && dto.ModuleId is not null)
+        // If a module is targeted, force ModuleStudents and prefix the title.
+        if (dto.ModuleId is not null)
         {
             audience = "ModuleStudents";
 
             var module = await _context.Modules.FindAsync(dto.ModuleId.Value);
-            if (module != null)
+            if (module != null && !string.IsNullOrWhiteSpace(module.ModuleCode))
             {
-                var codeTag = $"[{module.ModuleCode}] ";
-                if (!dto.Title.StartsWith(codeTag, StringComparison.OrdinalIgnoreCase))
-                    dto.Title = codeTag + dto.Title;
-
-                if (!dto.Message.Contains(module.ModuleCode, StringComparison.OrdinalIgnoreCase))
-                    dto.Message = $"{dto.Message} (Module: {module.ModuleCode})";
+                dto.Title = EnsurePrefixed(dto.Title ?? "(untitled)", module.ModuleCode);
+                dto.Message = StripModuleSuffix(dto.Message);
+            }
+            else
+            {
+                dto.Message = StripModuleSuffix(dto.Message);
             }
         }
+        else
+        {
+            // global message cleanup
+            dto.Message = StripModuleSuffix(dto.Message);
+        }
 
-        // Defence-in-depth for Lecturer
         var creator = await _context.Users
             .Include(u => u.UserModules)
             .FirstOrDefaultAsync(u => u.UserName == createdByUserName);
@@ -174,27 +194,59 @@ public class NotificationService : INotificationService
             .Select(ur => ur.Role.Name)
             .ToListAsync();
 
+        // --- RULE: Lecturers usually must target a module,
+        //           but allow GLOBAL repository updates.
+        bool isRepositoryUpdate =
+            dto.Type != null &&
+            dto.Type.Equals("RepositoryUpdate", StringComparison.OrdinalIgnoreCase);
+
         if (creatorRoles.Contains("Lecturer"))
         {
-            if (dto.ModuleId is null)
-                throw new Exception("Lecturers must target a specific module.");
+            // Allowed global case → RepositoryUpdate to All users
+            if (!isRepositoryUpdate)
+            {
+                // the usual lecturer rule
+                if (dto.ModuleId is null)
+                    throw new Exception("Lecturers must target a specific module.");
 
-            var lecturerModuleIds = creator.UserModules
-                .Where(um => um.RoleContext == "Lecturer")
-                .Select(um => um.ModuleId)
-                .ToHashSet();
+                var lecturerModuleIds = creator.UserModules
+                    .Where(um => um.RoleContext == "Lecturer")
+                    .Select(um => um.ModuleId)
+                    .ToHashSet();
 
-            if (!lecturerModuleIds.Contains(dto.ModuleId.Value))
-                throw new Exception("You are not assigned as Lecturer for the selected module.");
+                if (!lecturerModuleIds.Contains(dto.ModuleId.Value))
+                    throw new Exception("You are not assigned as Lecturer for the selected module.");
 
-            audience = "ModuleStudents";
+                audience = "ModuleStudents";
+            }
+            else
+            {
+                // Make sure repository updates remain global
+                dto.ModuleId = null;
+                audience = "All";
+            }
+        }
+
+        // Small clean-up for lab/schedule style global messages that might include a trailing date
+        if (dto.Type != null
+            && dto.Type.Equals("ScheduleUpdate", StringComparison.OrdinalIgnoreCase)
+            && dto.ModuleId is null
+            && string.Equals(audience, "All", StringComparison.OrdinalIgnoreCase)
+            && !string.IsNullOrWhiteSpace(dto.Message))
+        {
+            dto.Message = Regex.Replace(
+                dto.Message,
+                @"\s*on\s+\d{4}[-/]\d{2}[-/]\d{2}\.?\s*$",
+                string.Empty,
+                RegexOptions.IgnoreCase
+            ).TrimEnd('.', ' ').Trim();
         }
 
         var notification = new Notification
         {
-            Type = dto.Type,
-            Title = dto.Title.Trim(),
-            Message = dto.Message,
+            Type = dto.Type ?? "General",
+            Title = (dto.Title ?? "(untitled)").Trim(),
+            Message = dto.Message ?? string.Empty,
             ImagePath = imagePath,
             CreatedBy = createdByUserName,
             CreatedAt = DateTime.UtcNow,
@@ -239,7 +291,6 @@ public class NotificationService : INotificationService
         return await _context.SaveChangesAsync() > 0;
     }
 
-    // 🆕 Persist "unread" by removing the read receipt
     public async Task<bool> UnmarkAsReadAsync(int notificationId, int userId)
     {
         var rec = await _context.NotificationReads
@@ -247,7 +298,6 @@ public class NotificationService : INotificationService
 
         if (rec == null)
         {
-            // not found is effectively "already unread" — report false only if the notification itself doesn't exist
             var exists = await _context.Notifications.AnyAsync(a => a.Id == notificationId);
             return exists;
         }

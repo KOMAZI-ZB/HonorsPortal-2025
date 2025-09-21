@@ -115,11 +115,14 @@ export class ClassScheduleComponent implements OnInit {
     const content = document.getElementById('pdfContent');
     if (!content) return;
     html2pdf().set({
-      margin: 0.5, filename: 'Class_Schedule.pdf',
+      margin: 0.5,
+      filename: 'Class_Schedule.pdf',
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
-    }).from(content).save();
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' },
+      // Use CSS hints and legacy handling (no aggressive "avoid-all")
+      pagebreak: { mode: ['css', 'legacy'] }
+    } as any).from(content).save();
   }
 
   formatTime(time: string): string {

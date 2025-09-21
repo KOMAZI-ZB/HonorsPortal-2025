@@ -1,75 +1,54 @@
 /* ===========================
-   Header (mirrors Lab/Class)
+   Header (logo above + topbar)
    =========================== */
-.pdf-header {
+.logo-row {
     display: flex;
-    align-items: flex-end;
-    /* sit neatly on top of the tables */
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 8px;
-}
-
-.pdf-left {
-    flex: 1 1 0%;
-    display: flex;
-    align-items: flex-end;
-}
-
-.pdf-title-left {
-    font-size: 24px;
-    /* ✅ Same as user name */
-    font-weight: 600;
-    text-align: left;
-}
-
-.pdf-center {
-    flex: 0 0 auto;
-    display: flex;
-    align-items: center;
     justify-content: center;
+    align-items: center;
+    margin-bottom: 16px;
 }
 
-.pdf-logo {
-    width: 400px;
+.pdf-logo-top {
+    max-width: clamp(220px, 28vw, 400px);
+    width: 100%;
     height: auto;
-    margin-bottom: 10px;
     display: block;
-    margin-left: auto;
-    margin-right: auto;
 }
 
-.pdf-right {
-    flex: 1 1 0%;
+/* Prevent a page break right AFTER these blocks */
+.keep-with-next {
+    page-break-after: avoid;
+    break-after: avoid;
+}
+
+.table-topbar {
     display: flex;
+    justify-content: space-between;
     align-items: flex-end;
-    justify-content: flex-end;
+    margin-bottom: 6px;
 }
 
-.pdf-user {
+.topbar-title {
     font-size: 24px;
-    /* ✅ Match title size */
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.topbar-user {
+    font-size: 24px;
     font-weight: 600;
     white-space: nowrap;
     text-align: right;
 }
 
-/* ✅ Logo styling inside PDF export (kept for compatibility with other views) */
-#pdfContent img {
-    width: 400px;
-    height: auto;
-    display: block;
-    margin: 0 auto 10px;
-}
-
-/* ✅ White background and padding */
+/* White background and padding */
 #pdfContent {
     background-color: white;
     padding: 20px;
     border-radius: 10px;
 }
 
-/* ✅ Table grid lines */
+/* Table grid lines */
 .table-bordered td,
 .table-bordered th {
     vertical-align: middle;
@@ -79,15 +58,42 @@
     font-size: 16px;
 }
 
-/* ✅ Blue header */
+/* Blue header (kept) */
 .table thead th {
     background-color: #007bff;
     color: white;
     font-weight: bold;
 }
 
-/* ✅ Print mode */
+/* Keep month blocks spaced */
+.month-section {
+    margin-bottom: 24px;
+}
+
+/* Keep individual rows intact; allow tables/sections to break */
+tr,
+td,
+th,
+.avoid-break {
+    break-inside: avoid;
+    page-break-inside: avoid;
+}
+
+/* Print mode */
 @media print {
+    thead {
+        display: table-header-group;
+    }
+
+    tfoot {
+        display: table-footer-group;
+    }
+
+    /* Allow TABLEs to split across pages */
+    table {
+        break-inside: auto;
+        page-break-inside: auto;
+    }
 
     .btn,
     .form-select,

@@ -1,5 +1,5 @@
 <div class="container mt-4">
-    <!-- ✅ Filter + Download -->
+    <!-- Filter + Download -->
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
             <label for="semester">Semester:</label>
@@ -10,37 +10,33 @@
             </select>
         </div>
 
-        <!-- ✅ Center label inside button + disable when no data -->
         <button class="btn btn-success d-inline-flex align-items-center justify-content-center"
             (click)="downloadScheduleAsPdf()" [disabled]="groupedMonths.length === 0">
             Download (PDF)
         </button>
     </div>
 
-    <!-- ✅ Consistent empty state (show ONLY this when there’s nothing) -->
+    <!-- Empty state -->
     <div *ngIf="groupedMonths.length === 0" class="alert alert-info text-center py-4">
         Nothing scheduled.
     </div>
 
-    <!-- ✅ PDF Content: render ONLY when there is data -->
+    <!-- PDF Content -->
     <div *ngIf="groupedMonths.length > 0" id="pdfContent" class="mt-4 p-4 bg-white">
+        <!-- Logo ABOVE everything -->
+        <div class="logo-row keep-with-next">
+            <img src="assets/ufslogo.jpg" alt="UFS Logo" class="pdf-logo-top" />
+        </div>
 
-        <!-- Header: title left | logo center | user right -->
-        <div class="pdf-header mb-3">
-            <div class="pdf-left">
-                <h2 class="pdf-title-left">Assessment Schedule</h2>
-            </div>
-            <div class="pdf-center">
-                <img src="assets/ufslogo.jpg" alt="UFS Logo" class="pdf-logo" />
-            </div>
-            <div class="pdf-right">
-                <div class="pdf-user">{{ userFullName }}</div>
-            </div>
+        <!-- Top bar right above the tables -->
+        <div class="table-topbar keep-with-next">
+            <div class="topbar-title">Assessment Schedule</div>
+            <div class="topbar-user">{{ userFullName }}</div>
         </div>
 
         <!-- Tables grouped by month -->
         <div>
-            <div *ngFor="let month of groupedMonths">
+            <div *ngFor="let month of groupedMonths" class="month-section">
                 <table class="table table-bordered text-center align-middle mb-5">
                     <thead class="table-dark">
                         <tr>
@@ -58,7 +54,8 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr *ngFor="let item of groupedAssessments[month]">
+                        <!-- Keep each row intact across page breaks -->
+                        <tr *ngFor="let item of groupedAssessments[month]" class="avoid-break">
                             <td>{{ item.moduleCode }}</td>
                             <td>{{ item.title }}</td>
                             <td>{{ item.description || '-' }}</td>

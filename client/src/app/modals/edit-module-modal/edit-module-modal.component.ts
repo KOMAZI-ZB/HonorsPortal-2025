@@ -47,8 +47,8 @@ export class EditModuleModalComponent implements OnInit, AfterViewInit, OnDestro
     this.newCode = this.module.moduleCode;
     this.newName = this.module.moduleName;
 
-    // Initialise semester choice from current module state
-    if (this.module.isYearModule) {
+    // Initialise semester choice from current module state (treat Semester=0 as year)
+    if (this.module.isYearModule || this.module.semester === 0) {
       this.semesterChoice = 'year';
     } else {
       this.semesterChoice = this.module.semester === 2 ? '2' : '1';
@@ -122,7 +122,7 @@ export class EditModuleModalComponent implements OnInit, AfterViewInit, OnDestro
     if (this.semesterChoice === 'year') {
       // Turn into (or keep as) a Year module
       payload.isYearModule = true;
-      // No need to send semester; backend already treats IsYearModule as authoritative
+      payload.semester = 0; // <-- year modules use semester 0
     } else {
       // Normal semester module
       payload.isYearModule = false;

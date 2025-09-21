@@ -42,7 +42,8 @@ export class EditDetailsModalComponent implements OnInit, AfterViewInit, OnDestr
 
   baseUrl = environment.apiUrl;
 
-  weekDays: string[] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  // ✅ Weekends removed for class scheduling in the modal
+  weekDays: string[] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
   venues: VenueConfig[] = [];
   assessments: Assessment[] = [];
@@ -85,6 +86,9 @@ export class EditDetailsModalComponent implements OnInit, AfterViewInit, OnDestr
         };
 
         for (const s of sessions) {
+          // Ignore any legacy weekend data silently
+          if (!this.weekDays.includes(s.weekDay)) continue;
+
           if (!byVenue.has(s.venue)) byVenue.set(s.venue, { venue: s.venue, days: makeEmptyDays() });
           const cfg = byVenue.get(s.venue)!;
           if (cfg.days[s.weekDay]) {
@@ -213,7 +217,7 @@ export class EditDetailsModalComponent implements OnInit, AfterViewInit, OnDestr
   private isAssessmentValid(a: Assessment): boolean {
     if (!a) return false;
     const hasTitle = (a.title || '').trim().length > 0;
-    const hasDesc = (a.description || '').trim().length > 0; // <-- required
+    const hasDesc = (a.description || '').trim().length > 0; // required
     const hasDate = (a.date || '').trim().length > 0;
 
     if (!hasTitle || !hasDesc || !hasDate) return false;
@@ -244,6 +248,7 @@ export class EditDetailsModalComponent implements OnInit, AfterViewInit, OnDestr
       const venueName = (v.venue || '').trim();
       if (!venueName) continue;
 
+      // ✅ Only Monday–Friday are iterated
       for (const day of this.weekDays) {
         const st = v.days[day];
         if (!st.checked) continue;
@@ -258,7 +263,7 @@ export class EditDetailsModalComponent implements OnInit, AfterViewInit, OnDestr
     const cleanedAssessments = this.assessments.filter(a => (a.date || '').trim() !== '');
     const processedAssessments = cleanedAssessments.map(a => ({
       title: a.title,
-      description: (a.description || '').trim() || null, // <-- sent to API
+      description: (a.description || '').trim() || null,
       date: a.date,
       isTimed: a.isTimed,
       startTime: a.isTimed ? this.formatTimeString(a.startTime!) : null,

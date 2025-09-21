@@ -14,26 +14,27 @@
         </button>
     </div>
 
-    <!-- ✅ Consistent empty state for Class -->
+    <!-- Empty state -->
     <div *ngIf="timeBlocks.length === 0" class="alert alert-info text-center py-4">
         Nothing scheduled.
     </div>
 
     <!-- PDF Export Content Only -->
-    <div *ngIf="timeBlocks.length > 0" id="pdfContent" class="table-responsive mt-3 p-4 bg-white">
-        <!-- ✅ Header: title left | logo center | user right -->
-        <div class="pdf-header mb-3">
-            <div class="pdf-left">
-                <h2 class="pdf-title-left">Class Schedule</h2>
-            </div>
-            <div class="pdf-center">
-                <img src="assets/ufslogo.jpg" alt="UFS Logo" class="pdf-logo" />
-            </div>
-            <div class="pdf-right">
-                <div class="pdf-user">{{ userFullName }}</div>
-            </div>
+    <!-- ⬇️ removed `table-responsive` so html2canvas doesn't crop the right edge -->
+    <div *ngIf="timeBlocks.length > 0" id="pdfContent" class="mt-3 p-4 bg-white">
+
+        <!-- Logo ABOVE everything -->
+        <div class="logo-row keep-with-next">
+            <img src="assets/ufslogo.jpg" alt="UFS Logo" class="pdf-logo-top" />
         </div>
 
+        <!-- Top bar sitting right on top of the table -->
+        <div class="table-topbar keep-with-next">
+            <div class="topbar-title">Class Schedule</div>
+            <div class="topbar-user">{{ userFullName }}</div>
+        </div>
+
+        <!-- Allow the table to span pages -->
         <table class="table table-bordered text-center align-middle">
             <thead class="table-light">
                 <tr>
@@ -53,7 +54,8 @@
                 <ng-container *ngFor="let block of timeBlocks">
                     <ng-container
                         *ngFor="let row of [].constructor(getMaxEntriesForBlock(block)); let rowIndex = index">
-                        <tr>
+                        <!-- Keep each rendered row intact across page breaks -->
+                        <tr class="avoid-break">
                             <td *ngIf="rowIndex === 0" [attr.rowspan]="getMaxEntriesForBlock(block)">
                                 <strong>{{ formatTime(block.startTime) }}</strong>
                             </td>

@@ -21,17 +21,12 @@ export class AssessmentScheduleComponent implements OnInit {
 
   constructor(
     private schedulerService: SchedulerService,
-    public accountService: AccountService      // ✅ added (same as Lab/Class)
+    public accountService: AccountService
   ) { }
 
-  ngOnInit(): void {
-    this.loadSchedule();
-  }
+  ngOnInit(): void { this.loadSchedule(); }
 
-  // ✅ same helpers as Lab/Class
-  get user() {
-    return this.accountService.currentUser();
-  }
+  get user() { return this.accountService.currentUser(); }
 
   get userFullName(): string {
     const u: any = this.user || {};
@@ -48,9 +43,7 @@ export class AssessmentScheduleComponent implements OnInit {
     return pick(u.displayName, u.username, u.userName);
   }
 
-  onSemesterChange(): void {
-    this.loadSchedule();
-  }
+  onSemesterChange(): void { this.loadSchedule(); }
 
   formatTime(time: string | null | undefined): string {
     if (!time) return '-';
@@ -70,7 +63,6 @@ export class AssessmentScheduleComponent implements OnInit {
             month: 'long',
             year: 'numeric'
           });
-
           if (!groups[month]) groups[month] = [];
           groups[month].push(a);
         }
@@ -82,7 +74,6 @@ export class AssessmentScheduleComponent implements OnInit {
             if (dateA.getTime() !== dateB.getTime()) {
               return dateA.getTime() - dateB.getTime();
             }
-
             const timeA = a.startTime || a.dueTime || '00:00';
             const timeB = b.startTime || b.dueTime || '00:00';
             return timeA.localeCompare(timeB);
@@ -104,9 +95,11 @@ export class AssessmentScheduleComponent implements OnInit {
       margin: 0.5,
       filename: 'Assessment_Schedule.pdf',
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
-    };
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' },
+      // Use CSS hints without forcing "avoid-all"
+      pagebreak: { mode: ['css', 'legacy'] }
+    } as any;
 
     html2pdf().set(options).from(tableElement).save();
   }

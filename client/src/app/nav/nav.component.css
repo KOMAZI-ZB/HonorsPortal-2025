@@ -27,3 +27,10 @@ img {
     margin-left: 0;
     /* Fully flush with container edge */
 }
+
+/* Ensure the dropdown aligns right on wide screens and stacks nicely when collapsed */
+@media (max-width: 767.98px) {
+    .dropdown .dropdown-menu {
+        width: 100%;
+    }
+}

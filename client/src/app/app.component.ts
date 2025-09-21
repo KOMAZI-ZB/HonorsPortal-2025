@@ -10,7 +10,7 @@ import { AccountService } from './_services/account.service';
   standalone: true,
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
-  imports: [RouterOutlet, NavComponent, HomeComponent, NgxSpinnerComponent]
+  imports: [RouterOutlet, NavComponent, NgxSpinnerComponent]
 })
 export class AppComponent implements OnInit {
   private accountService = inject(AccountService);

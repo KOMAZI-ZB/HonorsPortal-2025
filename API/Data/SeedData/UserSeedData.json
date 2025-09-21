@@ -9,11 +9,13 @@
         "joinDate": "2024-01-15",
         "semester1ModuleIds": [
             1,
-            2
+            2,
+            1
         ],
         "semester2ModuleIds": [
             1,
-            2
+            2,
+            1
         ]
     },
     {
@@ -26,11 +28,13 @@
         "joinDate": "2024-01-18",
         "semester1ModuleIds": [
             3,
-            4
+            4,
+            53
         ],
         "semester2ModuleIds": [
             3,
-            4
+            4,
+            53
         ]
     },
     {
@@ -43,11 +47,13 @@
         "joinDate": "2024-01-20",
         "semester1ModuleIds": [
             5,
-            6
+            6,
+            1
         ],
         "semester2ModuleIds": [
             5,
-            6
+            6,
+            1
         ]
     },
     {
@@ -60,11 +66,13 @@
         "joinDate": "2024-01-25",
         "semester1ModuleIds": [
             7,
-            8
+            8,
+            53
         ],
         "semester2ModuleIds": [
             7,
-            8
+            8,
+            53
         ]
     },
     {
@@ -77,11 +85,13 @@
         "joinDate": "2023-12-10",
         "semester1ModuleIds": [
             9,
-            10
+            10,
+            1
         ],
         "semester2ModuleIds": [
             9,
-            10
+            10,
+            1
         ]
     },
     {
@@ -179,5 +189,221 @@
         "joinDate": "2023-10-01",
         "semester1ModuleIds": [],
         "semester2ModuleIds": []
+    },
+    {
+        "userName": "2023000011",
+        "firstName": "Eva",
+        "lastName": "Khoza",
+        "email": "eva@student.com",
+        "password": "Pa$$w0rd",
+        "role": "Student",
+        "joinDate": "2024-02-01",
+        "semester1ModuleIds": [
+            21,
+            22,
+            1
+        ],
+        "semester2ModuleIds": [
+            21,
+            22,
+            1
+        ]
+    },
+    {
+        "userName": "2023000012",
+        "firstName": "Frank",
+        "lastName": "Dlamini",
+        "email": "frank@student.com",
+        "password": "Pa$$w0rd",
+        "role": "Student",
+        "joinDate": "2024-02-03",
+        "semester1ModuleIds": [
+            23,
+            24,
+            1
+        ],
+        "semester2ModuleIds": [
+            23,
+            24,
+            1
+        ]
+    },
+    {
+        "userName": "2023000013",
+        "firstName": "Lerato",
+        "lastName": "Mhlongo",
+        "email": "lerato@student.com",
+        "password": "Pa$$w0rd",
+        "role": "Student",
+        "joinDate": "2024-02-05",
+        "semester1ModuleIds": [
+            25,
+            26,
+            1
+        ],
+        "semester2ModuleIds": [
+            25,
+            26,
+            1
+        ]
+    },
+    {
+        "userName": "2023000014",
+        "firstName": "Musa",
+        "lastName": "Shabalala",
+        "email": "musa@student.com",
+        "password": "Pa$$w0rd",
+        "role": "Student",
+        "joinDate": "2024-02-07",
+        "semester1ModuleIds": [
+            27,
+            28,
+            53
+        ],
+        "semester2ModuleIds": [
+            27,
+            28,
+            53
+        ]
+    },
+    {
+        "userName": "2023000015",
+        "firstName": "Naledi",
+        "lastName": "Pule",
+        "email": "naledi@student.com",
+        "password": "Pa$$w0rd",
+        "role": "Student",
+        "joinDate": "2024-02-10",
+        "semester1ModuleIds": [
+            29,
+            30,
+            53
+        ],
+        "semester2ModuleIds": [
+            29,
+            30,
+            53
+        ]
+    },
+    {
+        "userName": "2023000016",
+        "firstName": "Owen",
+        "lastName": "Radebe",
+        "email": "owen@student.com",
+        "password": "Pa$$w0rd",
+        "role": "Student",
+        "joinDate": "2024-02-12",
+        "semester1ModuleIds": [
+            31,
+            32,
+            53
+        ],
+        "semester2ModuleIds": [
+            31,
+            32,
+            53
+        ]
+    },
+    {
+        "userName": "2023000017",
+        "firstName": "Patrick",
+        "lastName": "Khoabane",
+        "email": "patrick@lecturer.com",
+        "password": "Pa$$w0rd",
+        "role": "Lecturer",
+        "joinDate": "2023-12-20",
+        "semester1ModuleIds": [
+            21,
+            22
+        ],
+        "semester2ModuleIds": [
+            21,
+            22
+        ]
+    },
+    {
+        "userName": "2023000018",
+        "firstName": "Queenie",
+        "lastName": "Jantjie",
+        "email": "queenie@lecturer.com",
+        "password": "Pa$$w0rd",
+        "role": "Lecturer",
+        "joinDate": "2023-12-22",
+        "semester1ModuleIds": [
+            23,
+            24
+        ],
+        "semester2ModuleIds": [
+            23,
+            24
+        ]
+    },
+    {
+        "userName": "2023000019",
+        "firstName": "Riaan",
+        "lastName": "Botha",
+        "email": "riaan@lecturer.com",
+        "password": "Pa$$w0rd",
+        "role": "Lecturer",
+        "joinDate": "2023-12-24",
+        "semester1ModuleIds": [
+            25,
+            26
+        ],
+        "semester2ModuleIds": [
+            25,
+            26
+        ]
+    },
+    {
+        "userName": "2023000020",
+        "firstName": "Sibongile",
+        "lastName": "Maseko",
+        "email": "sibongile@lecturer.com",
+        "password": "Pa$$w0rd",
+        "role": "Lecturer",
+        "joinDate": "2023-12-26",
+        "semester1ModuleIds": [
+            27,
+            28
+        ],
+        "semester2ModuleIds": [
+            27,
+            28
+        ]
+    },
+    {
+        "userName": "2023000021",
+        "firstName": "Tariq",
+        "lastName": "Patel",
+        "email": "tariq@lecturer.com",
+        "password": "Pa$$w0rd",
+        "role": "Lecturer",
+        "joinDate": "2023-12-28",
+        "semester1ModuleIds": [
+            29,
+            30
+        ],
+        "semester2ModuleIds": [
+            29,
+            30
+        ]
+    },
+    {
+        "userName": "2023000022",
+        "firstName": "Yvonne",
+        "lastName": "Molefe",
+        "email": "yvonne@lecturer.com",
+        "password": "Pa$$w0rd",
+        "role": "Lecturer",
+        "joinDate": "2023-12-30",
+        "semester1ModuleIds": [
+            31,
+            32
+        ],
+        "semester2ModuleIds": [
+            31,
+            32
+        ]
     }
 ]

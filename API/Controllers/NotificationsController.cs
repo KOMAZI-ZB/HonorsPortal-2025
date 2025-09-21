@@ -5,15 +5,25 @@ using API.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.IO;
+using System.Text.RegularExpressions;
+using API.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class NotificationsController(INotificationService notificationService) : BaseApiController
+public class NotificationsController : BaseApiController
 {
-    private readonly INotificationService _notificationService = notificationService;
+    private readonly INotificationService _notificationService;
+    private readonly DataContext _context;
+
+    public NotificationsController(INotificationService notificationService, DataContext context)
+    {
+        _notificationService = notificationService;
+        _context = context;
+    }
 
     private static readonly string[] AllowedTypes = new[]
     {
@@ -28,6 +38,13 @@ public class NotificationsController(INotificationService notificationService) :
 
     private static readonly HashSet<string> AllowedImageExtensions = new(StringComparer.OrdinalIgnoreCase)
     { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+
+    // strips any trailing " (Module: XXXX)" redundancy
+    private static string StripModuleSuffix(string? message)
+    {
+        if (string.IsNullOrWhiteSpace(message)) return string.Empty;
+        return Regex.Replace(message, @"\s*\(Module:\s*[^)]+\)\s*$", string.Empty, RegexOptions.IgnoreCase);
+    }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<NotificationDto>>> GetAll([FromQuery] QueryParams queryParams)
@@ -44,10 +61,15 @@ public class NotificationsController(INotificationService notificationService) :
     {
         var userName = User.GetUsername();
 
-        if (!AllowedTypes.Any(t => string.Equals(t, dto.Type, StringComparison.OrdinalIgnoreCase)))
+        // Type validation (null-safe)
+        if (string.IsNullOrWhiteSpace(dto.Type) ||
+            !AllowedTypes.Any(t => string.Equals(t, dto.Type, StringComparison.OrdinalIgnoreCase)))
+        {
             return BadRequest("Invalid notification type.");
+        }
 
-        if (string.IsNullOrWhiteSpace(dto.Audience)) dto.Audience = "All";
+        // Audience normalization (null-safe)
+        dto.Audience ??= "All";
         if (!AllowedAudiences.Any(a => string.Equals(a, dto.Audience, StringComparison.OrdinalIgnoreCase)))
             return BadRequest("Invalid audience. Allowed: All, Students, Staff, ModuleStudents.");
 
@@ -55,23 +77,63 @@ public class NotificationsController(INotificationService notificationService) :
         if (dto.Type.Equals("System", StringComparison.OrdinalIgnoreCase) && !User.IsInRole("Admin"))
             return Forbid("Only Admins can post System announcements.");
 
-        // Lecturers must target ModuleStudents and pick a module
-        if (User.IsInRole("Lecturer"))
+        // If audience is module students OR a module was selected, we enforce module-id and prefix the title.
+        var wantsModuleScoped =
+            dto.ModuleId is not null ||
+            string.Equals(dto.Audience, "ModuleStudents", StringComparison.OrdinalIgnoreCase) ||
+            User.IsInRole("Lecturer"); // lecturers must post to a specific module
+
+        if (wantsModuleScoped)
         {
             if (dto.ModuleId is null)
-                return BadRequest("Lecturers must select a specific Module for their post.");
+                return BadRequest("Please choose a specific module for Module students audience.");
+
+            // Lock the audience to ModuleStudents
             dto.Audience = "ModuleStudents";
+
+            // Fetch module code and prepend to the title (null-safe)
+            var module = await _context.Modules.AsNoTracking()
+                .FirstOrDefaultAsync(m => m.Id == dto.ModuleId.Value);
+
+            if (module is null)
+                return BadRequest("Module not found.");
+
+            var code = (module.ModuleCode ?? string.Empty).Trim();
+            if (!string.IsNullOrWhiteSpace(code))
+            {
+                var currentTitle = dto.Title ?? string.Empty;
+                var trimmedTitle = currentTitle.TrimStart();
+                var bracket = $"[{code}]";
+
+                if (!trimmedTitle.StartsWith(bracket, StringComparison.OrdinalIgnoreCase))
+                {
+                    dto.Title = $"{bracket} {currentTitle}".Trim();
+                }
+                else
+                {
+                    dto.Title = currentTitle; // keep as-is but ensure non-null
+                }
+            }
         }
 
         // 🔒 Restrict files to images only (server-side guard)
         if (dto.Image is not null)
         {
-            if (string.IsNullOrWhiteSpace(dto.Image.ContentType) || !dto.Image.ContentType.StartsWith("image/"))
+            var contentType = dto.Image.ContentType ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(contentType) || !contentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
                 return BadRequest("Only image uploads are allowed.");
-            var ext = Path.GetExtension(dto.Image.FileName ?? string.Empty);
+
+            var fileName = dto.Image.FileName ?? string.Empty;
+            var ext = Path.GetExtension(fileName);
             if (string.IsNullOrEmpty(ext) || !AllowedImageExtensions.Contains(ext))
                 return BadRequest("Unsupported image type. Allowed: .jpg, .jpeg, .png, .gif, .webp");
         }
+
+        // Ensure message has no redundant "(Module: CODE)"
+        dto.Message = StripModuleSuffix(dto.Message);
+
+        // Also ensure Title is not null when it reaches the service
+        dto.Title ??= string.Empty;
 
         var result = await _notificationService.CreateAsync(dto, userName);
         return Ok(result);
@@ -89,7 +151,6 @@ public class NotificationsController(INotificationService notificationService) :
         return Ok(new { message = "Notification deleted successfully." });
     }
 
-    // Mark as read (persist)
     [HttpPost("{id}/read")]
     public async Task<ActionResult> MarkRead(int id)
     {
@@ -99,7 +160,6 @@ public class NotificationsController(INotificationService notificationService) :
         return Ok(new { message = "Marked as read." });
     }
 
-    // 🆕 Mark as UNREAD (persist) — delete read receipt
     [HttpDelete("{id}/read")]
     public async Task<ActionResult> UnmarkRead(int id)
     {

@@ -15,7 +15,28 @@
     font-weight: 600;
 }
 
-/* 🆕 Ensure modal displays properly */
+/* Top bar: make it a positioning context and keep height stable */
+.card-topbar {
+    position: relative;
+    min-height: 32px;
+    /* enough room for badges */
+}
+
+/* Absolutely center the badges independent of left/right widths */
+.top-center-abs {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    white-space: nowrap;
+}
+
+/* Bottom-right date/time styling */
+.date-bottom {
+    font-size: 0.85rem;
+}
+
+/* Ensure modal displays properly */
 .modal {
     z-index: 1055;
 }

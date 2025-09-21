@@ -5,6 +5,8 @@ using API.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Linq; // (existing)
+using System;      // (existing)
 
 namespace API.Controllers;
 
@@ -15,12 +17,16 @@ public class ModulesController(DataContext context) : BaseApiController
     [HttpPost]
     public async Task<ActionResult> AddModule(ModuleDto dto)
     {
+        // Normalize: any year module => Semester = 0
+        var isYear = dto.IsYearModule || dto.Semester == 0;
+        var semester = isYear ? 0 : dto.Semester;
+
         var module = new Module
         {
             ModuleCode = dto.ModuleCode,
             ModuleName = dto.ModuleName,
-            Semester = dto.Semester,
-            IsYearModule = dto.IsYearModule,
+            Semester = semester,
+            IsYearModule = isYear,
 
             // legacy fields optional/ignored for schedule rendering
             ClassVenue = dto.ClassVenue,
@@ -52,7 +58,7 @@ public class ModulesController(DataContext context) : BaseApiController
                 module.Assessments.Add(new Assessment
                 {
                     Title = a.Title,
-                    Description = a.Description,          // <-- FIX: save description
+                    Description = a.Description,          // save description
                     Date = DateOnly.Parse(a.Date),
                     StartTime = a.StartTime,
                     EndTime = a.EndTime,
@@ -69,7 +75,7 @@ public class ModulesController(DataContext context) : BaseApiController
         return Ok(new { message = "Module created successfully.", moduleId = module.Id });
     }
 
-    // 🔁 CHANGED: allow Admin OR Coordinator to fetch all modules
+    // allow Admin OR Coordinator to fetch all modules
     [Authorize(Roles = "Admin,Coordinator")]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<ModuleDto>>> GetAllModules()
@@ -111,7 +117,7 @@ public class ModulesController(DataContext context) : BaseApiController
         if (User.IsInRole("Admin"))
         {
             var allModules = await context.Modules
-                .Where(m => m.Semester == semester || m.IsYearModule)
+                .Where(m => m.Semester == semester || m.IsYearModule || m.Semester == 0) // include year modules (sem 0)
                 .Include(m => m.ClassSessions)
                 .ToListAsync();
 
@@ -138,7 +144,8 @@ public class ModulesController(DataContext context) : BaseApiController
         }
 
         var assignedModules = await context.UserModules
-            .Where(um => um.AppUserId == userId && (um.Module.Semester == semester || um.Module.IsYearModule))
+            .Where(um => um.AppUserId == userId &&
+                         (um.Module.Semester == semester || um.Module.IsYearModule || um.Module.Semester == 0)) // include year modules (sem 0)
             .Include(um => um.Module)
                 .ThenInclude(m => m.ClassSessions)
             .Select(um => um.Module)
@@ -173,16 +180,16 @@ public class ModulesController(DataContext context) : BaseApiController
     {
         var userId = int.Parse(User.GetUserId());
 
-        // All modules in this semester or year modules
+        // All modules in this semester or year modules (sem 0)
         var allModules = await context.Modules
-            .Where(m => m.Semester == semester || m.IsYearModule)
+            .Where(m => m.Semester == semester || m.IsYearModule || m.Semester == 0)
             .Include(m => m.ClassSessions)
             .ToListAsync();
 
         // Modules where this user is linked as Coordinator
         var managedIds = await context.UserModules
             .Where(um => um.AppUserId == userId
-                         && (um.Module.Semester == semester || um.Module.IsYearModule)
+                         && (um.Module.Semester == semester || um.Module.IsYearModule || um.Module.Semester == 0)
                          && um.RoleContext == "Coordinator")
             .Select(um => um.ModuleId)
             .ToListAsync();
@@ -272,20 +279,44 @@ public class ModulesController(DataContext context) : BaseApiController
 
         if (module == null) return NotFound(new { message = "Module not found." });
 
-        // snapshot original sessions
-        var original = module.ClassSessions
+        // snapshot original class sessions
+        var originalSessions = module.ClassSessions
             .Select(s => new { s.Venue, s.WeekDay, s.StartTime, s.EndTime })
             .OrderBy(x => x.Venue).ThenBy(x => x.WeekDay).ThenBy(x => x.StartTime).ThenBy(x => x.EndTime)
             .ToList();
 
+        // snapshot original assessments (min fields to compare)
+        var originalAssessments = await context.Assessments
+            .Where(a => a.ModuleId == id)
+            .Select(a => new
+            {
+                a.Title,
+                a.Description,
+                a.Date,
+                a.StartTime,
+                a.EndTime,
+                a.DueTime,
+                a.Venue,
+                a.IsTimed
+            })
+            .OrderBy(a => a.Date).ThenBy(a => a.Title)
+            .ToListAsync();
+
         // basic fields
         module.ModuleCode = dto.ModuleCode ?? module.ModuleCode;
         module.ModuleName = dto.ModuleName ?? module.ModuleName;
-        module.Semester = dto.Semester != 0 ? dto.Semester : module.Semester;
 
-        // NEW: flip year flag if provided
+        // Handle year / semester normalization
         if (dto.IsYearModule.HasValue)
+        {
             module.IsYearModule = dto.IsYearModule.Value;
+            if (module.IsYearModule) module.Semester = 0;
+        }
+
+        if (dto.Semester != 0 && !module.IsYearModule)
+        {
+            module.Semester = dto.Semester;
+        }
 
         // legacy fields (kept writable)
         module.ClassVenue = dto.ClassVenue;
@@ -323,7 +354,7 @@ public class ModulesController(DataContext context) : BaseApiController
                 context.Assessments.Add(new Assessment
                 {
                     Title = a.Title,
-                    Description = a.Description,          // <-- FIX: save description
+                    Description = a.Description,          // save description
                     Date = DateOnly.Parse(a.Date),
                     StartTime = a.StartTime,
                     EndTime = a.EndTime,
@@ -337,37 +368,89 @@ public class ModulesController(DataContext context) : BaseApiController
 
         await context.SaveChangesAsync();
 
-        // compare sessions to decide notification
-        var current = await context.ClassSessions.Where(s => s.ModuleId == id)
+        // compare sessions to decide CLASS schedule notification
+        var currentSessions = await context.ClassSessions.Where(s => s.ModuleId == id)
             .Select(s => new { s.Venue, s.WeekDay, s.StartTime, s.EndTime })
             .OrderBy(x => x.Venue).ThenBy(x => x.WeekDay).ThenBy(x => x.StartTime).ThenBy(x => x.EndTime)
             .ToListAsync();
 
-        bool scheduleChanged = original.Count != current.Count
-            || original.Zip(current, (o, c) =>
+        bool classScheduleChanged = originalSessions.Count != currentSessions.Count
+            || originalSessions.Zip(currentSessions, (o, c) =>
                 o.Venue != c.Venue || o.WeekDay != c.WeekDay || o.StartTime != c.StartTime || o.EndTime != c.EndTime)
                .Any(diff => diff);
 
-        Notification? notification = null;
-        if (scheduleChanged)
-        {
-            notification = new Notification
+        // compare assessments to decide ASSESSMENT schedule notification
+        var currentAssessments = await context.Assessments
+            .Where(a => a.ModuleId == id)
+            .Select(a => new
             {
-                Title = $"Schedule Updated for {module.ModuleCode}",
+                a.Title,
+                a.Description,
+                a.Date,
+                a.StartTime,
+                a.EndTime,
+                a.DueTime,
+                a.Venue,
+                a.IsTimed
+            })
+            .OrderBy(a => a.Date).ThenBy(a => a.Title)
+            .ToListAsync();
+
+        bool assessmentScheduleChanged =
+            originalAssessments.Count != currentAssessments.Count
+            || originalAssessments.Zip(currentAssessments, (o, c) =>
+                   o.Title != c.Title ||
+                   o.Description != c.Description ||
+                   o.Date != c.Date ||
+                   o.StartTime != c.StartTime ||
+                   o.EndTime != c.EndTime ||
+                   o.DueTime != c.DueTime ||
+                   o.Venue != c.Venue ||
+                   o.IsTimed != c.IsTimed)
+               .Any(diff => diff);
+
+        // 🔔 Create targeted notifications (ModuleStudents + author)
+        if (classScheduleChanged)
+        {
+            var n = new Notification
+            {
+                // ⬅️ Prepend module code
+                Title = $"[{module.ModuleCode}] Class schedule updated",
                 Message = $"The class timetable (venues/days/times) for {module.ModuleCode} has changed. Please check your schedule.",
                 Type = "ScheduleUpdate",
                 ModuleId = module.Id,
+                Audience = "ModuleStudents",          // target only students of this module (author also sees via CreatedBy)
                 CreatedBy = User.GetUsername(),
                 CreatedAt = DateTime.UtcNow
             };
-            context.Notifications.Add(notification);
+            context.Notifications.Add(n);
+        }
+
+        if (assessmentScheduleChanged)
+        {
+            var n = new Notification
+            {
+                // ⬅️ Prepend module code
+                Title = $"[{module.ModuleCode}] Assessment schedule updated",
+                Message = $"The assessment schedule for {module.ModuleCode} has changed. Please check your assessment dates.",
+                Type = "ScheduleUpdate",
+                ModuleId = module.Id,
+                Audience = "ModuleStudents",          // target only students of this module (author also sees via CreatedBy)
+                CreatedBy = User.GetUsername(),
+                CreatedAt = DateTime.UtcNow
+            };
+            context.Notifications.Add(n);
+        }
+
+        if (classScheduleChanged || assessmentScheduleChanged)
+        {
             await context.SaveChangesAsync();
         }
 
-        return Ok(new { message = "Module updated successfully.", notification });
+        return Ok(new { message = "Module updated successfully." });
     }
 
-    // ⬇️ Restored EXACTLY as before (same route and roles)
+    // EXACT as before (same route and roles)
     [Authorize(Roles = "Lecturer,Coordinator")]
     [HttpGet("assigned")]
     public async Task<ActionResult<IEnumerable<ModuleDto>>> GetAssignedModules()
@@ -416,7 +499,7 @@ public class ModulesController(DataContext context) : BaseApiController
         {
             Id = a.Id,
             Title = a.Title,
-            Description = a.Description,           // <-- FIX: return description
+            Description = a.Description,           // return description
             Date = a.Date.ToString("yyyy-MM-dd"),
             StartTime = a.StartTime,
             EndTime = a.EndTime,
@@ -462,7 +545,7 @@ public class ModulesController(DataContext context) : BaseApiController
             {
                 Id = a.Id,
                 Title = a.Title,
-                Description = a.Description,        // <-- FIX: return description
+                Description = a.Description,        // return description
                 Date = a.Date.ToString("yyyy-MM-dd"),
                 StartTime = a.StartTime,
                 EndTime = a.EndTime,
