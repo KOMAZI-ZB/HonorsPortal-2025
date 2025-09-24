@@ -8,12 +8,14 @@ namespace API.DTOs
 
         public string FilePath { get; set; } = string.Empty;
 
-        public DateTime UploadedAt { get; set; }
+        // Use DateTimeOffset so JSON carries timezone (e.g., "Z") and client can localize.
+        public DateTimeOffset UploadedAt { get; set; }
 
         public string UploadedBy { get; set; } = string.Empty;
 
         public int? ModuleId { get; set; } // null for Repository files
-                                           // ✅ Optional: expose user number for UI logic
+
+        // Optional: expose username for UI logic
         public string? UploadedByUserName { get; set; }
     }
 }

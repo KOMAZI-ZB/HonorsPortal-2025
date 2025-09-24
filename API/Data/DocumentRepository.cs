@@ -40,9 +40,6 @@ namespace API.Services
             if (user == null)
                 throw new Exception("User not found.");
 
-            // ---------------------------
-            // PERMISSION LOGIC (Adjusted)
-            // ---------------------------
             if (dto.Source == "Module")
             {
                 if (!dto.ModuleId.HasValue)
@@ -54,7 +51,6 @@ namespace API.Services
                 if (!moduleExists)
                     throw new Exception("Module not found.");
 
-                // Get roles to decide the rule
                 var roles = await _context.UserRoles
                     .Include(ur => ur.Role)
                     .Where(ur => ur.UserId == user.Id)
@@ -65,7 +61,6 @@ namespace API.Services
                 bool isCoordinator = roles.Contains("Coordinator");
                 bool isLecturer = roles.Contains("Lecturer");
 
-                // Lecturers must be assigned; Coordinators/Admins may upload to ANY module
                 if (isLecturer && !isCoordinator && !isAdmin)
                 {
                     var lecturerAssigned = user.UserModules.Any(um =>
@@ -87,7 +82,7 @@ namespace API.Services
             {
                 File = new FileDescription(dto.File.FileName, stream),
                 Folder = "academic-portal-docs",
-                Type = "upload" // publicly accessible
+                Type = "upload"
             };
 
             uploadResult = await _cloudinary.UploadAsync(uploadParams, "raw");
@@ -100,7 +95,6 @@ namespace API.Services
                 uploadResult.Url?.AbsoluteUri ??
                 throw new Exception("Upload succeeded, but no URL was returned by Cloudinary.");
 
-            // Store the first role label for display
             var userRole = await _context.UserRoles
                 .Include(ur => ur.Role)
                 .Where(ur => ur.UserId == user.Id)
@@ -114,7 +108,7 @@ namespace API.Services
                 UploadedBy = userRole ?? "Unknown",
                 UploadedByUserName = user.UserName
                     ?? throw new InvalidOperationException("User has no username."),
-                UploadedAt = DateTime.UtcNow,
+                UploadedAt = DateTimeOffset.UtcNow,
                 ModuleId = dto.ModuleId,
                 Source = dto.Source
             };
@@ -127,6 +121,8 @@ namespace API.Services
 
         public async Task<IEnumerable<DocumentDto>> GetDocumentsByModuleAsync(int moduleId)
         {
+            var isSqlite = _context.Database.IsSqlite();
+
             var query = _context.Documents.AsQueryable();
 
             if (moduleId > 0)
@@ -134,8 +130,12 @@ namespace API.Services
             else
                 query = query.Where(d => d.ModuleId != null);
 
+            // SQLite cannot ORDER BY DateTimeOffset. Use Id as a proxy on SQLite.
+            query = isSqlite
+                ? query.OrderByDescending(d => d.Id)
+                : query.OrderByDescending(d => d.UploadedAt);
+
             return await query
-                .OrderByDescending(d => d.UploadedAt)
                 .ProjectTo<DocumentDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();
         }
@@ -143,6 +143,8 @@ namespace API.Services
         public async Task<PagedList<DocumentDto>> GetDocumentsByModulePaginatedAsync(
             int moduleId, PaginationParams paginationParams)
         {
+            var isSqlite = _context.Database.IsSqlite();
+
             var query = _context.Documents.AsQueryable();
 
             if (moduleId > 0)
@@ -150,7 +152,9 @@ namespace API.Services
             else
                 query = query.Where(d => d.ModuleId != null);
 
-            query = query.OrderByDescending(d => d.UploadedAt);
+            query = isSqlite
+                ? query.OrderByDescending(d => d.Id)
+                : query.OrderByDescending(d => d.UploadedAt);
 
             return await PagedList<DocumentDto>.CreateAsync(
                 query.ProjectTo<DocumentDto>(_mapper.ConfigurationProvider),
@@ -161,9 +165,16 @@ namespace API.Services
 
         public async Task<IEnumerable<DocumentDto>> GetInternalRepositoryDocumentsAsync()
         {
-            return await _context.Documents
-                .Where(d => d.ModuleId == null)
-                .OrderByDescending(d => d.UploadedAt)
+            var isSqlite = _context.Database.IsSqlite();
+
+            var query = _context.Documents
+                .Where(d => d.ModuleId == null);
+
+            query = isSqlite
+                ? query.OrderByDescending(d => d.Id)
+                : query.OrderByDescending(d => d.UploadedAt);
+
+            return await query
                 .ProjectTo<DocumentDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();
         }

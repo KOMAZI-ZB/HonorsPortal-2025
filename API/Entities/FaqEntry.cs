@@ -1,12 +1,14 @@
-namespace API.Entities;
-
-public class FaqEntry
+namespace API.Entities
 {
-    public int Id { get; set; }
+    public class FaqEntry
+    {
+        public int Id { get; set; }
 
-    public string Question { get; set; } = string.Empty;
+        public string Question { get; set; } = string.Empty;
 
-    public string Answer { get; set; } = string.Empty;
+        public string Answer { get; set; } = string.Empty;
 
-    public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
+        // Offset-aware for consistent client rendering
+        public DateTimeOffset LastUpdated { get; set; } = DateTimeOffset.UtcNow;
+    }
 }

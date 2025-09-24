@@ -37,8 +37,14 @@ export class AddUserModalComponent implements OnInit, AfterViewInit, OnDestroy {
 
   semester1Modules: Module[] = [];
   semester2Modules: Module[] = [];
+
+  // Selected IDs
   selectedSemester1: number[] = [];
   selectedSemester2: number[] = [];
+
+  // Track which modules are Year modules to sync both lists
+  private yearModuleIds = new Set<number>();
+
   roles = ['Student', 'Lecturer', 'Coordinator', 'Admin'];
 
   private originalHide!: () => void;
@@ -53,7 +59,6 @@ export class AddUserModalComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // ✅ Ensure no autofill values are set by us
     this.userName = '';
     this.firstName = '';
     this.lastName = '';
@@ -62,7 +67,7 @@ export class AddUserModalComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.moduleService.getAllModules().subscribe({
       next: modules => {
-        // ✅ Include year modules in BOTH, then sort by module code
+        // Fill lists (include Year modules in both)
         this.semester1Modules = modules
           .filter(m => m.semester === 1 || m.isYearModule)
           .sort(this.sortByCode.bind(this));
@@ -70,6 +75,9 @@ export class AddUserModalComponent implements OnInit, AfterViewInit, OnDestroy {
         this.semester2Modules = modules
           .filter(m => m.semester === 2 || m.isYearModule)
           .sort(this.sortByCode.bind(this));
+
+        // Record which IDs are Year modules for sync logic
+        this.yearModuleIds = new Set(modules.filter(m => !!m.isYearModule).map(m => m.id));
       }
     });
 
@@ -112,18 +120,36 @@ export class AddUserModalComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   markDirty() { this.formDirty = true; }
+  togglePasswordVisibility() { this.showPassword = !this.showPassword; }
 
-  toggleModule(id: number, list: number[], event: any) {
-    if (event.target.checked) {
-      if (!list.includes(id)) list.push(id);
+  /**
+   * Sync logic: If a module is a Year module, checking/unchecking it in one list
+   * mirrors the selection in the other list so both are always in step.
+   */
+  toggleModule(mod: Module, semester: 1 | 2, event: any) {
+    const checked = !!event.target.checked;
+    const id = mod.id;
+    const isYear = !!mod.isYearModule || this.yearModuleIds.has(id);
+
+    const primary = (semester === 1) ? this.selectedSemester1 : this.selectedSemester2;
+    const other = (semester === 1) ? this.selectedSemester2 : this.selectedSemester1;
+
+    const addIfMissing = (arr: number[], val: number) => { if (!arr.includes(val)) arr.push(val); };
+    const removeIfPresent = (arr: number[], val: number) => {
+      const i = arr.indexOf(val);
+      if (i > -1) arr.splice(i, 1);
+    };
+
+    if (checked) {
+      addIfMissing(primary, id);
+      if (isYear) addIfMissing(other, id);  // auto-tick in the other list
     } else {
-      const index = list.indexOf(id);
-      if (index > -1) list.splice(index, 1);
+      removeIfPresent(primary, id);
+      if (isYear) removeIfPresent(other, id); // keep both in sync on uncheck too
     }
+
     this.formDirty = true;
   }
-
-  togglePasswordVisibility() { this.showPassword = !this.showPassword; }
 
   private openConfirm(): Promise<boolean> {
     return new Promise<boolean>((resolve) => {

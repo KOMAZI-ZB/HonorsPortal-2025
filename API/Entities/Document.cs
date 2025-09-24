@@ -1,5 +1,3 @@
-using System;
-
 namespace API.Entities
 {
     public class Document
@@ -11,19 +9,20 @@ namespace API.Entities
         // Cloudinary FilePath
         public string FilePath { get; set; } = string.Empty;
 
-        // Date uploaded (for sorting if needed)
-        public DateTime UploadedAt { get; set; } = DateTime.UtcNow;
+        // Store UTC instant with offset; client will localize
+        public DateTimeOffset UploadedAt { get; set; } = DateTimeOffset.UtcNow;
 
-        // Uploader (LastName for traceability)
+        // Uploader (role label for traceability)
         public string UploadedBy { get; set; } = string.Empty;
-        // ✅ NEW FIELD to correctly track uploader by identity
+
+        // Correct identity of uploader
         public string UploadedByUserName { get; set; } = string.Empty;
 
         // Nullable → If null, this is a Repository document
         public int? ModuleId { get; set; }
         public Module? Module { get; set; }
 
-        // Used to distinguish between ModulesTab vs Repository uploads
+        // Distinguish ModulesTab vs Repository uploads
         public string Source { get; set; } = "Module"; // or "Repository"
     }
 }

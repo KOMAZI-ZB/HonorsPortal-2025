@@ -3,7 +3,6 @@
     <button type="button" class="btn-close" (click)="cancel()" aria-label="Close"></button>
 </div>
 
-<!-- Prevent admin credential autofill -->
 <div class="modal-body">
     <form autocomplete="off">
         <div class="mb-3">
@@ -33,7 +32,6 @@
         <div class="mb-3">
             <label>Password</label>
             <div class="input-group">
-                <!-- Stop saved-password injection -->
                 <input [type]="showPassword ? 'text' : 'password'" class="form-control" [(ngModel)]="password"
                     name="newPassword" (ngModelChange)="markDirty()" autocomplete="new-password" autocapitalize="none"
                     spellcheck="false" />
@@ -53,18 +51,24 @@
         <div class="mb-3">
             <label>Semester 1 Modules</label>
             <div *ngFor="let mod of semester1Modules" class="form-check">
-                <input class="form-check-input" type="checkbox" [value]="mod.id"
-                    (change)="toggleModule(mod.id, selectedSemester1, $event)" />
-                <label class="form-check-label">{{ mod.moduleCode }} - {{ mod.moduleName }}</label>
+                <input class="form-check-input" type="checkbox" [checked]="selectedSemester1.includes(mod.id)"
+                    (change)="toggleModule(mod, 1, $event)" />
+                <label class="form-check-label">
+                    {{ mod.moduleCode }} - {{ mod.moduleName }}
+                    <small *ngIf="mod.isYearModule" class="text-muted">(Year)</small>
+                </label>
             </div>
         </div>
 
         <div class="mb-3">
             <label>Semester 2 Modules</label>
             <div *ngFor="let mod of semester2Modules" class="form-check">
-                <input class="form-check-input" type="checkbox" [value]="mod.id"
-                    (change)="toggleModule(mod.id, selectedSemester2, $event)" />
-                <label class="form-check-label">{{ mod.moduleCode }} - {{ mod.moduleName }}</label>
+                <input class="form-check-input" type="checkbox" [checked]="selectedSemester2.includes(mod.id)"
+                    (change)="toggleModule(mod, 2, $event)" />
+                <label class="form-check-label">
+                    {{ mod.moduleCode }} - {{ mod.moduleName }}
+                    <small *ngIf="mod.isYearModule" class="text-muted">(Year)</small>
+                </label>
             </div>
         </div>
     </form>

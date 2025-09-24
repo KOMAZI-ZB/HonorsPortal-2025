@@ -16,18 +16,37 @@ public class FAQService(DataContext context, IMapper mapper) : IFAQService
 
     public async Task<PagedList<FaqEntryDto>> GetAllPaginatedFAQsAsync(QueryParams queryParams)
     {
-        var query = _context.FaqEntries
-            .OrderByDescending(f => f.LastUpdated)
+        // SQLite cannot ORDER BY DateTimeOffset; use Id fallback there.
+        var isSqlite = _context.Database.IsSqlite();
+
+        var baseQuery = _context.FaqEntries.AsQueryable();
+
+        var ordered = isSqlite
+            ? baseQuery.OrderByDescending(f => f.Id)
+            : baseQuery.OrderByDescending(f => f.LastUpdated);
+
+        var projected = ordered
             .ProjectTo<FaqEntryDto>(_mapper.ConfigurationProvider)
             .AsQueryable();
 
-        return await PagedList<FaqEntryDto>.CreateAsync(query, queryParams.PageNumber, queryParams.PageSize);
+        return await PagedList<FaqEntryDto>.CreateAsync(
+            projected,
+            queryParams.PageNumber,
+            queryParams.PageSize
+        );
     }
 
     public async Task<IEnumerable<FaqEntryDto>> GetAllFAQsAsync()
     {
-        return await _context.FaqEntries
-            .OrderByDescending(f => f.LastUpdated)
+        var isSqlite = _context.Database.IsSqlite();
+
+        var baseQuery = _context.FaqEntries.AsQueryable();
+
+        var ordered = isSqlite
+            ? baseQuery.OrderByDescending(f => f.Id)
+            : baseQuery.OrderByDescending(f => f.LastUpdated);
+
+        return await ordered
             .ProjectTo<FaqEntryDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
     }
@@ -38,7 +57,7 @@ public class FAQService(DataContext context, IMapper mapper) : IFAQService
         {
             Question = question,
             Answer = answer,
-            LastUpdated = DateTime.UtcNow
+            LastUpdated = DateTimeOffset.UtcNow // UTC with offset
         };
 
         _context.FaqEntries.Add(newEntry);
@@ -52,7 +71,7 @@ public class FAQService(DataContext context, IMapper mapper) : IFAQService
 
         entry.Question = question;
         entry.Answer = answer;
-        entry.LastUpdated = DateTime.UtcNow;
+        entry.LastUpdated = DateTimeOffset.UtcNow; // UTC with offset
 
         return await _context.SaveChangesAsync() > 0;
     }

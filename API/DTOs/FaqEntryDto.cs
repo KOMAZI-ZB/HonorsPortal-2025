@@ -1,12 +1,12 @@
-namespace API.DTOs;
-
-public class FaqEntryDto
+namespace API.DTOs
 {
-    public int Id { get; set; }
+    public class FaqEntryDto
+    {
+        public int Id { get; set; }
+        public string Question { get; set; } = string.Empty;
+        public string Answer { get; set; } = string.Empty;
 
-    public string Question { get; set; } = string.Empty;
-
-    public string Answer { get; set; } = string.Empty;
-
-    public DateTime LastUpdated { get; set; }
+        // Match entity type to avoid AutoMapper DateTimeOffset -> DateTime error
+        public DateTimeOffset LastUpdated { get; set; }
+    }
 }

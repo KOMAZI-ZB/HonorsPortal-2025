@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250920191545_SqlInitial")]
+    [Migration("20250921144904_SqlInitial")]
     partial class SqlInitial
     {
         /// <inheritdoc />
@@ -237,7 +237,7 @@ namespace API.Data.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("UploadedAt")
+                    b.Property<DateTimeOffset>("UploadedAt")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("UploadedBy")
@@ -265,7 +265,7 @@ namespace API.Data.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("LastUpdated")
+                    b.Property<DateTimeOffset>("LastUpdated")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Question")
@@ -357,7 +357,7 @@ namespace API.Data.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("CreatedBy")
@@ -398,7 +398,7 @@ namespace API.Data.Migrations
                     b.Property<int>("NotificationId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTime>("ReadAt")
+                    b.Property<DateTimeOffset>("ReadAt")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("UserId")

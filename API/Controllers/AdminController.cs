@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace API.Controllers;
 
@@ -26,56 +27,93 @@ public class AdminController(
         if (string.IsNullOrWhiteSpace(userNameTrimmed) || string.IsNullOrWhiteSpace(emailLower))
             return BadRequest(new { message = "UserName and Email are required." });
 
-        // Check using normalized values to avoid case/culture issues
-        var exists = await userManager.Users.AnyAsync(x =>
-            x.NormalizedUserName == userNameTrimmed.ToUpperInvariant() ||
-            x.NormalizedEmail == emailLower.ToUpperInvariant());
+        var normalizedUserName = userNameTrimmed.ToUpperInvariant();
+        var normalizedEmail = emailLower.ToUpperInvariant();
 
-        if (exists)
-            return BadRequest(new { message = "User with this UserName or Email already exists." });
+        // Look for an existing user by normalized values
+        var existing = await userManager.Users
+            .AsNoTracking()
+            .Where(x => x.NormalizedUserName == normalizedUserName || x.NormalizedEmail == normalizedEmail)
+            .Select(x => new { x.NormalizedUserName, x.NormalizedEmail })
+            .FirstOrDefaultAsync();
 
-        var user = new AppUser
+        if (existing != null)
         {
-            FirstName = dto.FirstName,
-            LastName = dto.LastName,
-            UserName = userNameTrimmed,                               // ✅ never null
-            Email = emailLower,                                        // normalized lower
-            NormalizedEmail = emailLower.ToUpperInvariant(),
-            NormalizedUserName = userNameTrimmed.ToUpperInvariant(),
-            JoinDate = DateOnly.FromDateTime(DateTime.UtcNow)          // ✅ set on registration
-        };
-
-        var result = await userManager.CreateAsync(user, dto.Password);
-        if (!result.Succeeded)
-            return BadRequest(new { message = "Failed to create user", errors = result.Errors });
-
-        if (!await roleManager.RoleExistsAsync(dto.Role))
-            return BadRequest(new { message = "Invalid role" });
-
-        await userManager.AddToRoleAsync(user, dto.Role);
-
-        foreach (var moduleId in dto.Semester1ModuleIds)
-        {
-            context.UserModules.Add(new UserModule
-            {
-                AppUserId = user.Id,
-                ModuleId = moduleId,
-                RoleContext = dto.Role
-            });
+            var msg = existing.NormalizedUserName == normalizedUserName
+                ? $"User already exists with user number '{userNameTrimmed}'."
+                : $"User already exists with email '{emailLower}'.";
+            return Conflict(new { message = msg }); // 409 for clearer toaster on the client
         }
 
-        foreach (var moduleId in dto.Semester2ModuleIds)
-        {
-            context.UserModules.Add(new UserModule
-            {
-                AppUserId = user.Id,
-                ModuleId = moduleId,
-                RoleContext = dto.Role
-            });
-        }
+        // use a transaction so we don't leave a half-created user on failure
+        using var tx = await context.Database.BeginTransactionAsync();
 
-        await context.SaveChangesAsync();
-        return Ok(new { message = "User registered and linked to modules." });
+        AppUser? user = null;
+
+        try
+        {
+            user = new AppUser
+            {
+                FirstName = dto.FirstName,
+                LastName = dto.LastName,
+                UserName = userNameTrimmed,                               // never null
+                Email = emailLower,
+                NormalizedEmail = normalizedEmail,
+                NormalizedUserName = normalizedUserName,
+                JoinDate = DateOnly.FromDateTime(DateTime.UtcNow)
+            };
+
+            var result = await userManager.CreateAsync(user, dto.Password);
+            if (!result.Succeeded)
+            {
+                await tx.RollbackAsync();
+                return BadRequest(new { message = "Failed to create user", errors = result.Errors });
+            }
+
+            if (!await roleManager.RoleExistsAsync(dto.Role))
+            {
+                await tx.RollbackAsync();
+                return BadRequest(new { message = "Invalid role" });
+            }
+
+            await userManager.AddToRoleAsync(user, dto.Role);
+
+            // ✅ De-dupe across both semester lists so we never add the same (user,module) twice
+            var moduleIds = (dto.Semester1ModuleIds ?? new List<int>())
+                .Concat(dto.Semester2ModuleIds ?? new List<int>())
+                .Distinct()
+                .ToList();
+
+            if (moduleIds.Count > 0)
+            {
+                var links = moduleIds.Select(id => new UserModule
+                {
+                    AppUserId = user.Id,
+                    ModuleId = id,
+                    RoleContext = dto.Role
+                });
+
+                context.UserModules.AddRange(links);
+            }
+
+            await context.SaveChangesAsync();
+            await tx.CommitAsync();
+
+            return Ok(new { message = "User registered and linked to modules." });
+        }
+        catch (DbUpdateException)
+        {
+            // on any failure after user creation, remove the user to avoid a half-state
+            await tx.RollbackAsync();
+            if (user != null)
+            {
+                await userManager.DeleteAsync(user);
+            }
+
+            // Most common reason here was duplicate module selection (now prevented by Distinct());
+            // still return a safe generic message.
+            return BadRequest(new { message = "Failed to register user. Please try again." });
+        }
     }
 
     [Authorize(Policy = "RequireAdminRole")]
@@ -280,9 +318,9 @@ public class AdminController(
         if (string.IsNullOrWhiteSpace(dto.Email))
             return BadRequest("Email is required.");
 
-        user.Email = dto.Email.ToLower();                  // keep behavior
-        user.NormalizedEmail = dto.Email.ToUpper();        // keep behavior
-        user.UserName = routeUserName;                     // ✅ cannot become null
+        user.Email = dto.Email.ToLower();
+        user.NormalizedEmail = dto.Email.ToUpper();
+        user.UserName = routeUserName;
         user.NormalizedUserName = routeUserName.ToUpperInvariant();
 
         var updateResult = await userManager.UpdateAsync(user);

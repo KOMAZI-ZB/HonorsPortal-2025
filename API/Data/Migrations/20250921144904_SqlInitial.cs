@@ -63,7 +63,7 @@ namespace API.Data.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     Question = table.Column<string>(type: "TEXT", nullable: false),
                     Answer = table.Column<string>(type: "TEXT", nullable: false),
-                    LastUpdated = table.Column<DateTime>(type: "TEXT", nullable: false)
+                    LastUpdated = table.Column<DateTimeOffset>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -287,7 +287,7 @@ namespace API.Data.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     Title = table.Column<string>(type: "TEXT", nullable: false),
                     FilePath = table.Column<string>(type: "TEXT", nullable: false),
-                    UploadedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    UploadedAt = table.Column<DateTimeOffset>(type: "TEXT", nullable: false),
                     UploadedBy = table.Column<string>(type: "TEXT", nullable: false),
                     UploadedByUserName = table.Column<string>(type: "TEXT", nullable: false),
                     ModuleId = table.Column<int>(type: "INTEGER", nullable: true),
@@ -314,7 +314,7 @@ namespace API.Data.Migrations
                     Message = table.Column<string>(type: "TEXT", nullable: false),
                     ImagePath = table.Column<string>(type: "TEXT", nullable: true),
                     CreatedBy = table.Column<string>(type: "TEXT", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "TEXT", nullable: false),
                     ModuleId = table.Column<int>(type: "INTEGER", nullable: true),
                     Audience = table.Column<string>(type: "TEXT", nullable: false)
                 },
@@ -361,7 +361,7 @@ namespace API.Data.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     NotificationId = table.Column<int>(type: "INTEGER", nullable: false),
                     UserId = table.Column<int>(type: "INTEGER", nullable: false),
-                    ReadAt = table.Column<DateTime>(type: "TEXT", nullable: false)
+                    ReadAt = table.Column<DateTimeOffset>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {

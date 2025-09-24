@@ -10,6 +10,7 @@ import { AccountService } from '../_services/account.service';
 import { FaqModalComponent } from '../modals/faq-modal/faq-modal.component';
 import { ConfirmDeleteModalComponent } from '../modals/confirm-delete-modal/confirm-delete-modal.component';
 import { Pagination } from '../_models/pagination';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-faq',
@@ -45,7 +46,17 @@ export class FaqComponent implements OnInit {
     this.loadFaqs();
   }
 
+  /**
+   * Default loader (paged). If there's an active search term,
+   * we switch to the "load all pages then filter" flow instead.
+   */
   loadFaqs() {
+    const activeSearch = this.searchTerm.trim().length > 0;
+    if (activeSearch) {
+      this.loadAllFaqsForSearch();
+      return;
+    }
+
     this.faqService.getAllFaqs({
       pageNumber: this.pageNumber,
       pageSize: this.pageSize
@@ -58,6 +69,68 @@ export class FaqComponent implements OnInit {
         if (paginationHeader) {
           this.pagination = JSON.parse(paginationHeader);
         }
+      },
+      error: () => this.toastr.error('Failed to load FAQs')
+    });
+  }
+
+  /**
+   * When searching, fetch **all pages** from the server and aggregate
+   * locally so the filter runs against the full dataset, not just the
+   * current page.
+   */
+  private loadAllFaqsForSearch() {
+    // First request to learn total pages
+    this.faqService.getAllFaqs({
+      pageNumber: 1,
+      pageSize: this.pageSize
+    }).subscribe({
+      next: firstResp => {
+        const paginationHeader = firstResp.headers.get('Pagination');
+        const firstPageItems = firstResp.body ?? [];
+
+        // If we can't read pagination for some reason, fall back to the first page only.
+        if (!paginationHeader) {
+          this.faqs = firstPageItems;
+          this.pagination = null; // hide pager while searching
+          this.applyFilter();
+          return;
+        }
+
+        const meta: Pagination = JSON.parse(paginationHeader);
+        const totalPages = meta.totalPages || 1;
+
+        if (totalPages === 1) {
+          // Only one page – easy.
+          this.faqs = firstPageItems;
+          this.pagination = null; // hide pager while searching
+          this.applyFilter();
+          return;
+        }
+
+        // Build requests for the remaining pages: 2..N
+        const requests = [];
+        for (let p = 2; p <= totalPages; p++) {
+          requests.push(
+            this.faqService.getAllFaqs({ pageNumber: p, pageSize: this.pageSize })
+          );
+        }
+
+        forkJoin(requests).subscribe({
+          next: restResponses => {
+            const restItems = restResponses.flatMap(r => r.body ?? []);
+            this.faqs = [...firstPageItems, ...restItems];
+            this.pagination = null; // hide pager while searching (show full results list)
+            this.applyFilter();
+          },
+          error: () => {
+            // Even if the extra pages fail, show whatever we have and keep searching within it.
+            this.faqs = firstPageItems;
+            this.pagination = null;
+            this.applyFilter();
+            this.toastr.error('Some results could not be loaded while searching.');
+          }
+        });
       },
       error: () => this.toastr.error('Failed to load FAQs')
     });
@@ -80,6 +153,7 @@ export class FaqComponent implements OnInit {
     this.bsModalRef = this.modalService.show(FaqModalComponent, { initialState });
 
     this.bsModalRef.onHidden?.subscribe(() => {
+      // After changes, reload respecting current search mode
       this.loadFaqs();
     });
   }
@@ -113,7 +187,9 @@ export class FaqComponent implements OnInit {
 
   // 🔎 search helpers
   onSearchChange() {
-    this.applyFilter();
+    // Whenever search changes, refetch to include ALL pages
+    this.loadFaqs();
+
     // keep the open item visible after a filter change
     if (this.openFaqId && !this.filteredFaqs.some(f => f.id === this.openFaqId)) {
       this.openFaqId = null;
@@ -122,7 +198,8 @@ export class FaqComponent implements OnInit {
 
   clearSearch() {
     this.searchTerm = '';
-    this.applyFilter();
+    this.pageNumber = 1; // reset paging when clearing search
+    this.loadFaqs();
   }
 
   private applyFilter() {
@@ -132,17 +209,17 @@ export class FaqComponent implements OnInit {
       return;
     }
 
-    // Match against question, answer, and common optional “name/author” fields if they exist
+    // Match against question, answer, and common optional fields (if present)
     this.filteredFaqs = this.faqs.filter(f => {
       const haystack = [
         f.question ?? '',
         f.answer ?? '',
-        // optional fields (won't throw if absent)
         (f as any).createdByName ?? '',
         (f as any).authorName ?? '',
         (f as any).createdBy ?? '',
         (f as any).author ?? ''
       ].join(' ').toLowerCase();
+
       return haystack.includes(term);
     });
   }

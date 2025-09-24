@@ -34,6 +34,10 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
           case 404:
             router.navigateByUrl('/not-found');
             break;
+          case 409:
+            // Suppress global toast for conflicts (e.g., "User already exists");
+            // let the component display the API's message.
+            break;
           case 500:
             const navigationExtras: NavigationExtras = { state: { error: error.error } };
             router.navigateByUrl('/server-error', navigationExtras);

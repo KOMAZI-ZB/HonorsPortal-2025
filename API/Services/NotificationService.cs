@@ -31,8 +31,6 @@ public class NotificationService : INotificationService
         _cloudinary = new Cloudinary(acc);
     }
 
-    // --- helpers ------------------------------------------------------------
-
     private static string StripModuleSuffix(string? s)
     {
         if (string.IsNullOrWhiteSpace(s)) return s ?? string.Empty;
@@ -48,10 +46,10 @@ public class NotificationService : INotificationService
             : $"{prefix} {title}".Trim();
     }
 
-    // -----------------------------------------------------------------------
-
     public async Task<PagedList<NotificationDto>> GetAllPaginatedAsync(QueryParams queryParams)
     {
+        var isSqlite = _context.Database.IsSqlite();
+
         var user = await _context.Users
             .Include(u => u.UserModules)
             .FirstOrDefaultAsync(u => u.UserName == queryParams.CurrentUserName);
@@ -75,10 +73,13 @@ public class NotificationService : INotificationService
 
         var query = _context.Notifications.AsQueryable();
 
-        if (joinDate is not null)
+        // ⚠️ SQLite cannot translate DateTimeOffset comparisons reliably.
+        // Only apply the join-date filter on providers that support it.
+        if (joinDate is not null && !isSqlite)
         {
-            var joinDateTime = joinDate.Value.ToDateTime(TimeOnly.MinValue);
-            query = query.Where(a => a.CreatedAt >= joinDateTime);
+            var joinedAtLocalMidnight = joinDate.Value.ToDateTime(TimeOnly.MinValue);
+            var joinedAtUtc = new DateTimeOffset(joinedAtLocalMidnight, TimeSpan.Zero);
+            query = query.Where(a => a.CreatedAt >= joinedAtUtc);
         }
 
         query = query.Where(a =>
@@ -110,8 +111,13 @@ public class NotificationService : INotificationService
 
         var readsForUser = _context.NotificationReads.Where(r => r.UserId == userId);
 
+        // Avoid ORDER BY DateTimeOffset on SQLite
+        var ordered = isSqlite
+            ? query.OrderByDescending(a => a.Id)
+            : query.OrderByDescending(a => a.CreatedAt);
+
         var dtoQuery =
-            from a in query.OrderByDescending(a => a.CreatedAt)
+            from a in ordered
             join r in readsForUser on a.Id equals r.NotificationId into gj
             from read in gj.DefaultIfEmpty()
             select new NotificationDto
@@ -157,10 +163,8 @@ public class NotificationService : INotificationService
             imagePath = uploadResult.SecureUrl?.AbsoluteUri;
         }
 
-        // Normalize audience
         var audience = string.IsNullOrWhiteSpace(dto.Audience) ? "All" : dto.Audience;
 
-        // If a module is targeted, force ModuleStudents and prefix the title.
         if (dto.ModuleId is not null)
         {
             audience = "ModuleStudents";
@@ -178,7 +182,6 @@ public class NotificationService : INotificationService
         }
         else
         {
-            // global message cleanup
             dto.Message = StripModuleSuffix(dto.Message);
         }
 
@@ -194,18 +197,14 @@ public class NotificationService : INotificationService
             .Select(ur => ur.Role.Name)
             .ToListAsync();
 
-        // --- RULE: Lecturers usually must target a module,
-        //           but allow GLOBAL repository updates.
         bool isRepositoryUpdate =
             dto.Type != null &&
             dto.Type.Equals("RepositoryUpdate", StringComparison.OrdinalIgnoreCase);
 
         if (creatorRoles.Contains("Lecturer"))
         {
-            // Allowed global case → RepositoryUpdate to All users
             if (!isRepositoryUpdate)
             {
-                // the usual lecturer rule
                 if (dto.ModuleId is null)
                     throw new Exception("Lecturers must target a specific module.");
 
@@ -221,13 +220,11 @@ public class NotificationService : INotificationService
             }
             else
             {
-                // Make sure repository updates remain global
                 dto.ModuleId = null;
                 audience = "All";
             }
         }
 
-        // Small clean-up for lab/schedule style global messages that might include a trailing date
         if (dto.Type != null
             && dto.Type.Equals("ScheduleUpdate", StringComparison.OrdinalIgnoreCase)
             && dto.ModuleId is null
@@ -249,7 +246,7 @@ public class NotificationService : INotificationService
             Message = dto.Message ?? string.Empty,
             ImagePath = imagePath,
             CreatedBy = createdByUserName,
-            CreatedAt = DateTime.UtcNow,
+            CreatedAt = DateTimeOffset.UtcNow,
             ModuleId = dto.ModuleId,
             Audience = audience
         };
@@ -285,7 +282,7 @@ public class NotificationService : INotificationService
         {
             NotificationId = notificationId,
             UserId = userId,
-            ReadAt = DateTime.UtcNow
+            ReadAt = DateTimeOffset.UtcNow
         });
 
         return await _context.SaveChangesAsync() > 0;

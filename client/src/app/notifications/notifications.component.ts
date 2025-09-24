@@ -31,6 +31,9 @@ export class NotificationsComponent implements OnInit {
   selectedImageUrl: string | null = null;
   showImageModal: boolean = false;
 
+  // modal zoom state
+  isZoomed = false;
+
   constructor(
     private notificationService: NotificationService,
     private modalService: BsModalService,
@@ -52,8 +55,8 @@ export class NotificationsComponent implements OnInit {
           const items = response.body ?? [];
           this.pagination = JSON.parse(response.headers.get('Pagination')!);
 
-          this.notifications = [...items].sort((a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          this.notifications = [...items].sort(
+            (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
           );
 
           this.applyFilters();
@@ -131,10 +134,17 @@ export class NotificationsComponent implements OnInit {
 
   openImageModal(imageUrl: string) {
     this.selectedImageUrl = imageUrl;
+    this.isZoomed = false; // start fit-to-screen
     this.showImageModal = true;
   }
+
   closeImageModal() {
     this.selectedImageUrl = null;
+    this.isZoomed = false;
     this.showImageModal = false;
+  }
+
+  toggleZoom() {
+    this.isZoomed = !this.isZoomed;
   }
 }

@@ -98,12 +98,20 @@ public class RepositoryService : IRepositoryService
     // ✅ Paginated internal documents where Source = "Repository"
     public async Task<PagedList<DocumentDto>> GetPaginatedInternalDocsAsync(QueryParams queryParams)
     {
-        var query = _context.Documents
-            .Where(d => d.Source == "Repository")
-            .OrderByDescending(d => d.UploadedAt)
+        var isSqlite = _context.Database.IsSqlite();
+
+        var baseQuery = _context.Documents
+            .Where(d => d.Source == "Repository");
+
+        // SQLite can't ORDER BY DateTimeOffset — fall back to Id for consistent newest-first ordering.
+        var ordered = isSqlite
+            ? baseQuery.OrderByDescending(d => d.Id)
+            : baseQuery.OrderByDescending(d => d.UploadedAt);
+
+        var projected = ordered
             .ProjectTo<DocumentDto>(_mapper.ConfigurationProvider)
             .AsQueryable();
 
-        return await PagedList<DocumentDto>.CreateAsync(query, queryParams.PageNumber, queryParams.PageSize);
+        return await PagedList<DocumentDto>.CreateAsync(projected, queryParams.PageNumber, queryParams.PageSize);
     }
 }

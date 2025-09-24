@@ -421,7 +421,7 @@ public class ModulesController(DataContext context) : BaseApiController
                 ModuleId = module.Id,
                 Audience = "ModuleStudents",          // target only students of this module (author also sees via CreatedBy)
                 CreatedBy = User.GetUsername(),
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTimeOffset.UtcNow     // <-- UTC with offset
             };
             context.Notifications.Add(n);
         }
@@ -437,7 +437,7 @@ public class ModulesController(DataContext context) : BaseApiController
                 ModuleId = module.Id,
                 Audience = "ModuleStudents",          // target only students of this module (author also sees via CreatedBy)
                 CreatedBy = User.GetUsername(),
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTimeOffset.UtcNow     // <-- UTC with offset
             };
             context.Notifications.Add(n);
         }

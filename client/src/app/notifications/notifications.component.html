@@ -37,8 +37,7 @@
 
 <!-- Feed -->
 <div *ngFor="let ann of filtered" class="card mb-3 shadow-sm">
-    <div class="card-body">
-
+    <div class="card-body text-start">
         <!-- Top row: TYPE (left) | centered badges (absolute center) | actions (right) -->
         <div class="d-flex align-items-center justify-content-between card-topbar">
             <!-- left: TYPE -->
@@ -71,8 +70,12 @@
         <h5 class="card-title mb-1">{{ ann.title }}</h5>
         <p class="card-text">{{ ann.message }}</p>
 
-        <img *ngIf="ann.imagePath" [src]="ann.imagePath" class="img-fluid rounded mt-2"
-            style="max-height: 200px; cursor: pointer;" (click)="openImageModal(ann.imagePath!)" />
+        <!-- Uniform, small, left-aligned thumbnail (cropped) -->
+        <div *ngIf="ann.imagePath" class="thumb-wrap mt-2" role="button" tabindex="0"
+            (click)="openImageModal(ann.imagePath!)" (keydown.enter)="openImageModal(ann.imagePath!)"
+            title="Click to enlarge">
+            <img [src]="ann.imagePath" alt="notification image" class="thumb-img" loading="lazy" />
+        </div>
 
         <!-- Bottom-right date + time (h:mm a) -->
         <div class="d-flex justify-content-end mt-2">
@@ -99,14 +102,19 @@
     </ul>
 </nav>
 
-<!-- Image Modal -->
-<div class="modal fade show d-block" tabindex="-1" role="dialog" *ngIf="showImageModal"
-    style="background-color: rgba(0, 0, 0, 0.8); z-index: 1055;" (click)="closeImageModal()">
-    <div class="modal-dialog modal-dialog-centered" role="document" (click)="$event.stopPropagation()">
-        <div class="modal-content bg-transparent border-0">
-            <div class="modal-body p-0">
-                <img [src]="selectedImageUrl" class="img-fluid w-100 rounded" style="max-height: 90vh;" />
+<!-- Fullscreen Image Modal (Bootstrap 5) -->
+<div class="modal fade show d-block" tabindex="-1" aria-modal="true" role="dialog" *ngIf="showImageModal"
+    style="background-color: rgba(0, 0, 0, 0.85); z-index: 1055;" (click)="closeImageModal()">
+    <!-- Fullscreen dialog removes fixed width cap -->
+    <div class="modal-dialog modal-fullscreen" role="document" (click)="$event.stopPropagation()">
+        <div class="modal-content bg-transparent border-0 pop-in">
+            <div class="modal-body p-0 d-flex align-items-center justify-content-center">
+                <!-- Click toggles fit-to-screen vs natural/original size -->
+                <img [src]="selectedImageUrl" alt="full size" class="modal-image rounded" [class.zoomed]="isZoomed"
+                    (click)="toggleZoom()" [title]="isZoomed ? 'Click to fit to screen' : 'Click to view full size'"
+                    loading="eager" />
             </div>
+
             <div class="modal-footer justify-content-center border-0">
                 <button class="btn btn-light" (click)="closeImageModal()">Close</button>
             </div>

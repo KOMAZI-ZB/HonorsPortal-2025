@@ -14,13 +14,13 @@ namespace API.Entities
 
         public string CreatedBy { get; set; } = string.Empty; // UserName
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        // Store UTC instant with offset
+        public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
 
         public int? ModuleId { get; set; }
         public Module? Module { get; set; }
 
-        // 🆕 Targeting
-        // All | Students | Staff | ModuleStudents
+        // Targeting: All | Students | Staff | ModuleStudents
         public string Audience { get; set; } = "All";
     }
 }
