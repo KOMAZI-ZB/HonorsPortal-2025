@@ -1,3 +1,5 @@
+/* src/app/scheduler/lab-schedule/lab-schedule.component.css */
+
 /* Button styling (unchanged) */
 .btn-outline-primary {
     border-radius: 20px;
@@ -9,6 +11,18 @@
 .non-interactive {
     pointer-events: none;
     cursor: default !important;
+}
+
+/* ✅ Student booked-slot color override (from black to #CAF5F6) */
+.non-interactive.cell-btn.btn-dark,
+.non-interactive.cell-btn.btn-dark:focus,
+.non-interactive.cell-btn.btn-dark:active {
+    background-color: #CAF5F6 !important;
+    /* Color(0xFFCAF5F6) */
+    border-color: #CAF5F6 !important;
+    color: #000 !important;
+    /* keep text readable on light background */
+    box-shadow: none !important;
 }
 
 /* ======= Header layout (NEW) ======= */

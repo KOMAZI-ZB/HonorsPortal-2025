@@ -1,3 +1,4 @@
+// src/app/scheduler/lab-schedule/lab-schedule.component.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LabBooking } from '../../_models/labbooking';
@@ -57,16 +58,24 @@ export class LabScheduleComponent implements OnInit {
     return first || last || pick(u.displayName, u.username, u.userName);
   }
 
-  /** ⏰ one-hour slots starting exactly on the hour (06:00 → 21:00) */
+  /** ⏰ one-hour slots starting exactly at HH:10 (06:10 → 22:10) to match backend (:10) */
   generateTimeSlots() {
     const slots: string[] = [];
-    const startHour = 6;    // 06:00
-    const totalSlots = 16;  // 06→07 ... 21→22 (adjust as you like)
+    const startHour = 6;      // 06:10
+    const startMinute = 10;   // :10
+    const totalSlots = 16;    // 06:10→07:10 ... 21:10→22:10
     const pad = (n: number) => n.toString().padStart(2, '0');
+    const fmt = (mins: number) => {
+      const h = Math.floor(mins / 60);
+      const m = mins % 60;
+      return `${pad(h)}:${pad(m)}`;
+    };
+
+    let fromMins = startHour * 60 + startMinute;
     for (let i = 0; i < totalSlots; i++) {
-      const fromH = startHour + i;
-      const toH = fromH + 1;
-      slots.push(`${pad(fromH)}:00 - ${pad(toH)}:00`);
+      const toMins = fromMins + 60;
+      slots.push(`${fmt(fromMins)} - ${fmt(toMins)}`);
+      fromMins += 60;
     }
     this.timeSlots = slots;
   }
@@ -101,7 +110,6 @@ export class LabScheduleComponent implements OnInit {
     return `Lab Schedule: ${ddMon} ${monShort} – ${ddSat} ${satShort} ${year}`;
   }
 
-  /** Any bookings within [Sun..Sun+7)? */
   hasBookingsThisWeek(): boolean {
     if (!this.bookings?.length) return false;
     const start = new Date(this.currentWeekStart);
@@ -114,7 +122,6 @@ export class LabScheduleComponent implements OnInit {
     });
   }
 
-  /** Map Mon..Sat to an actual Date in the current week */
   getBookingDateForDay(day: string): Date {
     const map: Record<string, number> = {
       'monday': 1, 'tuesday': 2, 'wednesday': 3, 'thursday': 4, 'friday': 5, 'saturday': 6
@@ -126,7 +133,6 @@ export class LabScheduleComponent implements OnInit {
     return d;
   }
 
-  /** Normalize JS Date to yyyy-MM-dd */
   private fmtDate(d: Date): string {
     const yyyy = d.getFullYear();
     const mm = (d.getMonth() + 1).toString().padStart(2, '0');
@@ -134,12 +140,10 @@ export class LabScheduleComponent implements OnInit {
     return `${yyyy}-${mm}-${dd}`;
   }
 
-  /** Normalize any API date string to yyyy-MM-dd (handles T00:00:00 etc.) */
   private normalizeApiDateString(s?: string | null): string | null {
     if (!s) return null;
     const d = new Date(s);
     return isNaN(d.getTime()) ? null : this.fmtDate(d);
-    // if your API already returns yyyy-MM-dd as a plain date, this still works.
   }
 
   /** Parse "HH:mm" or "HH:mm:ss" into minutes since midnight */
@@ -151,13 +155,11 @@ export class LabScheduleComponent implements OnInit {
     return h * 60 + m;
   }
 
-  /** Whether the booking range [bs, be) overlaps slot range [ss, se) */
   private overlaps(bs: number | null, be: number | null, ss: number, se: number): boolean {
     if (bs == null || be == null) return false;
     return Math.max(bs, ss) < Math.min(be, se);
   }
 
-  /** Case-insensitive day compare; also tolerates “Mon” vs “Monday” by prefix match */
   private sameDay(apiDay?: string | null, gridDay?: string | null): boolean {
     const a = (apiDay ?? '').trim().toLowerCase();
     const b = (gridDay ?? '').trim().toLowerCase();
@@ -248,9 +250,8 @@ export class LabScheduleComponent implements OnInit {
       margin: 0.5,
       filename: 'Lab_Schedule.pdf',
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
+      html2pdf: { scale: 2 },
       jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' },
-      // ✅ honor CSS page-break hints to avoid slicing rows/sections
       pagebreak: { mode: ['css', 'avoid-all'] }
     } as any;
     html2pdf().set(options).from(tableElement).save();

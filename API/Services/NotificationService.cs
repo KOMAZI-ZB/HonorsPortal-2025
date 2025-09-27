@@ -1,3 +1,4 @@
+// API/Services/NotificationService.cs
 using API.Data;
 using API.DTOs;
 using API.Entities;
@@ -73,8 +74,6 @@ public class NotificationService : INotificationService
 
         var query = _context.Notifications.AsQueryable();
 
-        // ⚠️ SQLite cannot translate DateTimeOffset comparisons reliably.
-        // Only apply the join-date filter on providers that support it.
         if (joinDate is not null && !isSqlite)
         {
             var joinedAtLocalMidnight = joinDate.Value.ToDateTime(TimeOnly.MinValue);
@@ -111,7 +110,6 @@ public class NotificationService : INotificationService
 
         var readsForUser = _context.NotificationReads.Where(r => r.UserId == userId);
 
-        // Avoid ORDER BY DateTimeOffset on SQLite
         var ordered = isSqlite
             ? query.OrderByDescending(a => a.Id)
             : query.OrderByDescending(a => a.CreatedAt);
@@ -201,9 +199,17 @@ public class NotificationService : INotificationService
             dto.Type != null &&
             dto.Type.Equals("RepositoryUpdate", StringComparison.OrdinalIgnoreCase);
 
+        // ⬇️⬇️ NEW: allow global ScheduleUpdate (lab bookings) without ModuleId for Lecturers
+        bool isScheduleUpdate =
+            dto.Type != null &&
+            dto.Type.Equals("ScheduleUpdate", StringComparison.OrdinalIgnoreCase);
+
+        bool isModuleExempt = isRepositoryUpdate || isScheduleUpdate;
+        // ⬆️⬆️
+
         if (creatorRoles.Contains("Lecturer"))
         {
-            if (!isRepositoryUpdate)
+            if (!isModuleExempt)
             {
                 if (dto.ModuleId is null)
                     throw new Exception("Lecturers must target a specific module.");
@@ -220,6 +226,7 @@ public class NotificationService : INotificationService
             }
             else
             {
+                // For RepositoryUpdate and ScheduleUpdate we do not require a module (global)
                 dto.ModuleId = null;
                 audience = "All";
             }

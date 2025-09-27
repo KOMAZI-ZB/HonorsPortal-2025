@@ -1,3 +1,4 @@
+// API/Controllers/SchedulerController.cs
 using API.DTOs;
 using API.Extensions;
 using API.Interfaces;
@@ -10,12 +11,12 @@ namespace API.Controllers;
 public class SchedulerController(
     ILabBookingService bookingService,
     ISchedulerService schedulerService,
-    INotificationService notificationService   // <-- add
+    INotificationService notificationService
 ) : BaseApiController
 {
     private readonly ILabBookingService _bookingService = bookingService;
     private readonly ISchedulerService _schedulerService = schedulerService;
-    private readonly INotificationService _notificationService = notificationService; // <-- add
+    private readonly INotificationService _notificationService = notificationService;
 
     // ✅ Get all lab bookings (Admin view)
     [HttpGet("lab")]
@@ -34,7 +35,7 @@ public class SchedulerController(
         return Ok(bookings);
     }
 
-    // ✅ Create a lab booking (self)
+    // ✅ Create a lab booking (Lecturer/Coordinator/Admin) — Students cannot
     [Authorize(Roles = "Lecturer,Coordinator,Admin")]
     [HttpPost("lab")]
     public async Task<ActionResult> CreateBooking([FromBody] CreateLabBookingDto dto)
