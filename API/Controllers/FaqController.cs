@@ -13,10 +13,12 @@ namespace API.Controllers;
 public class FaqController : ControllerBase
 {
     private readonly IFAQService _faqService;
+    private readonly INotificationService _notificationService;
 
-    public FaqController(IFAQService faqService)
+    public FaqController(IFAQService faqService, INotificationService notificationService)
     {
         _faqService = faqService;
+        _notificationService = notificationService;
     }
 
     [HttpGet]
@@ -40,6 +42,17 @@ public class FaqController : ControllerBase
         if (!success)
             return BadRequest("Failed to create FAQ.");
 
+        // 🔔 Auto-announce: General Announcement → Audience: All
+        var userName = User.GetUsername();
+        await _notificationService.CreateAsync(new CreateNotificationDto
+        {
+            Type = "General",                        // announcements are General/System
+            Title = "New FAQ Announcement",          // naming convention ends with “Announcement”
+            Message = $"A new FAQ was posted: {dto.Question}",
+            Audience = "All",                        // visible to everyone
+            ModuleId = null                          // not module-scoped
+        }, userName);
+
         return Ok(new { message = "FAQ created successfully." });
     }
 
@@ -51,6 +64,17 @@ public class FaqController : ControllerBase
 
         if (!success)
             return BadRequest("Failed to update FAQ.");
+
+        // 🔔 Auto-announce: General Announcement → Audience: All
+        var userName = User.GetUsername();
+        await _notificationService.CreateAsync(new CreateNotificationDto
+        {
+            Type = "General",
+            Title = "FAQ Updated Announcement",
+            Message = $"An FAQ was updated: {dto.Question}",
+            Audience = "All",
+            ModuleId = null
+        }, userName);
 
         return Ok(new { message = "FAQ updated successfully." });
     }

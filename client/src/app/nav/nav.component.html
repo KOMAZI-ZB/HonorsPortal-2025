@@ -1,4 +1,4 @@
-<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-primary">
+<nav *ngIf="accountService.currentUser()" class="navbar navbar-expand-md navbar-dark fixed-top bg-primary">
     <div class="container">
 
         <!-- Branding: centered when logged out, left-aligned when logged in -->
@@ -48,7 +48,7 @@
                 </li>
             </ul>
 
-            <!-- User Dropdown (right-aligned on wide; stacks in collapsed view) -->
+            <!-- User Dropdown -->
             <div dropdown class="dropdown ms-md-auto mt-2 mt-md-0 d-flex align-items-center">
                 <img class="me-2" src="./assets/user.png" alt="user icon" width="32" height="32" />
                 <a dropdownToggle class="dropdown-toggle text-light text-decoration-none">

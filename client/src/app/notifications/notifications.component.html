@@ -36,10 +36,13 @@
 </div>
 
 <!-- Feed -->
-<div *ngFor="let ann of filtered" class="card mb-3 shadow-sm">
+<div *ngFor="let ann of filtered" class="card mb-3 shadow-sm" [ngClass]="{ 'clickable': isAutoInteractive(ann) }"
+    (click)="handleCardClick($event, ann)" [attr.aria-role]="isAutoInteractive(ann) ? 'button' : null"
+    [attr.tabindex]="isAutoInteractive(ann) ? '0' : null"
+    [attr.title]="isAutoInteractive(ann) ? 'Click to open' : null">
     <div class="card-body text-start">
         <!-- Top row: TYPE (left) | centered badges (absolute center) | actions (right) -->
-        <div class="d-flex align-items-center justify-content-between card-topbar">
+        <div class="d-flex align-items-center justify-content-between card-topbar mb-2">
             <!-- left: TYPE -->
             <span class="text-uppercase fw-bold text-primary small">
                 {{ formatBadgeLabel(ann.type) }}
@@ -67,8 +70,8 @@
         </div>
 
         <!-- Content -->
-        <h5 class="card-title mb-1">{{ ann.title }}</h5>
-        <p class="card-text">{{ ann.message }}</p>
+        <h5 class="card-title lh-sm mb-2">{{ ann.title }}</h5>
+        <p class="card-text lh-base mb-3">{{ ann.message }}</p>
 
         <!-- Uniform, small, left-aligned thumbnail (cropped) -->
         <div *ngIf="ann.imagePath" class="thumb-wrap mt-2" role="button" tabindex="0"
@@ -80,7 +83,7 @@
         <!-- Bottom-right date + time (h:mm a) -->
         <div class="d-flex justify-content-end mt-2">
             <small class="text-muted date-bottom">
-                {{ ann.createdAt | date:'longDate' }} • {{ ann.createdAt | date:'h:mm a' }}
+                {{ ann.createdAt | date: 'longDate' }} • {{ ann.createdAt | date: 'h:mm a' }}
             </small>
         </div>
     </div>
@@ -105,11 +108,9 @@
 <!-- Fullscreen Image Modal (Bootstrap 5) -->
 <div class="modal fade show d-block" tabindex="-1" aria-modal="true" role="dialog" *ngIf="showImageModal"
     style="background-color: rgba(0, 0, 0, 0.85); z-index: 1055;" (click)="closeImageModal()">
-    <!-- Fullscreen dialog removes fixed width cap -->
     <div class="modal-dialog modal-fullscreen" role="document" (click)="$event.stopPropagation()">
         <div class="modal-content bg-transparent border-0 pop-in">
             <div class="modal-body p-0 d-flex align-items-center justify-content-center">
-                <!-- Click toggles fit-to-screen vs natural/original size -->
                 <img [src]="selectedImageUrl" alt="full size" class="modal-image rounded" [class.zoomed]="isZoomed"
                     (click)="toggleZoom()" [title]="isZoomed ? 'Click to fit to screen' : 'Click to view full size'"
                     loading="eager" />

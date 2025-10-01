@@ -99,6 +99,18 @@ public class RepositoryController(
         }
 
         var created = await _repositoryService.AddAsync(dto);
+
+        // 🔔 NEW: Fire a clickable notification that routes to Repository → Links
+        var createdBy = User.GetUsername();
+        await _notificationService.CreateAsync(new CreateNotificationDto
+        {
+            Type = "RepositoryUpdate",
+            Title = "External Repository Link Added",
+            Message = $"A new external repository link \"{created.Label}\" was added.",
+            Audience = "All",
+            ModuleId = null
+        }, createdBy);
+
         return CreatedAtAction(nameof(GetExternalRepositories), new { id = created.Id }, created);
     }
 

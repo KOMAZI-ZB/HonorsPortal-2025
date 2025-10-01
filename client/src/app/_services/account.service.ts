@@ -1,12 +1,11 @@
+// src/app/_services/account.service.ts
 import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { User } from '../_models/user';
 import { map } from 'rxjs';
 import { environment } from '../../environments/environment';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class AccountService {
   private http = inject(HttpClient);
   private baseUrl = environment.apiUrl;
@@ -34,14 +33,14 @@ export class AccountService {
     return roles.length > 0 ? roles[0] : '';
   }
 
-  // ✅ Helper to check if user has modules (used for nav visibility)
+  // Helper to check if user has modules (used for nav visibility)
   hasModules(): boolean {
     return (this.currentUser()?.modules ?? []).length > 0;
   }
 
-  // ✅ Alternative naming if you want both available
+  // Alias if you still call this elsewhere
   getUserHasModules(): boolean {
-    return (this.currentUser()?.modules ?? []).length > 0;
+    return this.hasModules();
   }
 
   login(model: any) {
@@ -49,14 +48,6 @@ export class AccountService {
       map(user => {
         if (user) this.setCurrentUser(user);
         return user;
-      })
-    );
-  }
-
-  register(model: any) {
-    return this.http.post<{ message: string }>(this.baseUrl + 'account/register-user', model).pipe(
-      map(response => {
-        return response; // Do NOT set currentUser here
       })
     );
   }
@@ -90,30 +81,6 @@ export class AccountService {
     this.clearStorage();
     this.currentUser.set(null);
     this.clearLogoutTimer();
-  }
-
-  getAllUsers() {
-    return this.http.get<User[]>(this.baseUrl + 'account/all-users');
-  }
-
-  getUsersByRole(role: string) {
-    return this.http.get<User[]>(`${this.baseUrl}account/users-by-role/${role}`);
-  }
-
-  getUsersWithNoModules() {
-    return this.http.get<User[]>(`${this.baseUrl}account/users-with-no-modules`);
-  }
-
-  updateRoles(userName: string, roles: string[]) {
-    return this.http.put(`${this.baseUrl}account/update-roles/${userName}`, roles);
-  }
-
-  updateUserModules(userName: string, semester1Ids: number[], semester2Ids: number[]) {
-    return this.http.put(`${this.baseUrl}account/users/${userName}/modules`, { semester1Ids, semester2Ids });
-  }
-
-  deleteUser(userName: string) {
-    return this.http.delete(`${this.baseUrl}account/users/${userName}`);
   }
 
   // ===== Helpers for token expiry & timers =====

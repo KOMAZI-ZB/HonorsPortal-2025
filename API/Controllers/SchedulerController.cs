@@ -18,7 +18,7 @@ public class SchedulerController(
     private readonly ISchedulerService _schedulerService = schedulerService;
     private readonly INotificationService _notificationService = notificationService;
 
-    // ✅ Get all lab bookings (Admin view)
+    // Get all lab bookings (Admin view)
     [HttpGet("lab")]
     public async Task<ActionResult<IEnumerable<LabBookingDto>>> GetAllBookings()
     {
@@ -26,7 +26,7 @@ public class SchedulerController(
         return Ok(bookings);
     }
 
-    // ✅ Get lab bookings for the current user
+    // Get lab bookings for the current user
     [HttpGet("lab/user")]
     public async Task<ActionResult<IEnumerable<LabBookingDto>>> GetMyBookings()
     {
@@ -35,7 +35,7 @@ public class SchedulerController(
         return Ok(bookings);
     }
 
-    // ✅ Create a lab booking (Lecturer/Coordinator/Admin) — Students cannot
+    //Create a lab booking (Lecturer/Coordinator/Admin) — Students cannot
     [Authorize(Roles = "Lecturer,Coordinator,Admin")]
     [HttpPost("lab")]
     public async Task<ActionResult> CreateBooking([FromBody] CreateLabBookingDto dto)
@@ -44,7 +44,7 @@ public class SchedulerController(
         var success = await _bookingService.CreateBookingAsync(userName, dto);
         if (!success) return BadRequest("Booking overlaps with an existing entry.");
 
-        // 🔔 Broadcast lab schedule updates to everyone
+        // Broadcast lab schedule updates to everyone
         await _notificationService.CreateAsync(new CreateNotificationDto
         {
             Type = "ScheduleUpdate",
@@ -56,7 +56,7 @@ public class SchedulerController(
         return Ok(new { message = "Booking created successfully." });
     }
 
-    // ✅ Create a lab booking on behalf of another user
+    // Create a lab booking on behalf of another user
     [Authorize(Roles = "Admin")]
     [HttpPost("lab/assign/{userName}")]
     public async Task<ActionResult> CreateBookingForUser(string userName, [FromBody] CreateLabBookingDto dto)
@@ -77,7 +77,7 @@ public class SchedulerController(
         return Ok(new { message = $"Booking created for user {userName}." });
     }
 
-    // ✅ Delete a lab booking (self or admin/coordinator)
+    // Delete a lab booking (self or admin/coordinator)
     [HttpDelete("lab/{id}")]
     public async Task<ActionResult> DeleteBooking(int id)
     {
@@ -89,7 +89,7 @@ public class SchedulerController(
         return Ok(new { message = "Booking deleted successfully." });
     }
 
-    // ✅ Get class schedule for user
+    // Get class schedule for user
     [HttpGet("class/{semester}")]
     public async Task<ActionResult<IEnumerable<ClassScheduleDto>>> GetClassSchedule(int semester)
     {
@@ -100,7 +100,7 @@ public class SchedulerController(
         return Ok(result);
     }
 
-    // ✅ Get assessment schedule for user (REPLACED TestSchedule)
+    // Get assessment schedule for user (REPLACED TestSchedule)
     [HttpGet("assessment/{semester}")]
     public async Task<ActionResult<IEnumerable<AssessmentDto>>> GetAssessmentSchedule(int semester)
     {

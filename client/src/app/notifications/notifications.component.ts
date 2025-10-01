@@ -7,6 +7,7 @@ import { CreateNotificationModalComponent } from '../modals/create-notification-
 import { AccountService } from '../_services/account.service';
 import { Pagination } from '../_models/pagination';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-notifications',
@@ -37,7 +38,8 @@ export class NotificationsComponent implements OnInit {
   constructor(
     private notificationService: NotificationService,
     private modalService: BsModalService,
-    private accountService: AccountService
+    private accountService: AccountService,
+    private router: Router
   ) { }
 
   ngOnInit(): void {
@@ -123,7 +125,7 @@ export class NotificationsComponent implements OnInit {
     });
   }
 
-  // 🔁 now persisted via backend
+  // 🔁 persisted via backend
   markAsUnread(a: Notification) {
     if (!a.isRead) return;
     this.notificationService.markAsUnread(a.id).subscribe({
@@ -146,5 +148,91 @@ export class NotificationsComponent implements OnInit {
 
   toggleZoom() {
     this.isZoomed = !this.isZoomed;
+  }
+
+  // ======= NEW: Auto-click logic + deep-links =======
+
+  private lc(s?: string | null): string { return (s || '').toLowerCase(); }
+
+  /** Only auto-triggered items are interactive; manual System/General remain non-clickable.
+   *  Auto = DocumentUpload, RepositoryUpdate, ScheduleUpdate/SchedulerUpdate,
+   *  and FAQ auto-announcements (General with specific titles). */
+  isAutoInteractive(n: Notification): boolean {
+    const t = this.lc(n.type);
+    if (t === 'documentupload' || t === 'repositoryupdate' || t === 'scheduleupdate' || t === 'schedulerupdate') {
+      return true;
+    }
+    if (t === 'general') {
+      const title = this.lc(n.title);
+      // These General items are auto posted by the system (FAQ create/update)
+      return title.startsWith('new faq announcement') || title.startsWith('faq updated announcement');
+    }
+    return false;
+  }
+
+  /** Card click handler with guard so buttons, selects, and thumbnails don't trigger navigation. */
+  handleCardClick(evt: MouseEvent, n: Notification) {
+    if (!this.isAutoInteractive(n)) return;
+
+    const target = evt.target as HTMLElement;
+    if (target.closest('.thumb-wrap, .btn, button, a, select, option, .dropdown-menu')) {
+      return; // let the inner control handle it
+    }
+
+    this.navigateFor(n);
+  }
+
+  /** Deep-link map to the correct destination based on type/title/moduleId. */
+  private navigateFor(n: Notification) {
+    const t = this.lc(n.type);
+    const title = this.lc(n.title);
+    const msg = this.lc(n.message);
+
+    // Module document uploads → Courses → [Module] → Documents
+    if (t === 'documentupload') {
+      if (n.moduleId != null) {
+        this.router.navigate(['/modules', n.moduleId], {
+          // keep both state and query in case the target component uses either
+          state: { fromNotification: true },
+          queryParams: { from: 'notification', view: 'documents' }
+        });
+      } else {
+        // Fallback: if no moduleId, send to repository documents
+        this.router.navigate(['/repository'], { state: { view: 'documents' }, queryParams: { view: 'documents' } });
+      }
+      return;
+    }
+
+    // Repository updates → Repository (Documents by default)
+    if (t === 'repositoryupdate') {
+      const looksLikeLinks = title.includes('link') || title.includes('external repository') || msg.includes('link');
+      const view = looksLikeLinks ? 'links' : 'documents';
+      this.router.navigate(['/repository'], { state: { view }, queryParams: { view } });
+      return;
+    }
+
+    // Schedule updates → Scheduler with correct tab preselected
+    if (t === 'scheduleupdate' || t === 'schedulerupdate') {
+      // Heuristics:
+      // - Title mentioning "lab" or ModuleId == null (our lab updates) => lab tab
+      // - Title mentioning "assessment" or "assessments" => assessment tab
+      // - else => class tab
+      let tab: 'lab' | 'assessment' | 'class' = 'class';
+      if (title.includes('lab')) tab = 'lab';
+      else if (title.includes('assessment') || msg.includes('assessment')) tab = 'assessment';
+      else tab = 'class';
+
+      this.router.navigate(['/scheduler'], { state: { tab }, queryParams: { tab } });
+      return;
+    }
+
+    // FAQ auto-announcements (General) → FAQ page
+    if (t === 'general') {
+      const isFaqAuto = title.startsWith('new faq announcement') || title.startsWith('faq updated announcement');
+      if (isFaqAuto) {
+        this.router.navigate(['/faq']);
+      }
+      return;
+    }
   }
 }

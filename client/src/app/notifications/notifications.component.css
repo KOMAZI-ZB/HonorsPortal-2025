@@ -1,108 +1,40 @@
-.card-title {
-    font-size: 1.1rem;
-    font-weight: 600;
+/* --- spacing & type rhythm for notification cards --- */
+.card .card-topbar {
+    margin-bottom: 0.5rem;
+    /* space under TYPE/Audience row */
 }
 
-.notification-img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 4px;
+.card .card-title {
+    margin-top: 0.125rem;
+    /* small nudge away from topbar */
+    margin-bottom: 0.5rem;
+    /* extra space before message */
+    line-height: 1.25;
+    /* compact but readable heading */
 }
 
-.badge.custom-type-badge {
-    background-color: #0063df !important;
-    color: white !important;
-    font-weight: 600;
+.card .card-text {
+    margin-top: 0.125rem;
+    /* small gap after title */
+    margin-bottom: 0.75rem;
+    /* room before date/image */
+    line-height: 1.55;
+    /* friendlier reading for sentences */
 }
 
-/* Top bar: make it a positioning context and keep height stable */
-.card-topbar {
-    position: relative;
-    min-height: 32px;
-    /* enough room for badges */
+/* Add a subtle affordance for deep-linkable cards */
+.card.clickable {
+    cursor: pointer;
 }
 
-/* Absolutely center the badges independent of left/right widths */
-.top-center-abs {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    white-space: nowrap;
+.card.clickable:hover {
+    box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.15) inset;
 }
 
-/* Bottom-right date/time styling */
-.date-bottom {
-    font-size: 0.85rem;
-}
-
-/* Ensure modal displays properly above navbar etc */
-.modal {
-    z-index: 1055;
-}
-
-/* ===============================
-   Thumbnail: small, left-aligned, uniform & clickable
-   =============================== */
-.thumb-wrap {
-    width: 160px;
-    /* small, consistent width */
-    height: 120px;
-    /* small, consistent height */
-    overflow: hidden;
-    /* crop anything outside */
-    border-radius: 0.375rem;
-    /* match bootstrap rounded */
-    border: 1px solid #e5e7eb;
-    /* subtle border */
-    cursor: zoom-in;
-    /* indicate enlargement on click */
-}
-
-.thumb-img {
-    width: 100%;
-    height: 100%;
-    display: block;
-    object-fit: cover;
-    /* crop uniformly to fill the box */
-}
-
-/* ===============================
-   Fullscreen modal image
-   - default: fit-to-screen
-   - click toggles to natural/original size (zoomed)
-   =============================== */
-.modal-image {
-    max-width: 95vw;
-    /* fit to viewport */
-    max-height: 95vh;
+/* Thumbnail (already present behavior kept) */
+.thumb-wrap .thumb-img {
+    max-height: 120px;
     width: auto;
-    height: auto;
-    display: block;
-    cursor: zoom-in;
-    object-fit: contain;
-}
-
-/* Zoomed: show natural size; scroll may appear in fullscreen modal */
-.modal-image.zoomed {
-    max-width: none;
-    max-height: none;
-    cursor: zoom-out;
-}
-
-/* Subtle pop-in animation on modal content */
-@keyframes popIn {
-    from {
-        transform: scale(0.92);
-        opacity: 0;
-    }
-
-    to {
-        transform: scale(1);
-        opacity: 1;
-    }
-}
-
-.pop-in {
-    animation: popIn 120ms ease-out;
+    object-fit: cover;
+    border-radius: 6px;
 }
