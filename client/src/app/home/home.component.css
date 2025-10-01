@@ -81,15 +81,16 @@
 }
 
 /* Title bigger */
+/* Title */
 .portal-title {
     font-size: 1.30rem;
-    /* ↑ was 1.35rem */
-    font-weight: 700;
+    font-weight: 700 !important;
+    /* keep bold */
     margin-bottom: 50px;
-    color: #2c3e50;
+    color: #000 !important;
+    /* black */
     text-align: center;
     white-space: nowrap;
-    /* keep title on one line */
 }
 
 .login-form {
