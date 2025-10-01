@@ -3,7 +3,10 @@
         <div class="modal-content">
 
             <div class="modal-header">
-                <h5 class="modal-title">Book Lab Slot</h5>
+                <h5 class="modal-title">
+                    Book Lab Slot
+                    <small class="text-muted ms-2" *ngIf="weekLabel">({{ weekLabel }})</small>
+                </h5>
                 <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
             </div>
 
@@ -11,20 +14,34 @@
                 <form>
                     <div class="mb-3">
                         <label for="daySelect" class="form-label">Select Day</label>
-                        <select id="daySelect" class="form-select" [(ngModel)]="selectedDay" name="day">
+                        <select id="daySelect" class="form-select" [(ngModel)]="selectedDay" name="day"
+                            (ngModelChange)="onDayChange()">
                             <option *ngFor="let day of weekdays" [value]="day">{{ day }}</option>
                         </select>
                     </div>
 
                     <div class="mb-3">
-                        <label for="timeSelect" class="form-label">Select Start Time</label>
-                        <select id="timeSelect" class="form-select" [(ngModel)]="selectedTime" name="time">
+                        <label for="timeSelect" class="form-label">Select Time</label>
+                        <select id="timeSelect" class="form-select" [(ngModel)]="selectedTime" name="time"
+                            (ngModelChange)="onTimeChange()">
                             <option *ngFor="let time of availableTimeSlots" [value]="time">{{ time }}</option>
                         </select>
                     </div>
 
-                    <!-- ✅ NEW: Description Input -->
-                    <div class="mb-3">
+                    <!-- Inline friendly "what will be booked" hint -->
+                    <div *ngIf="selectedDay && selectedTime && resolvedDateHuman" class="alert alert-info py-2 mb-3">
+                        You are about to book: <strong>{{ selectedDay }}</strong>,
+                        <strong>{{ resolvedDateHuman }}</strong> • <strong>{{ selectedTime }}</strong>
+                    </div>
+
+                    <!-- Inline overlap validation (client pre-check) -->
+                    <div *ngIf="overlapMessage" class="alert alert-danger py-2 mb-3">{{ overlapMessage }}</div>
+
+                    <!-- Server-side message (source of truth) -->
+                    <div *ngIf="serverError" class="alert alert-danger py-2 mb-0">{{ serverError }}</div>
+
+                    <!-- Description -->
+                    <div class="mb-0 mt-3">
                         <label for="description" class="form-label">Description (optional)</label>
                         <textarea id="description" class="form-control" rows="2" [(ngModel)]="description"
                             name="description" placeholder="Why are you booking this slot?"></textarea>
@@ -34,8 +51,8 @@
 
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" (click)="close()">Cancel</button>
-                <button type="button" class="btn btn-primary" [disabled]="!selectedDay || !selectedTime"
-                    (click)="submit()">
+                <button type="button" class="btn btn-primary"
+                    [disabled]="!selectedDay || !selectedTime || !!overlapMessage" (click)="submit()">
                     Confirm Booking
                 </button>
             </div>

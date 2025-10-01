@@ -3,7 +3,6 @@ using API.DTOs;
 using API.Entities;
 using API.Interfaces;
 using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Services;
@@ -15,7 +14,6 @@ public class LabBookingService(DataContext context, IMapper mapper) : ILabBookin
 
     public async Task<IEnumerable<LabBookingDto>> GetAllBookingsAsync()
     {
-        // Join LabBookings to Users so we can include FirstName/LastName in the DTO
         return await (
             from b in _context.LabBookings
             join u in _context.Users on b.UserName equals u.UserName into gj
@@ -61,11 +59,13 @@ public class LabBookingService(DataContext context, IMapper mapper) : ILabBookin
 
     public async Task<bool> CreateBookingAsync(string userName, CreateLabBookingDto dto)
     {
+        // Robust time overlap check (server remains the source of truth)
         var conflict = await _context.LabBookings.AnyAsync(b =>
             b.BookingDate == dto.BookingDate &&
             b.WeekDays == dto.WeekDays &&
-            ((dto.StartTime >= b.StartTime && dto.StartTime < b.EndTime) ||
-             (dto.EndTime > b.StartTime && dto.EndTime <= b.EndTime)));
+            dto.StartTime < b.EndTime &&   // start before existing end
+            dto.EndTime > b.StartTime      // end after existing start
+        );
 
         if (conflict) return false;
 

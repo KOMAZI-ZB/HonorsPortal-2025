@@ -34,3 +34,30 @@ img {
         width: 100%;
     }
 }
+
+/* --- ADDED: make navbar slightly taller & nav tabs a bit larger --- */
+.navbar {
+    /* Increase vertical padding a touch (Bootstrap uses this var) */
+    --bs-navbar-padding-y: 0.85rem;
+    /* was ~0.5rem */
+}
+
+.navbar .nav-link,
+.navbar .dropdown-toggle {
+    /* Small, readable bump for the menu/tabs */
+    font-size: 1.06rem;
+    /* subtle increase */
+    padding-top: 0.55rem;
+    /* slightly larger click area */
+    padding-bottom: 0.55rem;
+}
+
+/* Keep things tidy on smaller screens */
+@media (max-width: 991.98px) {
+
+    .navbar .nav-link,
+    .navbar .dropdown-toggle {
+        font-size: 1rem;
+        /* avoid wrapping on mobile */
+    }
+}

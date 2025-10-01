@@ -1,8 +1,26 @@
 <div class="container mt-4">
+
+    <!-- Controls row: Semester filter (left) + view-only indicator (right) -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3 weekbar">
+        <div class="d-flex align-items-center gap-2">
+            <label class="me-2 sem-label">Semester:</label>
+            <select class="form-select form-select-sm sem-select" [(ngModel)]="selectedSemester"
+                (change)="onSemesterChange()">
+                <option [ngValue]="1">Semester 1</option>
+                <option [ngValue]="2">Semester 2</option>
+            </select>
+        </div>
+
+        <div class="ms-auto">
+            <span *ngIf="isPastWeekView()" class="badge bg-secondary">Past week • View only</span>
+        </div>
+    </div>
+
     <!-- Button Row -->
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div *ngIf="canBook(); else readonlyMsg">
-            <button class="btn btn-primary" (click)="openBookingModal()">Book Lab Slot</button>
+            <button class="btn btn-primary" (click)="openBookingModal()" [disabled]="isPastWeekView()">Book Lab
+                Slot</button>
         </div>
         <ng-template #readonlyMsg></ng-template>
         <div class="ms-auto">
@@ -14,23 +32,37 @@
 
     <!-- Empty state -->
     <div *ngIf="!hasBookingsThisWeek()" class="alert alert-info text-center py-4">
-        Nothing scheduled.
+        Nothing scheduled for this week.
     </div>
 
-    <!-- Weekly Grid Table + PDF content (only when we have bookings this week) -->
+    <!-- Prev / Next ABOVE the logo but OUTSIDE the PDF capture root -->
+    <div class="logo-nav" data-html2canvas-ignore="true">
+        <button class="btn nav-btn" (click)="prevWeek()" [disabled]="!canGoPrevWeek()" aria-label="Previous week">
+            <span class="nav-circle" aria-hidden="true">&lt;</span>
+            <span class="nav-text">Prev</span>
+        </button>
+        <button class="btn nav-btn" (click)="nextWeek()" [disabled]="!canGoNextWeek()" aria-label="Next week">
+            <span class="nav-text">Next</span>
+            <span class="nav-circle" aria-hidden="true">&gt;</span>
+        </button>
+    </div>
+
+
+    <!-- Weekly Grid Table (PDF content) -->
     <div *ngIf="hasBookingsThisWeek()" id="labScheduleTable" class="table-responsive mt-3 p-4 bg-white">
-        <!-- ✅ Logo ABOVE everything -->
+        <!-- Logo -->
         <div class="logo-row">
             <img src="assets/ufslogo.jpg" alt="UFS Logo" class="pdf-logo-top" />
         </div>
 
-        <!-- ✅ Top bar sitting right on top of the table -->
+        <!-- Table top bar (kept tight to the table, like your original) -->
         <div class="table-topbar">
-            <div class="topbar-title">{{ getWeekDateRangeLabel() }}</div>
+            <div class="topbar-title">
+                Lab Schedule: {{ getWeekRangeLabelShort().replace('Week:', 'Week') }}
+            </div>
             <div class="topbar-user">{{ userFullName }}</div>
         </div>
 
-        <!-- Table -->
         <table class="table table-bordered text-center align-middle schedule-table"
             style="table-layout: auto; width: 100%;">
             <colgroup>
@@ -61,7 +93,8 @@
 
                                 <ng-template #staffButton>
                                     <button class="btn btn-outline-dark btn-sm w-100 cell-btn"
-                                        (click)="triggerUnbookModal(booking)" style="cursor: pointer;">
+                                        (click)="triggerUnbookModal(booking)" [disabled]="isPastWeekView()"
+                                        [style.cursor]="isPastWeekView() ? 'not-allowed' : 'pointer'">
                                         {{ booking.description || 'Booked' }}
                                     </button>
                                 </ng-template>
@@ -84,7 +117,9 @@
 
     <!-- Modals -->
     <app-book-lab-slot-modal *ngIf="showBookingModal" [weekdays]="weekdays" [availableTimeSlots]="timeSlots"
-        (confirmBooking)="handleBookingConfirmed($event)" (cancel)="closeBookingModal()">
+        [weekStart]="currentWeekStart" [existingBookings]="bookings" [weekLabel]="getWeekRangeLabelShort()"
+        [serverError]="modalServerError" (confirmBooking)="handleBookingConfirmed($event)"
+        (cancel)="closeBookingModal()">
     </app-book-lab-slot-modal>
 
     <app-unbook-lab-slot-modal *ngIf="showUnbookingModal && selectedBookingToDelete" [booking]="selectedBookingToDelete"

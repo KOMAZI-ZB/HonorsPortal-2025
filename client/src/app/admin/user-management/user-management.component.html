@@ -1,6 +1,6 @@
 <div class="row">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>User Management</h2>
+        <h2 class="section-title">User Management</h2>
         <button class="btn btn-primary" (click)="openAddUserModal()">Add User</button>
     </div>
 
@@ -30,20 +30,15 @@
                 <td>{{ user.email }}</td>
                 <td>{{ user.roles.join(', ') }}</td>
                 <td>
-                    <button class="btn btn-outline-secondary btn-sm" (click)="openEditUserModal(user)">
-                        Edit User
-                    </button>
+                    <button class="btn btn-outline-secondary btn-sm" (click)="openEditUserModal(user)">Edit
+                        User</button>
                 </td>
                 <td>
-                    <!-- ✅ Admins can also edit modules now -->
-                    <button class="btn btn-outline-secondary btn-sm" (click)="openEditModulesModal(user)">
-                        Edit Modules
-                    </button>
+                    <button class="btn btn-outline-secondary btn-sm" (click)="openEditModulesModal(user)">Edit
+                        Modules</button>
                 </td>
                 <td>
-                    <button class="btn btn-outline-danger btn-sm" (click)="openDeleteUserModal(user)">
-                        Delete
-                    </button>
+                    <button class="btn btn-outline-danger btn-sm" (click)="openDeleteUserModal(user)">Delete</button>
                 </td>
             </tr>
         </tbody>

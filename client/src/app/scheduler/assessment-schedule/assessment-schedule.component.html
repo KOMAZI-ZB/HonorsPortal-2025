@@ -2,8 +2,8 @@
     <!-- Filter + Download -->
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
-            <label for="semester">Semester:</label>
-            <select id="semester" class="form-select d-inline-block w-auto ms-2" [(ngModel)]="semester"
+            <label for="semester" class="filter-label">Semester:</label>
+            <select id="semester" class="form-select d-inline-block w-auto ms-2 filter-select" [(ngModel)]="semester"
                 (change)="onSemesterChange()">
                 <option [value]="1">Semester 1</option>
                 <option [value]="2">Semester 2</option>
@@ -23,18 +23,15 @@
 
     <!-- PDF Content -->
     <div *ngIf="groupedMonths.length > 0" id="pdfContent" class="mt-4 p-4 bg-white">
-        <!-- Logo ABOVE everything -->
         <div class="logo-row keep-with-next">
             <img src="assets/ufslogo.jpg" alt="UFS Logo" class="pdf-logo-top" />
         </div>
 
-        <!-- Top bar right above the tables -->
         <div class="table-topbar keep-with-next">
             <div class="topbar-title">Assessment Schedule</div>
             <div class="topbar-user">{{ userFullName }}</div>
         </div>
 
-        <!-- Tables grouped by month -->
         <div>
             <div *ngFor="let month of groupedMonths" class="month-section">
                 <table class="table table-bordered text-center align-middle mb-5">
@@ -54,7 +51,6 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Keep each row intact across page breaks -->
                         <tr *ngFor="let item of groupedAssessments[month]" class="avoid-break">
                             <td>{{ item.moduleCode }}</td>
                             <td>{{ item.title }}</td>

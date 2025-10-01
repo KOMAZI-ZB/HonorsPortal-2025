@@ -1,6 +1,4 @@
-/* src/app/scheduler/lab-schedule/lab-schedule.component.css */
-
-/* Button styling (unchanged) */
+/* Buttons (unchanged) */
 .btn-outline-primary {
     border-radius: 20px;
     font-weight: 500;
@@ -13,26 +11,73 @@
     cursor: default !important;
 }
 
-/* ✅ Student booked-slot color override (from black to #CAF5F6) */
+/* Student booked-slot color override (unchanged) */
 .non-interactive.cell-btn.btn-dark,
 .non-interactive.cell-btn.btn-dark:focus,
 .non-interactive.cell-btn.btn-dark:active {
     background-color: #CAF5F6 !important;
-    /* Color(0xFFCAF5F6) */
     border-color: #CAF5F6 !important;
     color: #000 !important;
-    /* keep text readable on light background */
     box-shadow: none !important;
 }
 
-/* ======= Header layout (NEW) ======= */
-/* Logo sits above everything */
+/* Prev/Next row above the logo (outside the PDF root) */
+.logo-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+/* NEW: circular blue arrows + black labels (match “Back to Modules” text) */
+.nav-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: transparent;
+    border: 0;
+    padding: 0;
+}
+
+.nav-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #0D6EFD;
+    /* same blue */
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 12px rgba(13, 110, 253, 0.25);
+    font-size: 16px;
+    line-height: 1;
+}
+
+.nav-text {
+    color: #000;
+    /* black text */
+    font-weight: 600;
+    /* same weight as Back to Modules */
+}
+
+.nav-btn[disabled] .nav-circle {
+    background: #93c5fd;
+    /* soften when disabled */
+    box-shadow: none;
+    opacity: .7;
+}
+
+.nav-btn[disabled] .nav-text {
+    color: #6c757d;
+}
+
+/* Header layout */
 .logo-row {
     display: flex;
     justify-content: center;
     align-items: center;
     margin-bottom: 20px;
-    /* small gap before the topbar */
 }
 
 .pdf-logo-top {
@@ -42,19 +87,19 @@
     display: block;
 }
 
-/* Top bar that sits right on top of the table */
+/* Top bar tight to the table, like before */
 .table-topbar {
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
     margin-bottom: 6px;
-    /* tight to the table */
 }
 
 .topbar-title {
     font-size: 24px;
     font-weight: 600;
     white-space: nowrap;
+    color: #000 !important;
 }
 
 .topbar-user {
@@ -62,19 +107,46 @@
     font-weight: 600;
     white-space: nowrap;
     text-align: right;
+    color: #000 !important;
 }
 
-/* Table container */
+/* Semester select width + appearance */
+.weekbar .sem-select {
+    width: auto !important;
+    max-width: max-content !important;
+    min-width: 0 !important;
+    display: inline-block !important;
+    color: #000 !important;
+    font-weight: 400 !important;
+    /* not bold */
+}
+
+/* Semester label appearance */
+.weekbar .sem-label {
+    color: #000 !important;
+    font-weight: 600 !important;
+    /* keep your existing weight */
+}
+
+/* PDF/table container */
 #labScheduleTable {
     background-color: white;
     padding: 20px;
     border-radius: 10px;
+    overflow: visible !important;
+}
+
+/* Ensure everything inside the capture root stays white (fixes grey blocks) */
+#labScheduleTable,
+#labScheduleTable * {
+    background: #fff !important;
 }
 
 /* Force table layout */
 #labScheduleTable table {
     table-layout: auto;
     width: 100%;
+    border-collapse: collapse;
 }
 
 /* Time column: fixed width + single line */
@@ -94,7 +166,7 @@
     padding-right: 8px;
 }
 
-/* Table borders */
+/* Borders & typography */
 .table-bordered td,
 .table-bordered th {
     vertical-align: middle;
@@ -104,14 +176,12 @@
     font-size: 16px;
 }
 
-/* Thead styling */
 .table thead th {
     background-color: #007bff;
     color: white;
     font-weight: bold;
 }
 
-/* First column background */
 .table tbody td:first-child {
     font-weight: bold;
     background-color: #f8f9fa;
@@ -128,11 +198,13 @@
     margin-top: 4px;
 }
 
-/* --- Page-break hygiene for PDF/print --- */
+/* Page-break hygiene for html2pdf/print */
 tr,
 td,
 th,
-.avoid-break {
+.avoid-break,
+.schedule-row,
+.schedule-row>td {
     break-inside: avoid;
     page-break-inside: avoid;
 }
@@ -142,7 +214,6 @@ th,
         display: table-header-group;
     }
 
-    /* repeat headers */
     tfoot {
         display: table-footer-group;
     }

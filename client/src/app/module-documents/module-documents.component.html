@@ -2,27 +2,27 @@
 
     <!-- Back Arrow & crumb -->
     <div class="mb-3 d-flex align-items-center">
-        <button class="btn back-button d-flex align-items-center p-0 me-2" (click)="goBack()">
-            <i class="bi bi-arrow-left back-icon"></i>
+        <button class="btn back-button d-flex align-items-center justify-content-center me-2" type="button"
+            aria-label="Back to Modules" (click)="goBack()">
+            <i class="bi bi-arrow-left back-icon" aria-hidden="true"></i>
         </button>
-        <span class="fw-semibold" style="cursor: pointer;" (click)="goBack()">Back to Modules</span>
+        <span class="fw-semibold back-crumb" style="cursor: pointer;" (click)="goBack()">Back to Modules</span>
     </div>
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <!-- Header context on module page -->
-        <h5 class="mb-0">
+    <div class="d-flex justify-content-between align-items-center mb-3 module-docs-header">
+        <h2 class="mb-0">
             Module documents
             <ng-container *ngIf="moduleCode || moduleName">
                 for {{ moduleCode ? (moduleCode | uppercase) : moduleName }}
             </ng-container>
-        </h5>
+        </h2>
 
         <button *ngIf="hasUploadRights()" class="btn btn-primary" (click)="openUploadModal()">
             Upload Document
         </button>
     </div>
 
-    <!-- (table unchanged) -->
+    <!-- (table + pagination unchanged) -->
     <table class="table table-bordered table-hover align-middle">
         <thead class="table-light">
             <tr>
@@ -39,12 +39,9 @@
                 <td>{{ doc.uploadedAt | date: 'medium' }}</td>
                 <td class="text-center">
                     <a [href]="doc.filePath" target="_blank" rel="noopener noreferrer" download
-                        class="btn btn-sm btn-success me-2">
-                        Download
-                    </a>
-                    <button *ngIf="hasUploadRights()" class="btn btn-sm btn-danger" (click)="deleteDocument(doc.id)">
-                        Delete
-                    </button>
+                        class="btn btn-sm btn-success me-2">Download</a>
+                    <button *ngIf="hasUploadRights()" class="btn btn-sm btn-danger"
+                        (click)="deleteDocument(doc.id)">Delete</button>
                 </td>
             </tr>
             <tr *ngIf="documents.length === 0">
@@ -53,7 +50,6 @@
         </tbody>
     </table>
 
-    <!-- Pagination (unchanged) -->
     <nav *ngIf="pagination.totalPages > 1" class="d-flex justify-content-center mt-3">
         <ul class="pagination">
             <li class="page-item" [class.disabled]="pagination.currentPage === 1">

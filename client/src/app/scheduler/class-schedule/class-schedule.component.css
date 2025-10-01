@@ -15,7 +15,6 @@
     display: block;
 }
 
-/* Prevent a page break right AFTER these blocks */
 .keep-with-next {
     page-break-after: avoid;
     break-after: avoid;
@@ -28,43 +27,47 @@
     margin-bottom: 6px;
 }
 
-.topbar-title {
+.topbar-title,
+.topbar-user {
     font-size: 24px;
     font-weight: 600;
     white-space: nowrap;
 }
 
 .topbar-user {
-    font-size: 24px;
-    font-weight: 600;
-    white-space: nowrap;
     text-align: right;
 }
 
-/* ===== Fix PDF clipping on the right edge ===== */
-/* Make sure the export root doesn't clip overflow content */
+/* Semester filter appearance */
+.no-print .filter-label {
+    color: #000 !important;
+    font-weight: 600 !important;
+}
+
+.no-print .filter-select {
+    color: #000 !important;
+    font-weight: 400 !important;
+}
+
+/* Export root */
 #pdfContent {
     background-color: white;
     padding: 20px;
     border-radius: 10px;
     overflow: visible;
-    /* ⬅️ important: no clipping when rasterized */
 }
 
-/* Make the table occupy the container width and wrap long text */
+/* Table */
 #pdfContent table {
     width: 100%;
     table-layout: fixed;
-    /* keeps 12 columns fitting within the page */
 }
 
-/* Avoids column expansion due to long content */
 #pdfContent th,
 #pdfContent td {
     word-break: break-word;
 }
 
-/* (kept) Table styling */
 .table-bordered td,
 .table-bordered th {
     vertical-align: middle;
@@ -80,7 +83,7 @@
     font-weight: bold;
 }
 
-/* --- Page-break hygiene --- */
+/* Page-break hygiene */
 tr,
 td,
 th,
@@ -98,7 +101,6 @@ th,
         display: table-footer-group;
     }
 
-    /* Allow the TABLE to split across pages, but keep rows intact */
     table {
         break-inside: auto;
         page-break-inside: auto;

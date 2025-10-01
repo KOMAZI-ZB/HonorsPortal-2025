@@ -8,12 +8,30 @@
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.06);
 }
 
-/* Title like mock */
+/* Title: black text + Notifications-style blue underline */
 .faq-title {
     font-weight: 800;
     letter-spacing: 0.5px;
-    color: #0b5ed7
-        /* 🔵 Blue title */
+    color: #000 !important;
+    /* black title */
+    display: inline-block;
+    /* underline matches text width */
+    position: relative;
+    padding-bottom: 0.25rem;
+    /* small gap between text and line */
+}
+
+.faq-title::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    /* full width of the text */
+    bottom: 0;
+    height: 2px;
+    background: #0D6EFD;
+    /* blue underline (same as Notifications) */
+    border-radius: 2px;
 }
 
 /* Search pill */
@@ -72,7 +90,6 @@
     font-weight: 700;
     color: #1e1e1e;
     font-size: 1.2rem;
-    /* ⬆️ Bigger text */
 }
 
 .faq-chevron i {
@@ -92,7 +109,6 @@
 
 .faq-body p {
     font-size: 1.2rem;
-    /* ⬆️ Bigger text inside answers */
     line-height: 1.6;
 }
 

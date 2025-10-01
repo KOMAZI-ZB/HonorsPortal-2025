@@ -15,7 +15,6 @@
     display: block;
 }
 
-/* Prevent a page break right AFTER these blocks */
 .keep-with-next {
     page-break-after: avoid;
     break-after: avoid;
@@ -28,17 +27,26 @@
     margin-bottom: 6px;
 }
 
-.topbar-title {
+.topbar-title,
+.topbar-user {
     font-size: 24px;
     font-weight: 600;
     white-space: nowrap;
 }
 
 .topbar-user {
-    font-size: 24px;
-    font-weight: 600;
-    white-space: nowrap;
     text-align: right;
+}
+
+/* Semester filter appearance */
+.filter-label {
+    color: #000 !important;
+    font-weight: 600 !important;
+}
+
+.filter-select {
+    color: #000 !important;
+    font-weight: 400 !important;
 }
 
 /* White background and padding */
@@ -89,7 +97,6 @@ th,
         display: table-footer-group;
     }
 
-    /* Allow TABLEs to split across pages */
     table {
         break-inside: auto;
         page-break-inside: auto;
