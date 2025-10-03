@@ -21,11 +21,7 @@ interface Assessment {
 }
 
 type DayState = { checked: boolean; startTime: string; endTime: string; };
-
-interface VenueConfig {
-  venue: string;
-  days: { [day: string]: DayState };
-}
+interface VenueConfig { venue: string; days: { [day: string]: DayState }; }
 
 @Component({
   selector: 'app-edit-details-modal',
@@ -42,9 +38,7 @@ export class EditDetailsModalComponent implements OnInit, AfterViewInit, OnDestr
 
   baseUrl = environment.apiUrl;
 
-  // ✅ Weekends removed for class scheduling in the modal
   weekDays: string[] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
-
   venues: VenueConfig[] = [];
   assessments: Assessment[] = [];
 
@@ -78,7 +72,6 @@ export class EditDetailsModalComponent implements OnInit, AfterViewInit, OnDestr
 
         const sessions = (updated.classSessions || []) as ClassSession[];
         const byVenue = new Map<string, VenueConfig>();
-
         const makeEmptyDays = (): { [d: string]: DayState } => {
           const obj: { [d: string]: DayState } = {};
           this.weekDays.forEach(d => obj[d] = { checked: false, startTime: '', endTime: '' });
@@ -86,9 +79,7 @@ export class EditDetailsModalComponent implements OnInit, AfterViewInit, OnDestr
         };
 
         for (const s of sessions) {
-          // Ignore any legacy weekend data silently
           if (!this.weekDays.includes(s.weekDay)) continue;
-
           if (!byVenue.has(s.venue)) byVenue.set(s.venue, { venue: s.venue, days: makeEmptyDays() });
           const cfg = byVenue.get(s.venue)!;
           if (cfg.days[s.weekDay]) {
@@ -156,7 +147,6 @@ export class EditDetailsModalComponent implements OnInit, AfterViewInit, OnDestr
     if (this.escCapture) document.removeEventListener('keydown', this.escCapture, true);
   }
 
-  // public for template
   markDirty() { this.locallyDirty = true; }
 
   private formatTimeString(time: string): string | null {
@@ -173,7 +163,6 @@ export class EditDetailsModalComponent implements OnInit, AfterViewInit, OnDestr
 
   removeVenue(index: number): void {
     this.venues.splice(index, 1);
-    if (this.venues.length === 0) this.addVenue();
     this.markDirty();
   }
 
@@ -190,6 +179,41 @@ export class EditDetailsModalComponent implements OnInit, AfterViewInit, OnDestr
   }
 
   removeAssessment(index: number) { this.assessments.splice(index, 1); this.markDirty(); }
+
+  // ===== Validation parity with Add =====
+  private venuesValid(): boolean {
+    if (this.venues.length === 0) return true; // optional overall
+    for (const v of this.venues) {
+      const vn = (v.venue || '').trim();
+      if (!vn) return false; // Venue is required once a block exists
+      for (const d of this.weekDays) {
+        const st = v.days[d];
+        if (st?.checked) {
+          if (!(st.startTime || '').trim()) return false;
+          if (!(st.endTime || '').trim()) return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  private assessmentsValid(): boolean {
+    for (const a of this.assessments) {
+      const titleOk = (a.title || '').trim().length > 0;
+      const descOk = (a.description || '').trim().length > 0;
+      const dateOk = (a.date || '').trim().length > 0;
+      if (!(titleOk && descOk && dateOk)) return false;
+
+      if (a.isTimed) {
+        if (!((a.venue || '').trim())) return false;
+        if (!((a.startTime || '').trim())) return false;
+        if (!((a.endTime || '').trim())) return false;
+      } else {
+        if (!((a.dueTime || '').trim())) return false;
+      }
+    }
+    return true;
+  }
 
   private hasUnsavedChanges(): boolean {
     if (this.justSaved) return false;
@@ -213,80 +237,53 @@ export class EditDetailsModalComponent implements OnInit, AfterViewInit, OnDestr
     this.originalHide();
   }
 
-  // ✅ Validation rule: require title, description, date; then timed vs non-timed fields
-  private isAssessmentValid(a: Assessment): boolean {
-    if (!a) return false;
-    const hasTitle = (a.title || '').trim().length > 0;
-    const hasDesc = (a.description || '').trim().length > 0; // required
-    const hasDate = (a.date || '').trim().length > 0;
-
-    if (!hasTitle || !hasDesc || !hasDate) return false;
-
-    if (a.isTimed) {
-      const v = (a.venue || '').trim();
-      const st = (a.startTime || '').trim();
-      const et = (a.endTime || '').trim();
-      return v.length > 0 && st.length > 0 && et.length > 0;
-    } else {
-      const due = (a.dueTime || '').trim();
-      return due.length > 0;
-    }
-  }
-
   submit() {
-    // Block submit if any assessment is incomplete
-    const anyInvalid = this.assessments.some(a => !this.isAssessmentValid(a));
-    if (anyInvalid) {
+    // Validate sections with same rules/messages
+    if (!this.venuesValid()) {
+      this.activeTab = 'contact';
+      this.toastr.error('Please fix the highlighted fields.');
+      return;
+    }
+    if (!this.assessmentsValid()) {
       this.activeTab = 'assessments';
-      this.toastr.error('Please complete Title, Description, Date and the required time fields for each assessment before saving.');
+      this.toastr.error('Please fix the highlighted fields.');
       return;
     }
 
     const classSessions: ClassSession[] = [];
-
     for (const v of this.venues) {
       const venueName = (v.venue || '').trim();
       if (!venueName) continue;
-
-      // ✅ Only Monday–Friday are iterated
       for (const day of this.weekDays) {
         const st = v.days[day];
         if (!st.checked) continue;
         const start = this.formatTimeString(st.startTime) || '';
         const end = this.formatTimeString(st.endTime) || '';
         if (!start || !end) continue;
-
         classSessions.push({ venue: venueName, weekDay: day, startTime: start, endTime: end });
       }
     }
 
-    const cleanedAssessments = this.assessments.filter(a => (a.date || '').trim() !== '');
-    const processedAssessments = cleanedAssessments.map(a => ({
-      title: a.title,
+    const processedAssessments = this.assessments.map(a => ({
+      title: a.title.trim(),
       description: (a.description || '').trim() || null,
       date: a.date,
       isTimed: a.isTimed,
       startTime: a.isTimed ? this.formatTimeString(a.startTime!) : null,
       endTime: a.isTimed ? this.formatTimeString(a.endTime!) : null,
       dueTime: a.isTimed ? null : this.formatTimeString(a.dueTime!),
-      venue: a.isTimed ? a.venue : null
+      venue: a.isTimed ? (a.venue || '').trim() : null
     }));
 
     const payload: any = { classSessions, assessments: processedAssessments };
 
     this.http.put<any>(`${this.baseUrl}modules/${this.module.id}`, payload).subscribe({
-      next: response => {
-        this.toastr.success('Module details updated');
-        if (response.notification) {
-          this.toastr.info(`An notification was triggered for ${this.module.moduleCode}`, 'Schedule Updated');
-          console.log('🔔 Notification:', response.notification);
-        }
+      next: () => {
+        this.toastr.success('Module updated successfully.');
         this.justSaved = true;
         this.originalHide();
       },
       error: err => { this.toastr.error('Failed to update module'); console.error(err); }
     });
   }
-
-  cancel() { this.attemptClose(); }
 }

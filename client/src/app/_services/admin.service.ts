@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { User } from '../_models/user';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -62,5 +63,10 @@ export class AdminService {
     roles: string[];
   }) {
     return this.http.put(`${this.baseUrl}admin/update-user/${userName}`, model);
+  }
+
+  // ✅ NEW: Check if a username/student number already exists (debounced from UI)
+  checkUsernameExists(userName: string): Observable<{ exists: boolean }> {
+    return this.http.get<{ exists: boolean }>(`${this.baseUrl}admin/exists/${encodeURIComponent(userName)}`);
   }
 }

@@ -25,7 +25,6 @@ export class EditModuleModalComponent implements OnInit, AfterViewInit, OnDestro
 
   newCode = '';
   newName = '';
-  // '1' | '2' | 'year' → allow choosing Semester 1, Semester 2, or Year module
   semesterChoice: '1' | '2' | 'year' = '1';
 
   private originalHide!: () => void;
@@ -43,16 +42,14 @@ export class EditModuleModalComponent implements OnInit, AfterViewInit, OnDestro
     private elRef: ElementRef<HTMLElement>
   ) { }
 
+  get detailsValid(): boolean {
+    return (this.newCode || '').trim().length > 0 && (this.newName || '').trim().length > 0;
+  }
+
   ngOnInit(): void {
     this.newCode = this.module.moduleCode;
     this.newName = this.module.moduleName;
-
-    // Initialise semester choice from current module state (treat Semester=0 as year)
-    if (this.module.isYearModule || this.module.semester === 0) {
-      this.semesterChoice = 'year';
-    } else {
-      this.semesterChoice = this.module.semester === 2 ? '2' : '1';
-    }
+    this.semesterChoice = (this.module.isYearModule || this.module.semester === 0) ? 'year' : (this.module.semester === 2 ? '2' : '1');
 
     const ref = this.bsModalRef ?? this.modalRef;
     this.originalHide = ref.hide.bind(ref);
@@ -114,17 +111,17 @@ export class EditModuleModalComponent implements OnInit, AfterViewInit, OnDestro
   }
 
   submit() {
-    const payload: any = {
-      moduleCode: this.newCode,
-      moduleName: this.newName
-    };
+    if (!this.detailsValid) {
+      this.toastr.error('Please fix the highlighted fields.');
+      return;
+    }
+
+    const payload: any = { moduleCode: this.newCode.trim(), moduleName: this.newName.trim() };
 
     if (this.semesterChoice === 'year') {
-      // Turn into (or keep as) a Year module
       payload.isYearModule = true;
-      payload.semester = 0; // <-- year modules use semester 0
+      payload.semester = 0;
     } else {
-      // Normal semester module
       payload.isYearModule = false;
       payload.semester = Number(this.semesterChoice);
     }

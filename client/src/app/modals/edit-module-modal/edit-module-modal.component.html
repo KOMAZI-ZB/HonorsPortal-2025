@@ -7,17 +7,20 @@
     <div class="modal-body">
         <div class="mb-3">
             <label class="form-label">Module Code</label>
-            <input type="text" class="form-control" [(ngModel)]="newCode" name="newCode" required />
+            <input type="text" class="form-control" [(ngModel)]="newCode" name="newCode" required
+                [class.is-invalid]="!(newCode||'').trim()" />
+            <div class="invalid-feedback">Module Code is required.</div>
         </div>
 
         <div class="mb-3">
             <label class="form-label">Module Name</label>
-            <input type="text" class="form-control" [(ngModel)]="newName" name="newName" required />
+            <input type="text" class="form-control" [(ngModel)]="newName" name="newName" required
+                [class.is-invalid]="!(newName||'').trim()" />
+            <div class="invalid-feedback">Module Name is required.</div>
         </div>
 
         <div class="mb-3">
             <label class="form-label">Semester</label>
-            <!-- Allow selecting Semester 1, Semester 2, or Year module -->
             <select class="form-select" [(ngModel)]="semesterChoice" name="semesterChoice">
                 <option value="1">Semester 1</option>
                 <option value="2">Semester 2</option>
@@ -28,6 +31,6 @@
 
     <div class="modal-footer">
         <button class="btn btn-secondary" type="button" (click)="attemptClose()">Cancel</button>
-        <button class="btn btn-primary" type="button" (click)="submit()">Save</button>
+        <button class="btn btn-primary" type="button" (click)="submit()" [disabled]="!detailsValid">Save</button>
     </div>
 </form>

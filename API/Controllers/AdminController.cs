@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace API.Controllers;
 
@@ -17,6 +18,23 @@ public class AdminController(
     DataContext context
 ) : BaseApiController
 {
+    // ✅ Quick existence check for username/student number (for real-time validation)
+    [Authorize(Policy = "RequireAdminRole")]
+    [HttpGet("exists/{userName}")]
+    public async Task<ActionResult> UsernameExists(string userName)
+    {
+        var trimmed = userName?.Trim();
+        if (string.IsNullOrWhiteSpace(trimmed))
+            return Ok(new { exists = false });
+
+        var normalized = trimmed.ToUpperInvariant();
+        var exists = await userManager.Users
+            .AsNoTracking()
+            .AnyAsync(u => u.NormalizedUserName == normalized);
+
+        return Ok(new { exists });
+    }
+
     [Authorize(Policy = "RequireAdminRole")]
     [HttpPost("register-user")]
     public async Task<ActionResult> RegisterUser(RegisterUserDto dto)
@@ -26,6 +44,16 @@ public class AdminController(
 
         if (string.IsNullOrWhiteSpace(userNameTrimmed) || string.IsNullOrWhiteSpace(emailLower))
             return BadRequest(new { message = "UserName and Email are required." });
+
+        // 🔒 Enforce 10-digit student number for non-Admin roles (string-based check)
+        var isAdminRole = string.Equals(dto.Role, "Admin", StringComparison.OrdinalIgnoreCase);
+        if (!isAdminRole)
+        {
+            if (!Regex.IsMatch(userNameTrimmed, @"^\d{10}$"))
+            {
+                return BadRequest(new { message = "Username must be exactly 10 digits." });
+            }
+        }
 
         var normalizedUserName = userNameTrimmed.ToUpperInvariant();
         var normalizedEmail = emailLower.ToUpperInvariant();
@@ -56,7 +84,7 @@ public class AdminController(
             {
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
-                UserName = userNameTrimmed,                               // never null
+                UserName = userNameTrimmed,                               // string, not parsed
                 Email = emailLower,
                 NormalizedEmail = normalizedEmail,
                 NormalizedUserName = normalizedUserName,
@@ -99,7 +127,7 @@ public class AdminController(
             await context.SaveChangesAsync();
             await tx.CommitAsync();
 
-            return Ok(new { message = "User registered and linked to modules." });
+            return Ok(new { message = "User registered successfully." });
         }
         catch (DbUpdateException)
         {
